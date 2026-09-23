@@ -4,22 +4,25 @@
 
 ### Jogo de encaixe de blocos em que a pilha tem massa e precisa ficar de pé.
 
-Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça vem em madeira, alvenaria, concreto ou aço. O jogo recalcula o **centro de massa** da estrutura a cada peça fixada e, se ele se afastar demais do eixo da base, **a obra desaba**.
+Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça vem em madeira, alvenaria, concreto ou aço. O backend recalcula o **centro de massa** da estrutura a cada peça fixada e, se ele se afastar demais do eixo da base, **a obra desaba**.
 
 <p>
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
+  <a href="docs/ESPECIFICACAO.md"><img src="https://img.shields.io/badge/especificação-v2.0-1F3864?style=for-the-badge" alt="Especificação v2.0"/></a>
 </p>
 
 <p>
   <img src="https://img.shields.io/badge/Java-17_LTS-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java 17"/>
-  <img src="https://img.shields.io/badge/Swing-interface_gráfica-5382A1?style=flat-square" alt="Swing"/>
+  <img src="https://img.shields.io/badge/Javalin-7-0A0A0A?style=flat-square" alt="Javalin 7"/>
   <img src="https://img.shields.io/badge/Maven-build-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven"/>
-  <img src="https://img.shields.io/badge/JUnit-5-25A162?style=flat-square&logo=junit5&logoColor=white" alt="JUnit 5"/>
-  <img src="https://img.shields.io/badge/Javadoc-100%25_público-1F3864?style=flat-square" alt="Javadoc"/>
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19"/>
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Vite-build-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite"/>
+  <img src="https://img.shields.io/badge/JUnit_5_·_Vitest-testes-25A162?style=flat-square&logo=junit5&logoColor=white" alt="JUnit 5 e Vitest"/>
 </p>
 
-<sub>🧱 <strong>7</strong> formas &nbsp;•&nbsp; 🪵 <strong>4</strong> materiais &nbsp;•&nbsp; 📐 <strong>15</strong> regras de negócio &nbsp;•&nbsp; ✅ <strong>28</strong> requisitos funcionais &nbsp;•&nbsp; ⚙️ <strong>12</strong> não funcionais &nbsp;•&nbsp; 🎯 <strong>60</strong> quadros/s</sub>
+<sub>🧱 <strong>7</strong> formas &nbsp;•&nbsp; 🪵 <strong>4</strong> materiais &nbsp;•&nbsp; 📐 <strong>15</strong> regras de negócio &nbsp;•&nbsp; ✅ <strong>31</strong> requisitos funcionais &nbsp;•&nbsp; ⚙️ <strong>16</strong> não funcionais &nbsp;•&nbsp; 🎯 <strong>60</strong> ciclos/s &nbsp;•&nbsp; 📦 <strong>1</strong> JAR</sub>
 
 <br/><br/>
 
@@ -48,6 +51,9 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [🗓️ Cronograma](#️-cronograma)
 - [👥 Equipe](#-equipe)
 
+> [!NOTE]
+> **A fonte da verdade é a [especificação v2.0](docs/ESPECIFICACAO.md).** Ela traz todos os requisitos, os diagramas, o protocolo completo entre backend e frontend e o que mudou em relação à [versão 1.0](docs/CANTEIRO_Documentacao-1.pdf). Este README é o resumo prático.
+
 ---
 
 ## 💡 O que é
@@ -63,6 +69,13 @@ Quando o desvio ultrapassa o limite do nível, as camadas acima da linha crític
 
 <sub>A estrutura da direita tem <strong>menos</strong> blocos que a da esquerda, e mesmo assim é ela que cai.</sub>
 </div>
+
+**Como ele é construído.** O jogo tem duas partes que rodam **na máquina do próprio jogador**:
+
+- o **backend em Java**, dono de todas as regras: física, colisão, estruturas de dados, pontuação e arquivos;
+- o **frontend em React com TypeScript**, que roda no navegador, desenha o que o backend manda e envia as teclas.
+
+Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e abrem o jogo no navegador. Não precisa de internet, e o jogador só precisa ter o Java instalado.
 
 > [!NOTE]
 > O modelo físico é **uma simplificação deliberada**. Não simulamos esforço interno, resistência dos materiais, deformação nem tombamento com rotação: o critério de colapso olha só para o deslocamento horizontal do centro de massa. Isso basta para o jogo funcionar, mas **não é análise estrutural de engenharia**, e a própria tela do jogo vai deixar isso claro.
@@ -117,89 +130,106 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 
 ## ✨ Destaques de engenharia
 
-**O centro de massa é recalculado em tempo constante, não varrendo o tabuleiro.** A saída ingênua seria percorrer as 200 posições a cada quadro e refazer a média ponderada. Funciona, mas desperdiça processamento. O `AnalisadorEstrutural` mantém só dois acumuladores: a **massa total** e a **soma dos momentos** (massa × coluna de cada bloco). Fixar um bloco soma nos dois, remover subtrai, e o centro de massa é `momentoX / massaTotal`. **Custo O(1) por bloco alterado, independente da altura da pilha (RNF02).**
+**O centro de massa é recalculado em tempo constante, não varrendo o tabuleiro.** A saída ingênua seria percorrer as 200 posições a cada ciclo e refazer a média ponderada. Funciona, mas desperdiça processamento. O `AnalisadorEstrutural` mantém só dois acumuladores: a **massa total** e a **soma dos momentos** (massa × coluna de cada bloco). Fixar um bloco soma nos dois, remover subtrai, e o centro de massa é `momentoX / massaTotal`. **Custo O(1) por bloco alterado, independente da altura da pilha (RNF02).**
 
-**Eliminar uma linha não mexe no momento dos blocos que descem.** Quando uma linha some, os blocos de cima caem, mas **continuam na mesma coluna**, e o momento horizontal só depende da coluna. Então basta descontar os blocos eliminados. Essa observação deixa a rotina de eliminação bem mais simples.
+**Eliminar uma linha não mexe no momento dos blocos que descem.** Quando uma linha some, os blocos de cima caem, mas **continuam na mesma coluna**, e o momento horizontal só depende da coluna. Então basta descontar os blocos eliminados.
 
 **Um teste confere a otimização contra a versão ingênua.** O ponto mais provável de falha do projeto é um acumulador de massa dessincronizado. Esse tipo de erro gera colapsos que parecem injustos, e o jogador percebe que o jogo está quebrado sem saber explicar por quê. Para pegar isso, um teste aplica **500 operações aleatórias** e compara o cálculo incremental com a varredura completa, com tolerância de `0,001`.
 
-**Rotação com deslocamento corretivo, para a peça não travar na parede.** Na implementação ingênua, girar uma peça encostada na parede é recusado, e o jogador sente isso como travamento. Aqui, se a rotação colide, o motor testa em ordem: 1 coluna à esquerda, 1 à direita, 2 à esquerda, 2 à direita e 1 linha acima. A primeira posição válida vence. A sequência de tentativas é **definida por peça**, porque a `I` é longa e precisa de tentativas mais amplas.
+**Só uma thread mexe no jogo.** As teclas chegam pela thread do WebSocket, mas não tocam no motor. Viram um `Comando` e entram numa `ConcurrentLinkedQueue`. O laço da partida, que roda num `ScheduledExecutorService` a cada ~16 ms, esvazia essa fila no começo de cada ciclo. **Sem trava, sem condição de corrida**, e com o jogo **determinístico**: com a mesma semente e os mesmos comandos, a partida termina com a mesma pontuação. É isso que torna a repetição possível.
 
-**A entrada do teclado vai para uma fila e só é aplicada no quadro seguinte.** Apertar uma tecla não mexe na peça na hora. O comando é enfileirado e consumido no começo do próximo quadro. Assim a peça nunca sofre alterações concorrentes e o jogo fica **determinístico**, o que é condição para o recurso de repetição: com a mesma semente e os mesmos comandos, a partida termina com a mesma pontuação e o mesmo tabuleiro.
+**Toda mensagem leva o estado inteiro.** O backend não manda "a peça desceu uma linha", manda o tabuleiro completo, a peça, o placar e a estabilidade, até 60 vezes por segundo. Parece desperdício, mas cabe em menos de 4 KB, e ganha-se muito: **se uma mensagem se perder, a próxima corrige tudo**, e o frontend nunca precisa juntar pedaços nem pode ficar dessincronizado.
 
-**Em máquina lenta, perde-se o desenho, nunca a lógica.** O laço roda num `javax.swing.Timer` de ~16 ms, e a atualização do estado é separada do redesenho. Se o computador não aguentar, o que cai é a taxa de quadros. A simulação continua avançando igual, porque um jogo que muda de comportamento conforme o hardware está quebrado.
+**Em máquina lenta, perde-se o desenho, nunca a regra.** O backend simula a 60 ciclos por segundo, sempre. O frontend guarda o último estado recebido e redesenha o Canvas a cada `requestAnimationFrame`. Se o computador não aguentar, o que cai é a taxa de quadros da tela. A partida continua igual, porque um jogo que muda de comportamento conforme o hardware está quebrado.
 
-**O modelo não sabe que existe uma janela.** O pacote `canteiro.modelo` **não pode importar nenhuma classe gráfica**. Essa regra é fácil de verificar e é ela que permite criar o motor, rodar milhares de jogadas e conferir o resultado num teste JUnit, sem abrir tela nenhuma (RNF08). O modelo avisa a visão por **observadores**: os painéis se inscrevem e o motor só conhece o contrato de observador.
+**O modelo não sabe que existe um servidor.** Os pacotes `modelo`, `fisica`, `estruturas`, `controle`, `persistencia` e `util` **não podem importar Javalin, JSON nem nada gráfico**. Isso é garantido por um teste que reprova o build. É o que permite criar um `MotorJogo`, rodar milhares de jogadas e conferir o resultado num teste JUnit, sem subir servidor nem abrir navegador (RNF08).
+
+**O frontend não tem regra de jogo.** Ele não calcula colisão, pontuação nem estabilidade: recebe tudo pronto e desenha. Isso mantém o conteúdo da disciplina no Java e deixa o React simples para quem está começando. **A pontuação do ranking nunca vem do navegador**: o frontend manda só o id da partida e o nome, e o backend lê a pontuação da própria sessão.
 
 **Duas hierarquias em vez de uma: 11 classes em vez de 28.** Forma e material são dimensões independentes. Juntar as duas numa hierarquia só exigiria uma classe para cada combinação (7 × 4). Separadas e ligadas por composição, ficam 7 subclasses de `Peca` e 4 de `Material`. **Criar um quinto material é escrever uma classe e registrá-la no catálogo**, sem tocar no motor.
 
-**Arquivo corrompido não derruba a partida.** Existem dois tipos de falha. **Erro de programação**, como pedir o centro de massa de uma estrutura vazia, lança exceção não verificada e deve estourar durante o desenvolvimento, porque é defeito. **Erro de ambiente**, como `ranking.csv` ausente ou malformado, é registrado em log e o jogo segue com valores padrão (RNF11 e RNF12). O jogador nunca perde uma partida por causa de um arquivo de ranking.
+**Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o React com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
+
+**Local de verdade.** O servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
 
 ---
 
 ## 🧬 Onde entra cada conceito da disciplina
 
-Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma existe porque o jogo precisa dela.**
+Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma existe porque o jogo precisa dela.** E todas estão **no Java**.
 
 | Conceito | Onde aparece | Por que esta estrutura, e não outra |
 |---|---|---|
 | **Herança** | `Peca` → `PecaI`, `PecaO`, `PecaT`, `PecaS`, `PecaZ`, `PecaJ`, `PecaL` · `Material` → `Madeira`, `Alvenaria`, `Concreto`, `Aco` | O que é comum a todas as peças (blocos, material, rotação, giro) e a todos os materiais (nome, densidade, cor) fica fatorado na superclasse abstrata |
 | **Polimorfismo** | `formas()`, `aoFixar()`, `bonusLinha()` | O motor pede a forma à peça e o efeito ao material **sem saber qual é qual**. Não há cadeia de `if` nem `switch` por tipo |
-| **Interfaces** | `Desenhavel`, `Atualizavel` | Contratos implementados por tudo que participa do laço do jogo |
-| **Fila** (`ArrayDeque`) | Próximas peças · comandos do teclado | Consumo em ordem de chegada, inserção sempre no fim e remoção O(1) |
-| **Pilha** (`Deque`) | Peça reservada · histórico de jogadas | Reserva e desfazer operam sobre o último elemento. A pilha da reserva já permite, no futuro, guardar várias peças sem reescrever a classe |
-| **Lista** (`ArrayList`) | Blocos de uma peça · linhas completas · blocos desprendidos | Acesso sequencial no desenho e na checagem de colisão |
-| **Tabela hash** (`HashMap`) | Catálogo de materiais · ranking | Material buscado pelo código milhares de vezes por partida, em O(1). No ranking, o nome do jogador aponta para a melhor pontuação dele, sem duplicatas |
+| **Interfaces** | `ObservadorPartida`, `Atualizavel` | O motor avisa que o estado mudou sem saber quem está ouvindo. É assim que o modelo fala com o WebSocket sem conhecê-lo |
+| **Fila** (`ArrayDeque`) | Próximas peças | Consumo em ordem de chegada, inserção sempre no fim e remoção O(1) |
+| **Fila concorrente** (`ConcurrentLinkedQueue`) | Comandos do jogador | É a fronteira entre a thread do WebSocket e a do laço, sem precisar de trava |
+| **Pilha** (`Deque`) | Peça reservada · histórico de jogadas | Reserva e desfazer operam sobre o último elemento. A pilha da reserva já permite, no futuro, guardar várias peças |
+| **Lista** (`ArrayList`) | Blocos de uma peça · linhas completas · blocos desprendidos | Acesso sequencial na colisão e na serialização |
+| **Tabela hash** (`HashMap`) | Catálogo de materiais · ranking · sessões de partida | Material buscado pelo código a cada peça, sessão buscada pelo id que vem na URL do WebSocket, nome do jogador apontando para a melhor pontuação: tudo em O(1) |
 | **Matriz** | Grade do tabuleiro | Acesso O(1) por linha e coluna. Checar uma linha completa percorre só 10 posições |
 | **Vetor de acumuladores** | Massa por coluna | É o que torna o centro de massa O(1) |
 | **Recursividade** | Reacomodação dos blocos no colapso | A queda por gravidade propaga coluna a coluna |
-| **Exceções** | Leitura dos arquivos de dados | Leitura defensiva, com recuperação por valores padrão |
+| **Exceções** | Leitura dos arquivos · validação das mensagens | Leitura defensiva com valores padrão, e mensagem inválida que vira erro em vez de derrubar a partida |
 
 ---
 
 ## 🏛️ Arquitetura
 
-MVC com uma quarta camada isolada para persistência. **As setas mostram quem conhece quem. A camada de modelo não aponta para cima.**
-
 ```mermaid
 flowchart TB
-    APP["<b>canteiro.app</b><br/>ponto de entrada"]
-    APP --> VISAO & CONTROLE
+    subgraph NAV["🌐 Navegador · React + TypeScript"]
+        TELAS["Telas"] --> HOOKS["usePartida · useTeclado"]
+        HOOKS --> CANVAS["Tabuleiro (Canvas)"]
+    end
 
-    VISAO["<b>canteiro.visao</b><br/>Swing · painéis · telas"]
-    CONTROLE["<b>canteiro.controle</b><br/>teclado → fila de comandos"]
+    subgraph JVM["☕ Backend · Java 17 · 127.0.0.1:7070"]
+        API["<b>canteiro.api</b><br/>rotas REST · WebSocket · DTOs"]
+        CTRL["<b>canteiro.controle</b><br/>sessões · fila de comandos · laço 60 Hz"]
+        MOD["<b>canteiro.modelo</b> · fisica · estruturas<br/>MotorJogo · Tabuleiro · Peca · Material<br/><i>sem Javalin, sem JSON, sem gráfico</i>"]
+        PERS["<b>canteiro.persistencia</b><br/>materiais · ranking · repetições"]
+        API --> CTRL --> MOD
+        CTRL --> PERS
+        MOD -. "observador" .-> CTRL
+    end
 
-    VISAO --> MODELO
-    CONTROLE --> MODELO
-    CONTROLE --> PERSIST
+    HOOKS -- "comandos (WebSocket)" --> API
+    API -- "estado + eventos (WebSocket)" --> HOOKS
+    TELAS -- "ranking, materiais, repetições (REST)" --> API
+    PERS <--> ARQ[("~/.canteiro/")]
 
-    MODELO["<b>canteiro.modelo</b><br/>MotorJogo · Tabuleiro · estados<br/><i>sem nenhum import gráfico</i>"]
-    PERSIST["<b>canteiro.persistencia</b><br/>materiais · ranking · repetições"]
-
-    MODELO --> PECAS["canteiro.modelo.pecas"]
-    MODELO --> MATERIAIS["canteiro.modelo.materiais"]
-    MODELO --> ESTRUT["canteiro.estruturas"]
-    MODELO --> FISICA["canteiro.fisica"]
-    MODELO --> UTIL["canteiro.util"]
-
-    MODELO -. "eventos (observador)" .-> VISAO
-
-    style MODELO fill:#1F3864,stroke:#0f1e38,color:#fff
-    style VISAO fill:#FBEBD2,stroke:#b58a4a,color:#000
-    style FISICA fill:#FBEBD2,stroke:#b58a4a,color:#000
+    style MOD fill:#1F3864,stroke:#0f1e38,color:#fff
+    style NAV fill:#E8F4FB,stroke:#61DAFB,color:#000
 ```
 
-O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega**. Ele recebe comandos do controlador, pergunta ao `Tabuleiro` se há colisão, pede ao `AnalisadorEstrutural` a verificação de equilíbrio e ao `GeradorPecas` o próximo elemento. Concentrar a coordenação numa classe só mantém as outras pequenas e testáveis isoladamente.
+O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega**: pergunta ao `Tabuleiro` se há colisão, pede ao `AnalisadorEstrutural` a verificação de equilíbrio e ao `GeradorPecas` o próximo elemento. A **`SessaoPartida`** é dona de um motor, da fila de comandos e do laço; ela se inscreve como observadora do motor e, a cada mudança, publica o estado no WebSocket.
+
+### O protocolo, em resumo
+
+| Canal | Direção | O que passa |
+|---|---|---|
+| `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida e devolve o `id` |
+| `WS /ws/partidas/{id}` | front → back | `{ "tipo": "COMANDO", "comando": "GIRAR_HORARIO" }` |
+| `WS /ws/partidas/{id}` | back → front | `ESTADO` (tabuleiro, peça, fila, reserva, placar, estabilidade) e `EVENTO` (linhas eliminadas, colapso, nível, fim) |
+| `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |
+| `GET /api/materiais` · `/api/dificuldades` · `/api/configuracoes` · `/api/repeticoes` | ambos | Catálogo, dificuldades, teclas e repetições |
+
+Todas as rotas, os comandos, os eventos e um exemplo completo de mensagem estão na **[seção 3.5 da especificação](docs/ESPECIFICACAO.md#35-protocolo-entre-backend-e-frontend)**.
+
+> [!IMPORTANT]
+> **O protocolo existe duas vezes, de propósito:** como `record`s Java em `canteiro.api` e como tipos TypeScript em `frontend/src/api/protocolo.ts`. **Mudou um lado, muda o outro no mesmo PR.**
 
 ### Dados persistidos
 
-Não há banco de dados. São três arquivos de texto no diretório do usuário:
+Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário. Os valores padrão vão dentro do JAR e são usados se o arquivo faltar ou vier corrompido.
 
 | Arquivo | Formato | Conteúdo |
 |---|---|---|
 | `materiais.properties` | chave = valor | Código, nome, densidade, cor e bônus de cada material. Carregado no `HashMap` do catálogo |
+| `configuracoes.properties` | chave = valor | Teclas de comando, volume e texturas para daltonismo |
 | `ranking.csv` | CSV | Nome, pontuação, nível, linhas, colapsos e data. Só entram partidas **sem uso do desfazer** (RN15) |
-| `repeticao_<data>.txt` | uma jogada por linha | Instante, comando e **semente do gerador**, o suficiente para reconstruir a partida inteira |
+| `repeticoes/<data>.txt` | uma jogada por linha | Semente do gerador e, para cada jogada, o ciclo e o comando: o suficiente para reconstruir a partida inteira |
 
 ---
 
@@ -207,74 +237,100 @@ Não há banco de dados. São três arquivos de texto no diretório do usuário:
 
 ```
 canteiro/
-├── .github/
-│   └── pull_request_template.md     checklist que aparece em todo PR
-├── .mvn/wrapper/                    configuração do Maven Wrapper
-├── docs/                            especificação e imagens do README
+├── backend/                         O JOGO EM JAVA (projeto Maven)
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/canteiro/
+│   │   │   │   ├── app/             main: sobe o servidor e abre o navegador
+│   │   │   │   ├── api/             rotas REST, WebSocket e DTOs
+│   │   │   │   ├── controle/        sessões, fila de comandos, laço
+│   │   │   │   ├── modelo/          motor, tabuleiro, estados da partida
+│   │   │   │   │   ├── pecas/       Peca + as 7 formas
+│   │   │   │   │   └── materiais/   Material + os 4 materiais
+│   │   │   │   ├── estruturas/      sacola, fila, pilha, histórico
+│   │   │   │   ├── fisica/          centro de massa, estabilidade, colapso
+│   │   │   │   ├── persistencia/    ranking, materiais, repetições
+│   │   │   │   └── util/            constantes e auxiliares
+│   │   │   └── resources/
+│   │   │       └── dados/           valores padrão dos arquivos
+│   │   └── test/
+│   │       ├── java/canteiro/       testes (espelham os pacotes de main)
+│   │       └── resources/arquivos/  arquivos de entrada dos testes
+│   ├── .mvn/wrapper/                configuração do Maven Wrapper
+│   ├── mvnw · mvnw.cmd              Maven sem precisar instalar
+│   └── pom.xml                      a receita do backend
+├── frontend/                        A INTERFACE (React + TypeScript)
+│   ├── src/
+│   │   ├── api/                     cliente REST, WebSocket, tipos do protocolo
+│   │   ├── telas/                   menu, partida, ranking, relatório...
+│   │   ├── componentes/             Tabuleiro, PainelEstabilidade, FilaProximas...
+│   │   ├── hooks/                   usePartida, useTeclado
+│   │   ├── estilos/                 cores, fontes, texturas dos materiais
+│   │   └── util/                    funções puras
+│   ├── public/                      ícone, sons, imagens
+│   ├── index.html
+│   ├── package.json                 a receita do frontend
+│   └── vite.config.ts
+├── docs/
+│   ├── ESPECIFICACAO.md             especificação v2.0
+│   ├── CANTEIRO_Documentacao-1.pdf  especificação v1.0 (histórico)
 │   └── imagens/
-├── src/
-│   ├── main/
-│   │   ├── java/canteiro/           CÓDIGO DO JOGO
-│   │   │   ├── app/                 ponto de entrada (main)
-│   │   │   ├── visao/               telas e painéis Swing
-│   │   │   ├── controle/            teclado → comandos
-│   │   │   ├── modelo/              motor, tabuleiro, estados da partida
-│   │   │   │   ├── pecas/           Peca + as 7 formas
-│   │   │   │   └── materiais/       Material + os 4 materiais
-│   │   │   ├── estruturas/          fila, pilha, histórico
-│   │   │   ├── fisica/              centro de massa, estabilidade, colapso
-│   │   │   ├── persistencia/        ranking, materiais, repetições
-│   │   │   └── util/                constantes e auxiliares
-│   │   └── resources/               ARQUIVOS QUE VÃO DENTRO DO JAR
-│   │       ├── dados/               materiais.properties padrão
-│   │       ├── imagens/             texturas e ícones
-│   │       └── sons/                efeitos sonoros
-│   └── test/
-│       ├── java/canteiro/           TESTES (espelham os pacotes de main)
-│       └── resources/arquivos/      arquivos de entrada dos testes
-├── .editorconfig                    mesma formatação em qualquer editor
-├── .gitattributes                   fim de linha certo no Windows e no Linux
-├── .gitignore                       o que o Git não deve versionar
-├── mvnw · mvnw.cmd                  Maven sem precisar instalar
-├── pom.xml                          a receita do projeto
+├── .github/pull_request_template.md
+├── .editorconfig · .gitattributes · .gitignore
 └── README.md
 ```
 
-### Por que o código está dividido assim
+> [!IMPORTANT]
+> **A migração para a v2.0 está em andamento.** Hoje o `backend/` ainda tem o esqueleto da v1.0, com um pacote `visao/` em Swing, e o `frontend/` está vazio. O Javalin, o pacote `api/` e o projeto React entram nos próximos PRs. A árvore acima é o destino.
 
-**A pasta diz de qual camada é o código, e a camada diz o que ele pode usar.** Os pacotes seguem a Figura 5 da especificação. A pergunta para decidir onde uma classe nova vai morar é *"isso é regra do jogo ou é tela?"*. Regra vai para `modelo`, `fisica` ou `estruturas`. Tela vai para `visao`. Tecla vai para `controle`. Arquivo vai para `persistencia`.
+### Por que o backend está dividido assim
 
-| Pasta | O que mora aqui | Por que separado | Pode usar Swing? |
+**A pasta diz de qual camada é o código, e a camada diz o que ele pode usar.** Para decidir onde uma classe nova vai morar, pergunte *"isso é regra do jogo, é coordenação ou é comunicação?"*. Regra vai para `modelo`, `fisica` ou `estruturas`. Coordenação da partida vai para `controle`. Rota, WebSocket e JSON vão para `api`. Arquivo vai para `persistencia`.
+
+| Pasta | O que mora aqui | Por que separado | Javalin / JSON? |
 |---|---|---|---|
-| `app/` | Só a classe `Aplicacao`, com o `main` | É o único lugar que conhece **todas** as camadas e as liga umas às outras. Fora daqui, ninguém cria tudo | ✅ |
-| `visao/` | `JanelaPrincipal`, painéis do tabuleiro, da estabilidade, da fila, telas de menu, pausa, ranking | Desenhar é um trabalho diferente de decidir. A visão **lê** o estado e desenha, nunca muda uma regra | ✅ |
-| `controle/` | Leitura do teclado e a fila de comandos | Tecla não mexe na peça na hora. Vira comando, entra na fila e o motor aplica no próximo quadro. Isso mantém o jogo reproduzível | ✅ |
-| `modelo/` | `MotorJogo`, `Tabuleiro`, `Bloco`, estados da partida | **O coração do jogo.** Tem que dar para rodar uma partida inteira num teste, sem abrir janela | ❌ |
-| `modelo/pecas/` | `Peca` (abstrata) e `PecaI`, `PecaO`, `PecaT`, `PecaS`, `PecaZ`, `PecaJ`, `PecaL` | Uma hierarquia inteira de herança. Juntas ficam fáceis de achar e comparar | ❌ |
-| `modelo/materiais/` | `Material` (abstrata) e `Madeira`, `Alvenaria`, `Concreto`, `Aco` | A segunda hierarquia, independente da primeira. A cor fica como número RGB, não como `java.awt.Color` | ❌ |
-| `estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico de jogadas | São as estruturas de dados que a disciplina avalia. Separadas, ficam fáceis de mostrar e de testar sozinhas | ❌ |
+| `app/` | Só a classe `Aplicacao`, com o `main` | É o único lugar que conhece **todas** as camadas e as liga. Também abre o navegador (RF29) | ✅ |
+| `api/` | `ServidorWeb`, rotas REST, `CanalPartida`, DTOs (`record`s) e a conversão entre modelo e DTO | **Tudo o que sabe que existe HTTP fica aqui.** Se amanhã trocássemos o Javalin, só esta pasta mudaria | ✅ |
+| `controle/` | `GerenciadorPartidas`, `SessaoPartida`, `Comando` | Coordena uma partida no tempo: recebe comandos, roda o laço, avisa quando o estado muda. Não sabe o que é JSON | ❌ |
+| `modelo/` | `MotorJogo`, `Tabuleiro`, `Bloco`, estados da partida | **O coração do jogo.** Tem que dar para rodar uma partida inteira num teste, sem servidor | ❌ |
+| `modelo/pecas/` | `Peca` (abstrata) e as 7 formas | Uma hierarquia inteira de herança, junta para ser fácil de achar e comparar | ❌ |
+| `modelo/materiais/` | `Material` (abstrata) e os 4 materiais | A segunda hierarquia, independente da primeira. A cor é um número RGB, não `java.awt.Color` | ❌ |
+| `estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
 | `fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
-| `persistencia/` | Leitura do catálogo de materiais, ranking em CSV, arquivos de repetição | Mexer com arquivo tem outro tipo de erro (arquivo sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
-| `util/` | Constantes (`COLUNAS = 10`, `LINHAS = 20`...) e auxiliares sem regra | Os "números mágicos" proibidos pela convenção têm um lugar para morar | ❌ |
+| `persistencia/` | Catálogo de materiais, configurações, ranking, repetições | Arquivo tem outro tipo de erro (sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
+| `util/` | Constantes (`COLUNAS = 10`, `LINHAS = 20`...) e auxiliares | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 
 > [!IMPORTANT]
-> **O ❌ não é sugestão, é teste.** O `ArquiteturaTest` lê os `import` de cada arquivo desses pacotes e **reprova o build** se encontrar `javax.swing`, `java.awt` ou uma camada de cima. Ele também impede o modelo de importar a persistência, porque quem liga os dois é o controle.
+> **O ❌ não é sugestão, é teste.** O `ArquiteturaTest` lê os `import` de cada arquivo desses pacotes e **reprova o build** se encontrar Javalin, Jackson, `java.awt`, `javax.swing` ou uma camada de cima.
+
+### Por que o frontend está dividido assim
+
+**O frontend só desenha e envia teclas.** Se você está escrevendo uma conta de colisão, pontuação ou estabilidade no TypeScript, ela está no lugar errado: é o backend que calcula.
+
+| Pasta | O que mora aqui | Por que separado |
+|---|---|---|
+| `api/` | `cliente.ts` (REST), `conexao.ts` (WebSocket com reconexão) e `protocolo.ts` (tipos) | **Único lugar que fala com o backend.** As telas não fazem `fetch` direto; chamam funções daqui |
+| `telas/` | Uma pasta por tela: `Menu`, `NovaPartida`, `Partida`, `FimDePartida`, `Ranking`, `Repeticoes`, `Relatorio`, `Configuracoes` | Cada tela é uma rota do React Router. Uma tela junta componentes e hooks, e quase não tem lógica própria |
+| `componentes/` | `Tabuleiro` (Canvas), `PainelEstabilidade`, `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas` | Pedaços reaproveitáveis que recebem dados por *props* e desenham. Fáceis de testar sozinhos |
+| `hooks/` | `usePartida` (conecta, guarda o último estado, envia comandos) e `useTeclado` (tecla → comando) | A lógica de tela que várias telas usam, fora dos componentes para eles ficarem pequenos |
+| `estilos/` | Cores, fontes e as texturas de cada material | Um lugar só para a identidade visual e para o padrão de daltonismo (RNF06) |
+| `util/` | Funções puras: converter cor RGB, formatar números e tempo | Sem React, sem rede: as mais fáceis de testar |
+| `public/` | Ícone, sons, imagens | Arquivos servidos como estão, sem passar pelo build |
 
 ### E as outras pastas
 
 | Pasta ou arquivo | Para que serve |
 |---|---|
-| `src/main/resources/` | Tudo o que o jogo **lê** mas não é código: o `materiais.properties` padrão (usado se o do usuário estiver faltando ou corrompido, RNF11), texturas para daltônicos (RNF06) e sons (RF28). Vai **dentro do JAR**, então funciona em qualquer computador |
-| `src/test/java/` | Os testes, **nos mesmos pacotes do código testado**. O teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest`. Assim o teste enxerga o que é do pacote e é fácil de achar |
-| `src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido. É com eles que se testa a leitura defensiva (RNF12) |
-| `docs/` | A especificação em PDF, a proposta e as imagens deste README |
-| `.github/` | O modelo de PR: todo PR novo já abre com o checklist preenchível |
-| `.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper. Garante que os três usam **a mesma versão do Maven**, sem instalar nada |
-| `pom.xml` | A receita: versão do Java, dependência do JUnit, nome do JAR, classe principal e regras do Javadoc |
-| `.gitignore` | Impede que `target/`, `.class`, `.idea/` e arquivos do sistema entrem no repositório |
-| `.gitattributes` | Resolve o problema clássico de Windows × Linux com fim de linha (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
-| `.editorconfig` | UTF-8, 4 espaços e LF em qualquer editor. O IntelliJ lê sozinho; o VS Code precisa da extensão *EditorConfig* |
-| `target/` | **Não versionada.** É onde o Maven coloca o que gera: `.class`, o JAR e o Javadoc. Pode apagar quando quiser (`./mvnw clean`) |
+| `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`, `configuracoes.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11) |
+| `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest` |
+| `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
+| `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
+| `docs/` | A especificação v2.0, a v1.0 em PDF, a proposta e as imagens deste README |
+| `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
+| `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
+| `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
+| `.editorconfig` | UTF-8, LF e indentação iguais em qualquer editor |
+| `target/`, `node_modules/`, `dist/` | **Não versionadas.** São geradas pelo Maven e pelo npm. Pode apagar quando quiser |
 
 > [!NOTE]
 > As pastas vazias têm um arquivo `.gitkeep`. O Git não guarda pasta vazia, e ele só existe para a pasta aparecer no repositório. Quando a pasta ganhar o primeiro arquivo de verdade, o `.gitkeep` pode ser apagado.
@@ -283,17 +339,16 @@ canteiro/
 
 ## 🔄 Ciclo de vida da partida
 
-A partida é uma **máquina de estados finita**, o que evita um monte de variáveis booleanas de controle. A cada quadro, o motor olha o estado atual e executa só as transições previstas para ele.
+A partida é uma **máquina de estados finita** no backend. A cada ciclo, o motor olha o estado atual e executa só as transições previstas para ele. O estado vai em toda mensagem, e **o frontend decide qual tela ou camada mostrar a partir dele**. O menu é uma tela do frontend: a partida só passa a existir quando o jogador a cria.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> MENU
-    MENU --> GERANDO_PECA: nova partida
+    [*] --> GERANDO_PECA: partida criada
     GERANDO_PECA --> PECA_CAINDO
     GERANDO_PECA --> FIM_DE_JOGO: peça nasce colidindo
     PECA_CAINDO --> PECA_CAINDO: move · gira · desce
-    PECA_CAINDO --> PAUSA: [P]
-    PAUSA --> PECA_CAINDO: [P]
+    PECA_CAINDO --> PAUSA: PAUSAR · conexão caiu · aba sem foco
+    PAUSA --> PECA_CAINDO: RETOMAR
     PECA_CAINDO --> FIXANDO: colidiu embaixo
     FIXANDO --> GERANDO_PECA: estável, sem linha
     FIXANDO --> ELIMINANDO_LINHAS: linha completa
@@ -305,17 +360,22 @@ stateDiagram-v2
     FIM_DE_JOGO --> [*]
 ```
 
-### O que acontece em cada quadro (~16 ms)
+### Do aperto da tecla ao desenho
 
 ```
-1. consome a fila de comandos → move/gira, sempre testando colisão antes
-2. o intervalo de queda do nível passou?          não → vai para o 7
-3. desce a peça uma linha                          não colidiu → vai para o 7
-4. colidiu: fixa a peça, empilha a jogada no histórico, elimina as linhas completas, soma a pontuação
-5. atualiza os acumuladores de massa → centro de massa → índice de estabilidade
-6. desvio > limite? executa o colapso e aplica a penalidade
-7. tira a próxima peça da fila e redesenha
+navegador   keydown → useTeclado traduz a tecla → envia { COMANDO } pelo WebSocket
+backend     CanalPartida valida → coloca na fila de comandos da sessão
+backend     próximo ciclo (≤ 16 ms):
+              1. consome a fila → move/gira, sempre testando colisão antes
+              2. o intervalo de queda passou? desce a peça
+              3. colidiu? fixa, empilha a jogada, elimina linhas, soma pontos
+              4. atualiza os acumuladores → centro de massa → índice
+              5. desvio > limite? colapso e penalidade
+              6. algo mudou? a sessão converte o estado em DTO e envia { ESTADO }
+navegador   usePartida guarda o estado → o Canvas redesenha no próximo quadro (≤ 16 ms)
 ```
+
+Tudo isso precisa caber em **50 ms** (RNF03). Localmente, sem internet no caminho, o esperado é bem menos.
 
 ---
 
@@ -324,28 +384,35 @@ stateDiagram-v2
 <table>
   <tbody>
     <tr>
-      <td><strong>Linguagem</strong></td>
-      <td><img src="https://img.shields.io/badge/Java_17_LTS-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/>: registros, <code>switch</code> como expressão e classes seladas onde fizer sentido</td>
+      <td rowspan="4"><strong>Backend</strong></td>
+      <td><img src="https://img.shields.io/badge/Java_17_LTS-ED8B00?style=flat-square&logo=openjdk&logoColor=white"/>: <code>record</code>s, <code>switch</code> como expressão e classes seladas onde fizer sentido</td>
     </tr>
     <tr>
-      <td><strong>Interface</strong></td>
-      <td><img src="https://img.shields.io/badge/Swing-5382A1?style=flat-square"/>: vem com o JDK. O JavaFX foi descartado porque exige dependência externa desde o Java 11</td>
+      <td><img src="https://img.shields.io/badge/Javalin_7-0A0A0A?style=flat-square"/>: servidor HTTP e WebSocket, com rotas declaradas num <code>main</code> comum</td>
     </tr>
     <tr>
-      <td><strong>Build</strong></td>
-      <td><img src="https://img.shields.io/badge/Maven_3.9-C71A36?style=flat-square&logo=apachemaven&logoColor=white"/> via <strong>Maven Wrapper</strong> (<code>./mvnw</code>): compila, roda os testes, gera o JAR executável e o Javadoc. Ninguém precisa instalar o Maven</td>
+      <td><img src="https://img.shields.io/badge/Jackson-JSON-2E7D32?style=flat-square"/> <img src="https://img.shields.io/badge/SLF4J-log-555555?style=flat-square"/>: JSON e log no terminal</td>
+    </tr>
+    <tr>
+      <td><img src="https://img.shields.io/badge/Maven_3.9-C71A36?style=flat-square&logo=apachemaven&logoColor=white"/> via <strong>Maven Wrapper</strong> (<code>./mvnw</code>): ninguém precisa instalar o Maven</td>
+    </tr>
+    <tr>
+      <td rowspan="3"><strong>Frontend</strong></td>
+      <td><img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black"/> <img src="https://img.shields.io/badge/TypeScript_strict-3178C6?style=flat-square&logo=typescript&logoColor=white"/>: componentes funcionais e hooks, sem <code>any</code></td>
+    </tr>
+    <tr>
+      <td><img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white"/>: servidor de desenvolvimento com recarga instantânea e build de produção</td>
+    </tr>
+    <tr>
+      <td><img src="https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white"/> <img src="https://img.shields.io/badge/Recharts-22B5BF?style=flat-square"/> e <code>&lt;canvas&gt;</code> 2D para o tabuleiro</td>
     </tr>
     <tr>
       <td><strong>Qualidade</strong></td>
-      <td><img src="https://img.shields.io/badge/JUnit_5-25A162?style=flat-square&logo=junit5&logoColor=white"/> <img src="https://img.shields.io/badge/Javadoc-1F3864?style=flat-square"/></td>
+      <td><img src="https://img.shields.io/badge/JUnit_5-25A162?style=flat-square&logo=junit5&logoColor=white"/> <img src="https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white"/> <img src="https://img.shields.io/badge/Testing_Library-E33332?style=flat-square&logo=testinglibrary&logoColor=white"/> <img src="https://img.shields.io/badge/Javadoc-1F3864?style=flat-square"/> <img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=eslint&logoColor=white"/> <img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=prettier&logoColor=black"/></td>
     </tr>
     <tr>
-      <td><strong>Dependências</strong></td>
-      <td>Só a biblioteca padrão do Java. <strong>A única exceção é o JUnit</strong></td>
-    </tr>
-    <tr>
-      <td><strong>Editor</strong></td>
-      <td><img src="https://img.shields.io/badge/IntelliJ_IDEA-000000?style=flat-square&logo=intellijidea&logoColor=white"/> <img src="https://img.shields.io/badge/VS_Code-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white"/>: cada um usa o que preferir</td>
+      <td><strong>Empacotamento</strong></td>
+      <td><code>frontend-maven-plugin</code> compila o React durante o <code>./mvnw package</code> e o coloca dentro do JAR, que sai com todas as dependências embutidas</td>
     </tr>
     <tr>
       <td><strong>Versionamento</strong></td>
@@ -354,33 +421,45 @@ stateDiagram-v2
   </tbody>
 </table>
 
-### Por que não Spring Boot
+### Por que Javalin, e não Spring Boot
 
-O Spring Boot resolve problemas de **servidor**: injeção de dependências em larga escala, API REST, acesso a banco, configuração por ambiente. O CANTEIRO não tem nenhum desses problemas. É um aplicativo **desktop**, local, de uma pessoa só, sem rede e sem banco (seção 1.4). Trazer o Spring significaria:
+O Spring Boot resolve problemas de sistemas grandes: injeção de dependências, acesso a banco, segurança, configuração por ambiente. O CANTEIRO precisa de **meia dúzia de rotas e um WebSocket**. Com o Spring:
 
-- **Quebrar a premissa 2.11**, que permite só a biblioteca padrão do Java, com exceção da de testes.
-- **Esconder justamente o que a disciplina avalia.** Com o Spring, os objetos são criados e ligados pelo framework, por anotações. Aqui queremos que herança, polimorfismo e a ligação entre as classes fiquem **visíveis no código**, escritos por nós.
-- **Aumentar a curva de aprendizado** da equipe sem ganho nenhum para o jogo.
+- os objetos seriam criados e ligados **pelo framework, por anotações**, justamente a parte que a disciplina quer ver escrita por nós;
+- a curva de aprendizado da equipe cresceria sem ganho nenhum para o jogo.
 
-O Swing, o `javax.swing.Timer` e o `java.util` resolvem tudo o que o projeto precisa.
+Com o Javalin, o servidor inteiro é algo assim, e **todo objeto é criado com `new`, de forma visível**:
+
+```java
+var partidas = new GerenciadorPartidas(catalogo);
+
+Javalin.create(config -> config.staticFiles.add("/publico"))
+    .get("/api/ranking", ctx -> ctx.json(ranking.dezMelhores()))
+    .post("/api/partidas", ctx -> ctx.json(partidas.criar(ctx.bodyAsClass(NovaPartidaDto.class))))
+    .ws("/ws/partidas/{id}", ws -> new CanalPartida(partidas).registrar(ws))
+    .start("127.0.0.1", 7070);
+```
 
 ---
 
 ## 🚀 Rodando localmente
 
+> [!IMPORTANT]
+> Enquanto a [migração para a v2.0](#-estrutura-de-pastas) não termina, só o **backend** roda, e só os testes. Os comandos de frontend e do JAR completo valem a partir dos próximos PRs.
+
 ### 1. Pré-requisitos
 
-| Requisito | Versão | Como conferir |
-|---|---|---|
-| **JDK** | 17 ou superior | `java -version` e `javac -version` |
-| **Git** | qualquer versão recente | `git --version` |
+| Requisito | Versão | Quem precisa | Como conferir |
+|---|---|---|---|
+| **JDK** | 17 ou superior | todos | `java -version` e `javac -version` |
+| **Git** | recente | todos | `git --version` |
+| **Node.js** | 20 ou superior | só quem mexe no **frontend** | `node -v` |
 
-**Não precisa instalar o Maven.** O projeto traz o **Maven Wrapper** (`mvnw`): na primeira execução ele baixa a versão certa do Maven sozinho, e todos na equipe usam exatamente a mesma.
+**Não precisa instalar o Maven.** O `backend/` traz o **Maven Wrapper** (`mvnw`): na primeira execução ele baixa a versão certa sozinho, e todos usam exatamente a mesma.
 
 > [!TIP]
-> **Onde baixar o JDK 17:** [adoptium.net](https://adoptium.net/temurin/releases/?version=17), escolhendo o seu sistema e o pacote **JDK**. No Ubuntu, `sudo apt install openjdk-17-jdk`. No IntelliJ, dá para baixar direto em *File → Project Structure → SDK → Download JDK*.
-
-O jogo roda sem nenhuma alteração em **Windows, Linux e macOS** (RNF04). A resolução mínima da janela é **1024 × 768**.
+> **JDK 17:** [adoptium.net](https://adoptium.net/temurin/releases/?version=17), pacote **JDK**. No Ubuntu, `sudo apt install openjdk-17-jdk`. No IntelliJ, *File → Project Structure → SDK → Download JDK*.
+> **Node.js:** [nodejs.org](https://nodejs.org), versão **LTS**.
 
 ### 2. Clonar
 
@@ -391,86 +470,149 @@ cd canteiro
 
 Nunca usou Git? Leia antes o [guia de Git da equipe](#-guia-de-git-da-equipe).
 
-### 3. Comandos
+### 3. Desenvolvendo: dois terminais
 
-No **Linux, macOS e Git Bash** use `./mvnw`. No **Prompt de Comando ou PowerShell do Windows** use `mvnw.cmd`.
+No dia a dia, backend e frontend rodam **separados**, cada um no seu terminal. Assim, mudar uma tela recarrega o navegador na hora, sem reiniciar o Java.
+
+```bash
+# Terminal 1 · backend em http://127.0.0.1:7070
+cd backend
+./mvnw compile exec:java
+
+# Terminal 2 · frontend em http://localhost:5173 (abra este no navegador)
+cd frontend
+npm install        # só na primeira vez, ou quando o package.json mudar
+npm run dev
+```
+
+O Vite repassa as chamadas `/api` e `/ws` para o backend, então para o navegador parece um servidor só.
+
+> [!TIP]
+> **No IntelliJ:** abra a pasta `canteiro/backend` (*File → Open*); ele reconhece o `pom.xml`. Para subir o backend, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** abra a pasta `canteiro` inteira e instale o *Extension Pack for Java*, o *ESLint* e o *Prettier*.
+
+### 4. Gerando o JAR
+
+```bash
+cd backend
+./mvnw package
+java -jar target/canteiro.jar     # ou dois cliques no arquivo
+```
+
+O `package` compila o frontend com um Node próprio, baixado dentro do projeto só para isso, e coloca o resultado dentro do JAR. **Quem for só jogar não precisa de Node.**
+
+### 5. Comandos
+
+**Backend**, de dentro de `backend/`. No **CMD ou PowerShell do Windows**, troque `./mvnw` por `mvnw.cmd`.
 
 | Comando | O que faz |
 |---|---|
-| `./mvnw compile` | Compila o código |
-| `./mvnw test` | Roda os testes automatizados |
+| `./mvnw compile exec:java` | Sobe o backend para desenvolvimento |
+| `./mvnw test` | Roda os testes do backend. **Não mexe no frontend**, por isso é rápido |
 | `./mvnw verify` | Compila, testa e empacota. **Rode antes de abrir um PR** |
-| `./mvnw package` | Gera o JAR executável em `target/canteiro.jar` |
-| `java -jar target/canteiro.jar` | Abre o jogo (ou dê dois cliques no JAR) |
+| `./mvnw package` | Gera `target/canteiro.jar`, com o frontend dentro |
 | `./mvnw javadoc:javadoc` | Gera a documentação em `target/reports/apidocs/`. **Falha se algo público estiver sem Javadoc** (RNF07) |
 | `./mvnw clean` | Apaga a pasta `target/` |
 
-> [!TIP]
-> **No IntelliJ:** *File → Open* e escolha a pasta `canteiro`. Ele reconhece o `pom.xml` sozinho. Para jogar, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** instale o *Extension Pack for Java* e abra a pasta.
+**Frontend**, de dentro de `frontend/`.
 
-### 4. Problemas comuns
+| Comando | O que faz |
+|---|---|
+| `npm install` | Instala as dependências (cria `node_modules/`) |
+| `npm run dev` | Sobe o Vite em `http://localhost:5173`, com recarga instantânea |
+| `npm test` | Roda os testes com Vitest |
+| `npm run lint` | Confere o código com ESLint |
+| `npm run build` | Checa os tipos e gera o build de produção em `dist/` |
+
+### 6. Problemas comuns
 
 | Sintoma | Causa | Solução |
 |---|---|---|
+| `./mvnw: No such file or directory` · `mvnw não é reconhecido` | Você está na raiz do repositório | `cd backend` |
 | `./mvnw: Permission denied` | O arquivo perdeu a permissão de execução | `chmod +x mvnw` |
 | `'.' não é reconhecido como um comando` (Windows) | `./mvnw` é sintaxe do Linux | No CMD ou PowerShell use `mvnw.cmd` |
-| `JAVA_HOME not found` · `JAVA_HOME is not defined correctly` | O wrapper não achou o JDK | Instale o JDK 17 e configure a variável `JAVA_HOME` apontando para a pasta dele |
+| `JAVA_HOME not found` · `JAVA_HOME is not defined correctly` | O wrapper não achou o JDK | Instale o JDK 17 e aponte a variável `JAVA_HOME` para a pasta dele |
 | `O CANTEIRO exige Java 17 ou superior` | O Java ativo é antigo | `java -version`. Troque o JDK padrão ou o `JAVA_HOME` |
-| `ArquiteturaTest` falhou | Alguém importou Swing, AWT ou uma camada de cima dentro do modelo | A mensagem mostra o arquivo e a linha. Mova o código para `visao` ou `controle` |
-| `javadoc:javadoc` falhou com `warning: no comment` | Tem classe ou método público sem Javadoc | Documente o que a mensagem aponta |
-
-### 5. Controles
-
-Todos os comandos são pelo teclado, com a legenda sempre visível na tela do jogo (RNF05). As teclas definitivas serão decididas na implementação. As já definidas na especificação são **[P] pausar**, **[R] reiniciar** e **[C] trocar pela peça reservada**.
+| `Address already in use` · porta 7070 ocupada | O backend já está rodando em outro terminal | Feche o outro, ou encerre o processo que usa a porta |
+| A tela abre, mas fica em "Reconectando..." | O backend não está rodando | Suba o terminal 1 |
+| `npm: command not found` | Node.js não instalado | Instale o Node LTS. Só é preciso para mexer no frontend |
+| `Cannot find module` depois de um `git pull` | Alguém adicionou uma dependência | `npm install` de novo |
+| `ArquiteturaTest` falhou | Alguém importou Javalin, JSON, gráfico ou uma camada de cima dentro do modelo | A mensagem mostra o arquivo e a linha. Mova o código para `api` ou `app` |
+| `javadoc:javadoc` falhou com `warning: no comment` | Classe ou método público sem Javadoc | Documente o que a mensagem aponta |
 
 ---
 
 ## 🧪 Testes
 
-A maior parte do esforço de teste fica em **testes de unidade da camada de modelo**, que é onde moram as regras que podem errar sem ninguém perceber. Só a navegação entre as telas é verificada manualmente. **O teste é escrito junto com a regra, não deixado para o fim.**
+A maior parte do esforço de teste fica nos **testes de unidade do modelo, no backend**, que é onde moram as regras que podem errar sem ninguém perceber. Acima deles, testes da API e do WebSocket com o servidor em memória. No frontend, testes dos componentes que têm lógica de apresentação. **O teste é escrito junto com a regra, não deixado para o fim.**
 
 ```bash
-./mvnw test
+cd backend && ./mvnw test      # JUnit 5
+cd frontend && npm test        # Vitest
 ```
 
-**Já existe:** o `ArquiteturaTest`, que garante que o modelo não importa nada gráfico (RNF08). **Previstos:**
+**Já existe:** o `ArquiteturaTest`, que garante a separação de camadas (RNF08). **Previstos:**
 
-| Alvo | O que vai ser testado |
-|---|---|
-| **Colisão** | Peça encostada em cada uma das 4 bordas · sobre um bloco fixado · em espaço livre · parcialmente acima do topo |
-| **Rotação** | As 4 rotações das 7 formas · rotação junto às paredes · peça `I` em espaço mínimo · rotação recusada |
-| **Gerador** | Em 200 peças, nenhuma forma se repete antes de a sacola esvaziar · material só entre os liberados na fase |
-| **Linhas** | 1, 2, 3 e 4 linhas simultâneas · linha que não está no topo · nenhuma linha · descida correta das linhas de cima |
-| **Centro de massa** | Estrutura simétrica · simétrica na geometria mas não na massa · coluna única · **incremental × varredura completa após 500 operações** |
-| **Colapso** | Desvio logo abaixo do limite · logo acima · pilha na altura crítica · reacomodação correta |
-| **Pontuação** | Multiplicadores por linhas, material e nível · penalidade de colapso · subida de nível |
-| **Persistência** | Arquivo ausente · vazio · linha malformada · caractere inválido · nome repetido no ranking |
-| **Repetição** | Reexecutar uma partida gravada tem que dar a mesma pontuação e o mesmo tabuleiro final |
+| Alvo | O que vai ser testado | Lado |
+|---|---|---|
+| **Colisão** | Peça encostada em cada uma das 4 bordas · sobre um bloco fixado · em espaço livre · parcialmente acima do topo | ☕ |
+| **Rotação** | As 4 rotações das 7 formas · rotação junto às paredes · peça `I` em espaço mínimo · rotação recusada | ☕ |
+| **Gerador** | Em 200 peças, nenhuma forma se repete antes de a sacola esvaziar · material só entre os liberados na fase | ☕ |
+| **Linhas** | 1, 2, 3 e 4 linhas simultâneas · linha que não está no topo · nenhuma linha · descida correta | ☕ |
+| **Centro de massa** | Estrutura simétrica · simétrica na geometria mas não na massa · coluna única · **incremental × varredura após 500 operações** | ☕ |
+| **Colapso** | Desvio logo abaixo do limite · logo acima · pilha na altura crítica · reacomodação correta | ☕ |
+| **Pontuação** | Multiplicadores por linhas, material e nível · penalidade de colapso · subida de nível | ☕ |
+| **Persistência** | Arquivo ausente · vazio · linha malformada · caractere inválido · nome repetido no ranking | ☕ |
+| **Repetição** | Reexecutar uma partida gravada tem que dar a mesma pontuação e o mesmo tabuleiro final | ☕ |
+| **API e WebSocket** | Cada rota com entrada válida e inválida · JSON malformado vira `ERRO` · fechar a conexão pausa a partida | ☕ |
+| **Protocolo** | O JSON gerado bate com os exemplos fixos · mensagem de estado abaixo de 4 KB | ☕ |
+| **Componentes** | Alerta de estabilidade abaixo do limiar · legenda segue as teclas configuradas · tela de reconexão | ⚛️ |
+| **Teclado** | Tecla configurada gera o comando certo · tecla segurada não duplica comando | ⚛️ |
 
 ### Metas de desempenho
 
 | Métrica | Meta |
 |---|---|
-| Taxa de quadros | ≥ 55 qps durante 10 minutos seguidos |
-| Tempo da lógica por quadro | ≤ 4 ms |
-| Latência entre tecla e tela | ≤ 50 ms |
-| Recálculo do centro de massa | constante, com a pilha em 2, 10 ou 18 linhas |
-| Inicialização | ≤ 2 s até o menu |
-| Memória | ≤ 200 MB após 10 minutos |
+| Quadros por segundo no navegador | ≥ 55 durante 10 minutos seguidos |
+| Ciclos por segundo no backend | 60 ± 1 |
+| Tempo da lógica por ciclo | ≤ 4 ms |
+| Da tecla ao desenho | ≤ 50 ms |
+| Mensagem de estado | ≤ 4 KB |
+| Do duplo clique ao menu | ≤ 3 s |
+| Memória do backend | ≤ 200 MB após 10 minutos |
 
 ---
 
 ## 📏 Convenções de código
 
+### Vale para os dois lados
+
 | Regra | Detalhe |
 |---|---|
-| 🇧🇷 **Português** | Classes, métodos, variáveis e comentários em português. Só os termos da própria linguagem ficam em inglês |
+| 🇧🇷 **Português** | Classes, funções, variáveis e comentários em português. Só os termos da linguagem e das bibliotecas ficam em inglês (`useState`, `onClick`, `@Override`) |
+| 🔢 **Sem números mágicos** | Dimensões, limites e intervalos em constantes nomeadas |
+| 🔌 **Protocolo nos dois lados** | Mudou um DTO em `canteiro.api`? Muda o tipo em `frontend/src/api/protocolo.ts` **no mesmo PR** |
+
+### Backend (Java)
+
+| Regra | Detalhe |
+|---|---|
 | 🔤 **Nomes** | `PascalCase` para classes · `camelCase` para métodos e atributos · `MAIUSCULAS_COM_SUBLINHADO` para constantes |
 | 🔒 **Encapsulamento** | Atributos **sempre** `private`. Acesso de fora só por métodos que preservem as invariantes |
 | 📐 **Tamanho** | Nenhum método com mais de **40 linhas úteis**, nenhuma classe com mais de **400** (RNF09) |
-| 🔢 **Sem números mágicos** | Dimensões, limites e intervalos em constantes nomeadas ou em arquivo de configuração |
-| 🚫 **Modelo sem Swing** | Nenhum `import javax.swing` ou `java.awt` dentro de `canteiro.modelo` |
+| 🚫 **Modelo isolado** | Nada de Javalin, Jackson, `java.awt` ou `javax.swing` fora de `api` e `app` |
+| 📦 **DTOs** | São `record`s e ficam só em `canteiro.api`. O modelo nunca é transformado em JSON diretamente |
 | 📝 **Javadoc** | Toda classe pública: responsabilidade, `@author`, `@version`. Todo método público: `@param`, `@return`, `@throws` |
+
+### Frontend (TypeScript)
+
+| Regra | Detalhe |
+|---|---|
+| 🔤 **Nomes** | Componentes em `PascalCase`, um por arquivo (`Tabuleiro.tsx`) · hooks começam com `use` (`usePartida.ts`) · funções e variáveis em `camelCase` |
+| 🧩 **Componentes** | Só funcionais, com hooks. No máximo **200 linhas**; passou disso, divida |
+| 🛡️ **Tipos** | TypeScript `strict`, **nada de `any`**. Todo dado que vem do backend tem tipo em `protocolo.ts` |
+| 🎨 **Sem regra de jogo** | Componente recebe o estado pronto e desenha. Não calcula colisão, pontos nem estabilidade |
+| 🌐 **Rede só em `api/`** | Telas e componentes não chamam `fetch` nem abrem WebSocket direto |
+| 📝 **TSDoc** | Tipos exportados e hooks com comentário `/** ... */` |
 
 ```java
 /**
@@ -479,12 +621,24 @@ A maior parte do esforço de teste fica em **testes de unidade da camada de mode
  * <p>Cálculo incremental: usa os acumuladores de massa por coluna,
  * atualizados a cada bloco fixado ou removido (RNF02).</p>
  *
- * @param tabuleiro estrutura avaliada; não pode ser nulo
  * @return posição horizontal do centro de massa, em colunas
  * @throws IllegalStateException se a estrutura não possuir blocos
- * @see #indiceEstabilidade()
  */
-public double centroDeMassa(Tabuleiro tabuleiro) { ... }
+public double centroDeMassa() { ... }
+```
+
+```tsx
+/** Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). */
+export function PainelEstabilidade({ estabilidade }: { estabilidade: EstabilidadeDto }) {
+  const emAlerta = estabilidade.indice < LIMIAR_ALERTA;
+  return (
+    <section className={emAlerta ? "painel painel--alerta" : "painel"}>
+      <h2>Estabilidade</h2>
+      <BarraProgresso valor={estabilidade.indice} />
+      <p>Desvio: {formatarColunas(estabilidade.desvio)}</p>
+    </section>
+  );
+}
 ```
 
 ---
@@ -616,7 +770,7 @@ Use o `git status` **o tempo todo**. Ele é o painel de controle do Git e quase 
 #### 4️⃣ Faça o commit (tire a foto)
 
 ```bash
-git add src/main/java/canteiro/modelo/GeradorPecas.java   # escolhe o que vai na foto
+git add backend/src/main/java/canteiro/modelo/GeradorPecas.java   # escolhe o que vai na foto
 git commit -m "feat(modelo): adiciona gerador de peças com método da sacola"
 ```
 
@@ -746,7 +900,7 @@ git push
 
 - ❌ **Trabalhar direto na `develop` ou na `main`.** Sempre crie um ramo. O GitHub vai recusar o push de qualquer jeito.
 - ❌ **`git push --force`** em ramo que outra pessoa também usa.
-- ❌ **Commitar arquivos gerados**, como `target/`, `*.class`, `.idea/` ou `.vscode/`. O `.gitignore` já barra esses arquivos.
+- ❌ **Commitar arquivos gerados**, como `target/`, `node_modules/`, `dist/`, `*.class`, `.idea/` ou `.vscode/`. O `.gitignore` já barra esses arquivos.
 - ❌ **Fazer merge do seu próprio PR sem ninguém ter olhado**, a não ser que o grupo combine o contrário.
 - ❌ **Passar dias sem dar push.** Se o computador der problema, o trabalho que não foi para o GitHub se perde.
 - ❌ **Apagar o conteúdo de um conflito sem entender o que ele é.**
@@ -801,23 +955,24 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 ## 🗓️ Cronograma
 
-| Semanas | Etapa | Entrega |
-|---|---|---|
-| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | [Documentação](docs/CANTEIRO_Documentacao-1.pdf) |
-| ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | Núcleo funcional em modo texto |
-| ⬜ 5 – 6 | Motor, rotação com deslocamento, linhas e pontuação | Jogável, ainda sem estabilidade |
-| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso | **Mecânica diferencial completa** |
-| ⬜ 9 – 10 | Interface gráfica, telas, animações e realimentação visual | Versão gráfica integrada |
-| ⬜ 11 | Persistência, ranking, repetição e relatório final | Requisitos desejáveis |
-| ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | **Entrega final** |
+| Semanas | Etapa | Lado | Entrega |
+|---|---|---|---|
+| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Especificação 1.0](docs/CANTEIRO_Documentacao-1.pdf) |
+| 🔄 3 | Revisão da arquitetura; Javalin; projeto React; build único; protocolo | ☕ ⚛️ | [Especificação 2.0](docs/ESPECIFICACAO.md) e esqueleto ponta a ponta |
+| ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
+| ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ ⚛️ | Jogável no navegador, ainda sem estabilidade |
+| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ ⚛️ | **Mecânica diferencial completa** |
+| ⬜ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | ⚛️ | Interface integrada |
+| ⬜ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ ⚛️ | Requisitos desejáveis |
+| ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ ⚛️ | **Entrega final** |
 
 ### Entregáveis
 
-- 📦 **Código-fonte**: projeto Maven completo, com testes e arquivos de dados de exemplo
-- ☕ **Executável**: JAR único, que abre com dois cliques
-- 📚 **Javadoc**: páginas geradas a partir dos comentários do código
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado, o que mudou em relação à especificação e por quê
-- 📄 **[Especificação](docs/CANTEIRO_Documentacao-1.pdf)**: requisitos, diagramas e estratégias, em PDF
+- 📦 **Código-fonte**: o repositório completo, com `backend/`, `frontend/`, testes e arquivos de dados de exemplo
+- ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
+- 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
+- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação à especificação, com o porquê. A [seção 0.2 da especificação](docs/ESPECIFICACAO.md#02-tabela-de-desvios) já registra os desvios da v2.0
+- 📄 **[Especificação 2.0](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
 
 ---
 
