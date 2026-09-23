@@ -1,6 +1,12 @@
 # Build do Maven
 target/
 
+# Frontend (npm, Vite e o Node baixado pelo frontend-maven-plugin)
+node_modules/
+dist/
+frontend/node/
+*.tsbuildinfo
+
 # Compilados e pacotes
 *.class
 *.jar
