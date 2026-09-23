@@ -207,40 +207,44 @@ Não há banco de dados. São três arquivos de texto no diretório do usuário:
 
 ```
 canteiro/
-├── .github/
-│   └── pull_request_template.md     checklist que aparece em todo PR
-├── .mvn/wrapper/                    configuração do Maven Wrapper
+├── backend/                         O JOGO EM JAVA (projeto Maven)
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/canteiro/       código do jogo
+│   │   │   │   ├── app/             ponto de entrada (main)
+│   │   │   │   ├── visao/           telas e painéis
+│   │   │   │   ├── controle/        teclado → comandos
+│   │   │   │   ├── modelo/          motor, tabuleiro, estados da partida
+│   │   │   │   │   ├── pecas/       Peca + as 7 formas
+│   │   │   │   │   └── materiais/   Material + os 4 materiais
+│   │   │   │   ├── estruturas/      fila, pilha, histórico
+│   │   │   │   ├── fisica/          centro de massa, estabilidade, colapso
+│   │   │   │   ├── persistencia/    ranking, materiais, repetições
+│   │   │   │   └── util/            constantes e auxiliares
+│   │   │   └── resources/           arquivos que vão dentro do JAR
+│   │   │       ├── dados/           materiais.properties padrão
+│   │   │       ├── imagens/         texturas e ícones
+│   │   │       └── sons/            efeitos sonoros
+│   │   └── test/
+│   │       ├── java/canteiro/       testes (espelham os pacotes de main)
+│   │       └── resources/arquivos/  arquivos de entrada dos testes
+│   ├── .mvn/wrapper/                configuração do Maven Wrapper
+│   ├── mvnw · mvnw.cmd              Maven sem precisar instalar
+│   └── pom.xml                      a receita do projeto
+├── frontend/                        A INTERFACE (em planejamento)
 ├── docs/                            especificação e imagens do README
 │   └── imagens/
-├── src/
-│   ├── main/
-│   │   ├── java/canteiro/           CÓDIGO DO JOGO
-│   │   │   ├── app/                 ponto de entrada (main)
-│   │   │   ├── visao/               telas e painéis Swing
-│   │   │   ├── controle/            teclado → comandos
-│   │   │   ├── modelo/              motor, tabuleiro, estados da partida
-│   │   │   │   ├── pecas/           Peca + as 7 formas
-│   │   │   │   └── materiais/       Material + os 4 materiais
-│   │   │   ├── estruturas/          fila, pilha, histórico
-│   │   │   ├── fisica/              centro de massa, estabilidade, colapso
-│   │   │   ├── persistencia/        ranking, materiais, repetições
-│   │   │   └── util/                constantes e auxiliares
-│   │   └── resources/               ARQUIVOS QUE VÃO DENTRO DO JAR
-│   │       ├── dados/               materiais.properties padrão
-│   │       ├── imagens/             texturas e ícones
-│   │       └── sons/                efeitos sonoros
-│   └── test/
-│       ├── java/canteiro/           TESTES (espelham os pacotes de main)
-│       └── resources/arquivos/      arquivos de entrada dos testes
+├── .github/
+│   └── pull_request_template.md     checklist que aparece em todo PR
 ├── .editorconfig                    mesma formatação em qualquer editor
 ├── .gitattributes                   fim de linha certo no Windows e no Linux
 ├── .gitignore                       o que o Git não deve versionar
-├── mvnw · mvnw.cmd                  Maven sem precisar instalar
-├── pom.xml                          a receita do projeto
 └── README.md
 ```
 
-### Por que o código está dividido assim
+**O repositório tem duas partes que não se misturam.** Em `backend/` fica o jogo em Java: regras, física, estruturas de dados e persistência, com o seu próprio build. Em `frontend/` vai ficar a interface. Cada parte tem as suas ferramentas e roda por conta própria. **Por enquanto, todo o trabalho acontece no `backend/`.**
+
+### Por que o código do backend está dividido assim
 
 **A pasta diz de qual camada é o código, e a camada diz o que ele pode usar.** Os pacotes seguem a Figura 5 da especificação. A pergunta para decidir onde uma classe nova vai morar é *"isso é regra do jogo ou é tela?"*. Regra vai para `modelo`, `fisica` ou `estruturas`. Tela vai para `visao`. Tecla vai para `controle`. Arquivo vai para `persistencia`.
 
@@ -262,8 +266,12 @@ canteiro/
 
 ### E as outras pastas
 
+<sub>Os caminhos que começam com <code>src/</code>, <code>.mvn/</code>, <code>mvnw</code> e <code>pom.xml</code> ficam dentro de <code>backend/</code>.</sub>
+
 | Pasta ou arquivo | Para que serve |
 |---|---|
+| `backend/` | O projeto Java inteiro. Todo comando `./mvnw` roda **de dentro desta pasta** |
+| `frontend/` | A interface do jogo. **Ainda vazia**: a tecnologia vai ser definida quando o backend estiver de pé |
 | `src/main/resources/` | Tudo o que o jogo **lê** mas não é código: o `materiais.properties` padrão (usado se o do usuário estiver faltando ou corrompido, RNF11), texturas para daltônicos (RNF06) e sons (RF28). Vai **dentro do JAR**, então funciona em qualquer computador |
 | `src/test/java/` | Os testes, **nos mesmos pacotes do código testado**. O teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest`. Assim o teste enxerga o que é do pacote e é fácil de achar |
 | `src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido. É com eles que se testa a leitura defensiva (RNF12) |
@@ -274,7 +282,7 @@ canteiro/
 | `.gitignore` | Impede que `target/`, `.class`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema clássico de Windows × Linux com fim de linha (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
 | `.editorconfig` | UTF-8, 4 espaços e LF em qualquer editor. O IntelliJ lê sozinho; o VS Code precisa da extensão *EditorConfig* |
-| `target/` | **Não versionada.** É onde o Maven coloca o que gera: `.class`, o JAR e o Javadoc. Pode apagar quando quiser (`./mvnw clean`) |
+| `backend/target/` | **Não versionada.** É onde o Maven coloca o que gera: `.class`, o JAR e o Javadoc. Pode apagar quando quiser (`./mvnw clean`) |
 
 > [!NOTE]
 > As pastas vazias têm um arquivo `.gitkeep`. O Git não guarda pasta vazia, e ele só existe para a pasta aparecer no repositório. Quando a pasta ganhar o primeiro arquivo de verdade, o `.gitkeep` pode ser apagado.
@@ -386,14 +394,14 @@ O jogo roda sem nenhuma alteração em **Windows, Linux e macOS** (RNF04). A res
 
 ```bash
 git clone https://github.com/mateus-vitor-ferreira-dev/canteiro.git
-cd canteiro
+cd canteiro/backend
 ```
 
 Nunca usou Git? Leia antes o [guia de Git da equipe](#-guia-de-git-da-equipe).
 
 ### 3. Comandos
 
-No **Linux, macOS e Git Bash** use `./mvnw`. No **Prompt de Comando ou PowerShell do Windows** use `mvnw.cmd`.
+Todos os comandos rodam **dentro da pasta `backend/`**. No **Linux, macOS e Git Bash** use `./mvnw`. No **Prompt de Comando ou PowerShell do Windows** use `mvnw.cmd`.
 
 | Comando | O que faz |
 |---|---|
@@ -406,12 +414,13 @@ No **Linux, macOS e Git Bash** use `./mvnw`. No **Prompt de Comando ou PowerShel
 | `./mvnw clean` | Apaga a pasta `target/` |
 
 > [!TIP]
-> **No IntelliJ:** *File → Open* e escolha a pasta `canteiro`. Ele reconhece o `pom.xml` sozinho. Para jogar, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** instale o *Extension Pack for Java* e abra a pasta.
+> **No IntelliJ:** *File → Open* e escolha a pasta `canteiro/backend`. Ele reconhece o `pom.xml` sozinho. Para jogar, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** instale o *Extension Pack for Java* e abra a pasta.
 
 ### 4. Problemas comuns
 
 | Sintoma | Causa | Solução |
 |---|---|---|
+| `./mvnw: No such file or directory` · `mvnw não é reconhecido` | Você está na raiz do repositório, não no backend | `cd backend` |
 | `./mvnw: Permission denied` | O arquivo perdeu a permissão de execução | `chmod +x mvnw` |
 | `'.' não é reconhecido como um comando` (Windows) | `./mvnw` é sintaxe do Linux | No CMD ou PowerShell use `mvnw.cmd` |
 | `JAVA_HOME not found` · `JAVA_HOME is not defined correctly` | O wrapper não achou o JDK | Instale o JDK 17 e configure a variável `JAVA_HOME` apontando para a pasta dele |
@@ -430,6 +439,7 @@ Todos os comandos são pelo teclado, com a legenda sempre visível na tela do jo
 A maior parte do esforço de teste fica em **testes de unidade da camada de modelo**, que é onde moram as regras que podem errar sem ninguém perceber. Só a navegação entre as telas é verificada manualmente. **O teste é escrito junto com a regra, não deixado para o fim.**
 
 ```bash
+cd backend
 ./mvnw test
 ```
 
@@ -616,7 +626,7 @@ Use o `git status` **o tempo todo**. Ele é o painel de controle do Git e quase 
 #### 4️⃣ Faça o commit (tire a foto)
 
 ```bash
-git add src/main/java/canteiro/modelo/GeradorPecas.java   # escolhe o que vai na foto
+git add backend/src/main/java/canteiro/modelo/GeradorPecas.java   # escolhe o que vai na foto
 git commit -m "feat(modelo): adiciona gerador de peças com método da sacola"
 ```
 
