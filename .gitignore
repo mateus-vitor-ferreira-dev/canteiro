@@ -1,0 +1,31 @@
+# Build do Maven
+target/
+
+# Compilados e pacotes
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos gerados pelo jogo durante testes manuais
+ranking.csv
+repeticao_*.txt
