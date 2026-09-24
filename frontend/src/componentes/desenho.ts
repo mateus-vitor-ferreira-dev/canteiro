@@ -1,23 +1,41 @@
 import type { EstadoDto, Posicao, QuedaDto } from "@/api/protocolo";
-import { corDoMaterial } from "@/estilos/materiais";
+import { desenharBloco } from "@/estilos/materiais";
 
 /** Linhas ocultas no topo da grade: o backend manda, mas a tela não mostra (RN01). */
 export const LINHAS_OCULTAS = 2;
 export const LINHAS_VISIVEIS = 20;
 export const COLUNAS = 10;
 
+/** Menor e maior lado de um quadrado do tabuleiro, em pixels. */
+export const CELULA_MINIMA = 14;
+export const CELULA_MAXIMA = 32;
+
+/** Quanto dura a animação do colapso, em milissegundos ("aproximadamente um segundo"). */
+export const DURACAO_COLAPSO_MS = 1000;
+
 const COR_FUNDO = "#1b2432";
 const COR_GRADE = "#263041";
-const COR_FANTASMA = "rgba(255, 255, 255, 0.35)";
-const COR_EIXO = "#56d364";
-const COR_CENTRO = "#f47067";
-const COR_CENTRO_ALERTA = "#ff3b30";
-const FOLGA = 1;
+const COR_FANTASMA = "rgba(255, 255, 255, 0.45)";
+const COR_EIXO = "#f2b53a";
+const COR_CENTRO = "#ff6b5e";
+const COR_CENTRO_BORDA = "#ffffff";
 const COR_CLARAO = "244, 112, 103";
 const OPACIDADE_CLARAO = 0.45;
+const FOLGA = 1;
 
-/** Quanto dura a animação do colapso, em milissegundos (seção 2.6.2 da especificação: "aproximadamente um segundo"). */
-export const DURACAO_COLAPSO_MS = 1000;
+/**
+ * Lado de cada quadrado para o tabuleiro caber na tela: 20 linhas na altura
+ * que sobra e 10 colunas na largura disponível, entre 14 e 32 pixels.
+ *
+ * @param larguraDisponivel largura que o tabuleiro pode ocupar, em pixels
+ * @param alturaDisponivel altura que o tabuleiro pode ocupar, em pixels
+ */
+export function tamanhoDaCelula(larguraDisponivel: number, alturaDisponivel: number): number {
+    const cabe = Math.floor(
+        Math.min(alturaDisponivel / LINHAS_VISIVEIS, larguraDisponivel / COLUNAS),
+    );
+    return Math.min(CELULA_MAXIMA, Math.max(CELULA_MINIMA, cabe));
+}
 
 /** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
 export function desenharTabuleiro(
@@ -34,7 +52,7 @@ export function desenharTabuleiro(
     estado.tabuleiro.forEach((linha, l) =>
         linha.forEach((material, c) => {
             if (material) {
-                pintar(ctx, [l, c], corDoMaterial(material), celula);
+                pintar(ctx, [l, c], material, celula);
             }
         }),
     );
@@ -42,8 +60,8 @@ export function desenharTabuleiro(
         contornar(ctx, posicao, celula);
     }
     if (estado.pecaAtual) {
-        const cor = corDoMaterial(estado.pecaAtual.material);
-        estado.pecaAtual.blocos.forEach((posicao) => pintar(ctx, posicao, cor, celula));
+        const material = estado.pecaAtual.material;
+        estado.pecaAtual.blocos.forEach((posicao) => pintar(ctx, posicao, material, celula));
     }
     desenharEquilibrio(ctx, estado, celula);
 }
@@ -57,21 +75,21 @@ export function naTela([linha, coluna]: Posicao, celula: number): { x: number; y
 function pintar(
     ctx: CanvasRenderingContext2D,
     posicao: Posicao,
-    cor: string,
+    material: string,
     celula: number,
 ): void {
     const ponto = naTela(posicao, celula);
     if (ponto) {
-        ctx.fillStyle = cor;
-        ctx.fillRect(ponto.x + FOLGA, ponto.y + FOLGA, celula - 2 * FOLGA, celula - 2 * FOLGA);
+        desenharBloco(ctx, ponto.x + FOLGA, ponto.y + FOLGA, celula - 2 * FOLGA, material);
     }
 }
 
 function contornar(ctx: CanvasRenderingContext2D, posicao: Posicao, celula: number): void {
     const ponto = naTela(posicao, celula);
     if (ponto) {
+        ctx.lineWidth = 2;
         ctx.strokeStyle = COR_FANTASMA;
-        ctx.strokeRect(ponto.x + 2, ponto.y + 2, celula - 4, celula - 4);
+        ctx.strokeRect(ponto.x + 3, ponto.y + 3, celula - 6, celula - 6);
     }
 }
 
@@ -86,7 +104,7 @@ function desenharGrade(ctx: CanvasRenderingContext2D, celula: number): void {
     }
 }
 
-/** O eixo da base (tracejado verde) e o centro de massa (ponto vermelho), para o jogador ver o equilíbrio. */
+/** O eixo da base (tracejado âmbar) e o centro de massa (círculo vermelho de borda branca). */
 function desenharEquilibrio(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto,
@@ -98,22 +116,21 @@ function desenharEquilibrio(
     }
     const altura = LINHAS_VISIVEIS * celula;
     ctx.strokeStyle = COR_EIXO;
+    ctx.lineWidth = 2;
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
     ctx.moveTo(estado.estabilidade.eixo * celula, 0);
     ctx.lineTo(estado.estabilidade.eixo * celula, altura);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = estado.estabilidade.alerta ? COR_CENTRO_ALERTA : COR_CENTRO;
+    // Forma e tamanho, e não só a cor, separam o centro de massa do eixo e mostram o alerta.
+    const raio = estado.estabilidade.alerta ? celula / 3 : celula / 4;
+    ctx.fillStyle = COR_CENTRO;
+    ctx.strokeStyle = COR_CENTRO_BORDA;
     ctx.beginPath();
-    ctx.arc(
-        estado.estabilidade.centroDeMassa * celula,
-        altura - celula / 2,
-        celula / 4,
-        0,
-        2 * Math.PI,
-    );
+    ctx.arc(estado.estabilidade.centroDeMassa * celula, altura - celula / 2, raio, 0, 2 * Math.PI);
     ctx.fill();
+    ctx.stroke();
 }
 
 /**
@@ -156,7 +173,7 @@ export function desenharColapso(
         const material = estado.tabuleiro[queda.destino[0]]?.[queda.destino[1]];
         const { linha, coluna } = posicaoNaQueda(queda, progresso);
         if (material) {
-            pintar(ctx, [linha, coluna], corDoMaterial(material), celula);
+            pintar(ctx, [linha, coluna], material, celula);
         }
     }
     const opacidade = OPACIDADE_CLARAO * (1 - Math.min(1, Math.max(0, progresso)));

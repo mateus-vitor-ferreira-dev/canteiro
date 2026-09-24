@@ -23,14 +23,14 @@
 
 <style>
     header {
-        padding: 1.5rem 3rem;
+        padding: 1rem;
         background: var(--cor-marinho);
         color: #fff;
         border-bottom: 6px solid var(--cor-ambar);
     }
     h1 {
         margin: 0;
-        font-size: 2rem;
+        font-size: clamp(1.5rem, 6vw, 2rem);
         letter-spacing: -0.02em;
     }
     header p {
@@ -38,6 +38,19 @@
         color: #d5dcea;
     }
     main {
-        padding: 2.5rem 3rem;
+        padding: 1rem;
+    }
+    @media (max-width: 599px) {
+        header p {
+            display: none;
+        }
+    }
+    @media (min-width: 768px) {
+        header {
+            padding: 1.25rem 3rem;
+        }
+        main {
+            padding: 2rem 3rem;
+        }
     }
 </style>

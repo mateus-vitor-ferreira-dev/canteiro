@@ -19,7 +19,7 @@
         font-size: 0.8rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--cor-ambar);
+        color: var(--cor-rotulo);
     }
     dl {
         display: grid;

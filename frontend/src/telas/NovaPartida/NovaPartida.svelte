@@ -81,7 +81,7 @@
     }
     .opcoes {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.25rem;
         padding: 0;
         list-style: none;
@@ -99,8 +99,11 @@
     }
     .opcao:hover:not(:disabled),
     .opcao:focus-visible {
-        border-color: var(--cor-ambar);
+        border-color: var(--cor-rotulo);
         box-shadow: 0 0 0 3px rgb(227 163 34 / 30%);
+    }
+    .opcao:disabled {
+        cursor: progress;
     }
     .opcao h3 {
         margin: 0 0 1rem;
@@ -116,7 +119,7 @@
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--cor-ambar);
+        color: var(--cor-rotulo);
     }
     dd {
         margin: 0 0 0.5rem;

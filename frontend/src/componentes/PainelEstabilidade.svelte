@@ -31,7 +31,12 @@
         aria-valuemax="100"
         aria-valuenow={percentual}
     >
-        <div class="preenchimento" style:width="{percentual}%"></div>
+        <!-- O degradê ocupa a barra inteira: a cor do fim do preenchimento diz onde ele parou. -->
+        <div
+            class="preenchimento"
+            style:width="{percentual}%"
+            style:background-size="{10000 / Math.max(percentual, 1)}% 100%"
+        ></div>
     </div>
 
     <div class="medidor" aria-hidden="true">
@@ -57,7 +62,7 @@
         font-size: 0.8rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--cor-ambar);
+        color: var(--cor-rotulo);
     }
     .percentual {
         margin: 0 0 0.5rem;
@@ -83,7 +88,6 @@
             var(--cor-ambar) 40%,
             var(--cor-verde)
         );
-        background-size: 200px 100%;
         border-radius: 6px;
         transition: width 120ms linear;
     }
@@ -98,7 +102,7 @@
         left: 50%;
         top: 0;
         bottom: -2px;
-        border-left: 2px dashed var(--cor-verde);
+        border-left: 2px dashed var(--cor-rotulo);
     }
     .ponteiro {
         position: absolute;
@@ -136,6 +140,24 @@
         }
         to {
             opacity: 0.45;
+        }
+    }
+    /* No celular, o painel encolhe para o tabuleiro caber na tela. */
+    @media (max-width: 767px) {
+        h2 {
+            font-size: 0.75rem;
+        }
+        .percentual {
+            margin-bottom: 0.25rem;
+            font-size: 1.5rem;
+        }
+        .medidor {
+            margin: 0.4rem 0;
+        }
+        dl {
+            margin-bottom: 0;
+            gap: 0 0.5rem;
+            font-size: 0.875rem;
         }
     }
 </style>

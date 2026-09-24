@@ -8,6 +8,7 @@
         desenharColapso,
         desenharTabuleiro,
     } from "./desenho";
+    import { densidadeDaTela, prefereMenosMovimento } from "@/util/tela";
 
     let {
         estado,
@@ -23,11 +24,19 @@
     } = $props();
 
     let canvas: HTMLCanvasElement | undefined = $state();
+    const densidade = densidadeDaTela();
+    const largura = $derived(COLUNAS * celula);
+    const altura = $derived(LINHAS_VISIVEIS * celula);
     let colapso: { quedas: QuedaDto[]; inicio: number } | null = null;
 
     // Cada evento é um objeto novo: um COLAPSO recém-chegado começa a animação.
+    // Com movimento reduzido, os blocos já aparecem no lugar, sem queda nem clarão.
     $effect(() => {
-        if (evento?.evento === "COLAPSO" && evento.dados.quedas?.length) {
+        if (
+            evento?.evento === "COLAPSO" &&
+            evento.dados.quedas?.length &&
+            !prefereMenosMovimento()
+        ) {
             colapso = { quedas: evento.dados.quedas, inicio: performance.now() };
         }
     });
@@ -41,6 +50,8 @@
         }
         let quadro = 0;
         const desenhar = (agora: number) => {
+            // Desenha em pixels do CSS; a escala deixa o traço nítido em telas de alta densidade.
+            ctx.setTransform(densidade, 0, 0, densidade, 0, 0);
             desenharTabuleiro(ctx, estado, celula);
             if (colapso && estado) {
                 const progresso = (agora - colapso.inicio) / DURACAO_COLAPSO_MS;
@@ -59,8 +70,10 @@
 
 <canvas
     bind:this={canvas}
-    width={COLUNAS * celula}
-    height={LINHAS_VISIVEIS * celula}
+    width={largura * densidade}
+    height={altura * densidade}
+    style:width="{largura}px"
+    style:height="{altura}px"
     aria-label="Tabuleiro da partida"
 ></canvas>
 

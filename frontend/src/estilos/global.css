@@ -9,6 +9,10 @@
     --cor-borda: #e2ded5;
     --cor-texto: #1b2432;
     --cor-texto-suave: #5b6472;
+    /* Rótulos em âmbar escuro: o âmbar da marca no fundo claro não passa de 4,5:1. */
+    --cor-rotulo: #8a5a00;
+    --cor-tabuleiro: #1b2432;
+    --cor-foco: #1f3864;
 
     --cor-madeira: #e6c48f;
     --cor-alvenaria: #c8704b;
@@ -16,6 +20,8 @@
     --cor-aco: #4e5a6b;
 
     font-family: Inter, "Noto Sans", system-ui, sans-serif;
+    font-size: 100%;
+    line-height: 1.5;
     color: var(--cor-texto);
     background: var(--cor-fundo);
 }
@@ -26,6 +32,36 @@
 
 body {
     margin: 0;
-    min-width: 1024px;
     min-height: 100vh;
+    min-height: 100dvh;
+}
+
+/* Foco sempre visível para quem joga e navega pelo teclado. */
+:focus-visible {
+    outline: 3px solid var(--cor-foco);
+    outline-offset: 2px;
+}
+
+/* Some da tela, mas o leitor de tela lê. */
+.so-leitor {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Movimento reduzido: nada pisca nem desliza. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
