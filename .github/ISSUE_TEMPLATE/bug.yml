@@ -1,0 +1,50 @@
+name: 🐛 Bug
+description: Algo que deveria funcionar e não funciona
+labels: ["tipo:bug"]
+body:
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que deveria acontecer
+    validations:
+      required: true
+
+  - type: textarea
+    id: aconteceu
+    attributes:
+      label: O que aconteceu
+      description: Cole a mensagem de erro ou o print, se tiver.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduzir
+    attributes:
+      label: Como reproduzir
+      description: Passo a passo, a partir da tela inicial. Se veio de um roteiro de teste, diga qual.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: input
+    id: ambiente
+    attributes:
+      label: Onde aconteceu
+      description: Sistema, navegador e se foi pelo JAR ou pelo modo de desenvolvimento.
+      placeholder: Windows 11, Chrome, JAR
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área principal
+      options:
+        - Back
+        - Front
+        - Não sei
+    validations:
+      required: true
