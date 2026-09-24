@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 28 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 28 prontos e 5 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -272,7 +272,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF01 | Desempenho | O frontend deve desenhar o tabuleiro a 60 quadros por segundo e o backend deve atualizar o estado 60 vezes por segundo, em máquina com processador de dois núcleos e 4 GB de memória | 🟡 | 60 ciclos no backend (#23) e 60 quadros medidos no navegador em 5 s (#25); falta a medição de 10 min (#27) |
 | RNF02 | Desempenho | O recálculo do centro de massa deve ser incremental, em tempo constante por bloco alterado, sem percorrer o tabuleiro a cada quadro | ✅ | Dois acumuladores (massa e momento), O(1) por bloco; confere com a varredura após 500 peças (#28) |
 | RNF03 | Desempenho | O tempo entre o pressionamento de uma tecla e a resposta visual não deve passar de 50 ms, contando a ida e a volta pelo WebSocket | ✅ | Da tecla ao estado novo: mediana de 13 ms e pior caso de 32 ms, medidos jogando pelo JAR (#25) |
-| RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | ⬜ |  |
+| RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | 🟡 | O CI abre o JAR no Linux, no Windows e no macOS com Java 17 e confere a tela e a API (#40); falta o teste com dois cliques e nos navegadores em máquinas reais |
 | RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ✅ | Legenda das teclas sempre visível na partida, gerada da mesma tabela que o teclado usa (#25); legenda dos materiais e botões de toque no celular (#59) |
 | RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ✅ | Textura em cada material (veios, tijolos, pontilhado, hachura) e borda clara nos blocos, legenda com nome e peso; conferido com simulação de protanopia, deuteranopia, tritanopia e escala de cinza (#59) |
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
@@ -284,7 +284,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | ✅ | REST e WebSocket validam tudo: JSON malformado vira erro 400 ou evento ERRO, e a partida continua (#4, #23) |
 | RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ✅ | Swagger nas rotas REST (#43); record e protocolo.ts espelhados, com teste de serialização contra exemplos fixos (#23) |
-| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8) |
+| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8); testado num contêiner só com Java 17, sem Node (#40) |
 
 </details>
 
@@ -658,6 +658,8 @@ O Vite repassa as chamadas `/api` e `/ws` para o backend, então para o navegado
 > **No IntelliJ:** abra a pasta `canteiro/backend` (*File → Open*); ele reconhece o `pom.xml`. Para subir o backend, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** abra a pasta `canteiro` inteira e instale o *Extension Pack for Java*, o *ESLint* e o *Prettier*.
 
 ### 4. Gerando o JAR
+
+> **Só quer jogar?** Baixe o `canteiro.jar` da versão mais recente em [Releases](https://github.com/mateus-vitor-ferreira-dev/canteiro/releases) e rode com Java 17 ou mais novo. Não precisa compilar nada.
 
 ```bash
 cd backend

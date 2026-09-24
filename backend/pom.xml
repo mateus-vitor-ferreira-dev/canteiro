@@ -6,7 +6,7 @@
 
     <groupId>canteiro</groupId>
     <artifactId>canteiro</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>CANTEIRO</name>
@@ -353,7 +353,7 @@
                     <doclint>all</doclint>
                     <failOnWarnings>true</failOnWarnings>
                     <show>public</show>
-                    <windowTitle>CANTEIRO ${project.version}</windowTitle>
+                    <windowtitle>CANTEIRO ${project.version}</windowtitle>
                     <doctitle>CANTEIRO — documentação do código</doctitle>
                 </configuration>
             </plugin>
