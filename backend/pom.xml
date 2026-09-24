@@ -19,13 +19,16 @@
     </organization>
 
     <properties>
-        <!-- RNF04: Java 17 ou superior, sem nada além do JDK para rodar -->
+        <!-- RNF04: Java 17 ou superior; o JAR já leva as dependências dentro -->
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <classe.principal>canteiro.app.Aplicacao</classe.principal>
 
+        <javalin.version>7.2.3</javalin.version>
+        <jackson.version>2.22.3</jackson.version>
+        <slf4j.version>2.0.18</slf4j.version>
         <junit.version>5.14.4</junit.version>
 
         <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -35,7 +38,9 @@
         <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -50,8 +55,25 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- Premissa 2.11: só a biblioteca padrão do Java, exceto a de testes -->
+    <!-- Premissa 2.11: biblioteca padrão do Java mais Javalin, Jackson e SLF4J.
+         Só canteiro.app e canteiro.api podem usá-las (ArquiteturaTest). -->
     <dependencies>
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -60,7 +82,7 @@
     </dependencies>
 
     <build>
-        <!-- target/canteiro.jar, sem a versão no nome -->
+        <!-- target/canteiro.jar, sem a versão no nome, com as dependências dentro -->
         <finalName>canteiro</finalName>
 
         <pluginManagement>
@@ -137,6 +159,63 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+
+            <!-- RNF16: um único JAR, com Javalin, Jackson e SLF4J embutidos -->
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <!-- assinaturas das dependências não valem para o JAR combinado -->
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                                        <!-- licenças repetidas entre as dependências; as do Apache
+                                             são combinadas pelos transformadores abaixo -->
+                                        <exclude>META-INF/LICENSE.md</exclude>
+                                        <exclude>META-INF/NOTICE.md</exclude>
+                                        <exclude>META-INF/LICENSE.txt</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${classe.principal}</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ./mvnw compile exec:java sobe o backend para desenvolvimento -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <configuration>
+                    <mainClass>${classe.principal}</mainClass>
                 </configuration>
             </plugin>
 

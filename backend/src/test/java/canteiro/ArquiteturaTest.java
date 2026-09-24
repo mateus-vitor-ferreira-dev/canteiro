@@ -16,9 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Garante a separação de camadas descrita na seção 2.9 da documentação.
  *
- * <p>O modelo e os pacotes que ele usa não podem importar classes gráficas
- * nem as camadas de cima (RNF08). Se esta regra valer, as regras do jogo
- * podem ser testadas sem abrir janela.</p>
+ * <p>Só {@code canteiro.app} e {@code canteiro.api} podem usar Javalin e
+ * Jackson. O controle, o modelo e os pacotes que ele usa não podem importar
+ * o servidor, o JSON, classes gráficas nem as camadas de cima (RNF08). Se
+ * esta regra valer, as regras do jogo podem ser testadas sem subir o
+ * servidor nem abrir o navegador.</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -28,19 +30,24 @@ class ArquiteturaTest {
     private static final Path FONTES = Path.of("src", "main", "java", "canteiro");
 
     private static final List<String> GRAFICOS = List.of("javax.swing.", "java.awt.");
-    private static final List<String> CAMADAS_DE_CIMA =
-            List.of("canteiro.app.", "canteiro.visao.", "canteiro.controle.");
+    private static final List<String> SERVIDOR_E_JSON = List.of("io.javalin.", "com.fasterxml.jackson.");
+    private static final List<String> ENTRADA_E_API = List.of("canteiro.app.", "canteiro.api.");
 
     static Stream<Arguments> regras() {
-        List<String> semGraficoNemCamadaDeCima = Stream.concat(GRAFICOS.stream(), CAMADAS_DE_CIMA.stream()).toList();
-        List<String> modeloIsolado = Stream.concat(semGraficoNemCamadaDeCima.stream(),
-                Stream.of("canteiro.persistencia.")).toList();
+        List<String> controleIsolado = juntar(GRAFICOS, juntar(SERVIDOR_E_JSON, ENTRADA_E_API));
+        List<String> semCamadaDeCima = juntar(controleIsolado, List.of("canteiro.controle."));
+        List<String> modeloIsolado = juntar(semCamadaDeCima, List.of("canteiro.persistencia."));
         return Stream.of(
+                Arguments.of("controle", controleIsolado),
                 Arguments.of("modelo", modeloIsolado),
                 Arguments.of("estruturas", modeloIsolado),
                 Arguments.of("fisica", modeloIsolado),
                 Arguments.of("util", modeloIsolado),
-                Arguments.of("persistencia", semGraficoNemCamadaDeCima));
+                Arguments.of("persistencia", semCamadaDeCima));
+    }
+
+    private static List<String> juntar(List<String> primeira, List<String> segunda) {
+        return Stream.concat(primeira.stream(), segunda.stream()).toList();
     }
 
     @ParameterizedTest(name = "canteiro.{0} não importa {1}")
