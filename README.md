@@ -1109,11 +1109,13 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 ## 👥 Equipe
 
-| Integrante | GitHub |
-|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) |
-| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) |
-| Wanessa Kylie Silva Medeiros | _a confirmar_ |
+| Integrante | GitHub | Responsabilidades |
+|---|---|---|
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · 🌐 tela de partida · build e integração contínua |
+| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Estruturas de dados · persistência · 🌐 telas de apoio (menu, ranking, repetições, relatório, configurações) |
+| Wanessa Kylie Silva Medeiros | _a confirmar_ | 📋 Requisitos · 🧪 plano de testes e validação com jogadores · ♿ usabilidade e acessibilidade · 📝 documentação e apresentações |
+
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão completa está na [seção 4.13 da especificação](docs/ESPECIFICACAO.md#413-divisão-de-responsabilidades).
 
 ---
 

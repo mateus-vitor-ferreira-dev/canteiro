@@ -1061,15 +1061,25 @@ O terceiro registro é o mais importante. Um colapso que o jogador não consegue
 
 ### 4.13. Divisão de responsabilidades
 
-Previsão inicial, a ser atualizada a cada etapa com o papel efetivo de cada integrante.
+Previsão inicial, a ser atualizada a cada etapa com o papel efetivo de cada integrante. A maior parte da programação fica com Mateus, o restante com Marcelo, e requisitos, testes e documentação com Wanessa. **Lado:** B = backend, F = frontend, — = não é programação.
 
-| Frente de trabalho | Lado | Responsável |
-|---|---|---|
-| Motor do jogo: tabuleiro, colisões, rotações e eliminação de linhas | B | a definir |
-| Materiais, centro de massa e regra de colapso | B | a definir |
-| Servidor: API REST, WebSocket, sessões e protocolo | B | a definir |
-| Interface: telas, tabuleiro em Canvas, animações e experiência do usuário | F | a definir |
-| Persistência, ranking, repetição, testes e documentação | B+F | a definir |
+| Frente de trabalho | Tipo | Lado | Responsável |
+|---|---|---|---|
+| Arquitetura, servidor e protocolo: Javalin, API REST, WebSocket e sessões de partida | Programação | B | Mateus Vitor Ferreira |
+| Motor do jogo: tabuleiro, colisões, rotações, eliminação de linhas e pontuação | Programação | B | Mateus Vitor Ferreira |
+| Física: materiais, centro de massa, índice de estabilidade e colapso | Programação | B | Mateus Vitor Ferreira |
+| Tela de partida: tabuleiro em Canvas, painel de estabilidade, animações e teclado | Programação | F | Mateus Vitor Ferreira |
+| Build e integração contínua: JAR único e testes automáticos em todo PR | Programação | B+F | Mateus Vitor Ferreira |
+| Estruturas de dados: gerador por sacola, fila de próximas, pilha de reserva e histórico | Programação | B | Marcelo Camillo De Paula Leite |
+| Persistência: materiais, configurações, ranking e repetições em arquivo | Programação | B | Marcelo Camillo De Paula Leite |
+| Telas de apoio: menu, nova partida, fim de partida, ranking, repetições, relatório e configurações | Programação | F | Marcelo Camillo De Paula Leite |
+| Requisitos: manter a especificação, a rastreabilidade e o status dos requisitos no README | Requisitos | — | Wanessa Kylie Silva Medeiros |
+| Plano de testes: roteiros manuais a partir dos critérios de aceitação, execução a cada entrega e registro de defeitos | Testes | — | Wanessa Kylie Silva Medeiros |
+| Validação com jogadores: sessões de teste, questionário e apoio ao balanceamento das dificuldades | Testes | — | Wanessa Kylie Silva Medeiros |
+| Usabilidade e acessibilidade: revisão dos textos, legendas de teclas e texturas para daltonismo | Qualidade | — | Wanessa Kylie Silva Medeiros |
+| Documentação e apresentação: relatório de plataforma e desvios, proposta, slides e ensaio das apresentações | Documentação | — | Wanessa Kylie Silva Medeiros |
+
+Os testes automatizados são escritos por quem programa a funcionalidade, no mesmo PR. Os testes de aceitação, os roteiros manuais e a validação com jogadores ficam com a frente de testes. A revisão de código de cada PR é feita pelo integrante que não o escreveu.
 
 ### 4.14. Limitações reconhecidas
 

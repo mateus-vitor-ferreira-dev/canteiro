@@ -32,6 +32,10 @@ bin/
 Thumbs.db
 desktop.ini
 
+# Trava criada pelo LibreOffice/Word enquanto um documento está aberto
+.~lock.*#
+~$*
+
 # Arquivos gerados pelo jogo durante testes manuais
 ranking.csv
 repeticao_*.txt
