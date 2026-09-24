@@ -1,0 +1,73 @@
+name: ✨ Funcionalidade
+description: Algo novo que o jogador vai conseguir fazer
+labels: ["tipo:feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Descreva pelo **resultado para o jogador**, não pela tarefa técnica.
+        Depois de criar, coloque a issue no [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5) e preencha Área, Estimativa, Prioridade e Sprint.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual o problema?
+      description: O que hoje falta ou atrapalha. Sem falar de solução ainda.
+      placeholder: Hoje o jogador não consegue saber quais peças vêm depois da atual.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposta
+    attributes:
+      label: O que fazer
+      description: A solução proposta, em poucas frases. Diga em qual pacote ou tela ela mora.
+    validations:
+      required: true
+
+  - type: textarea
+    id: aceite
+    attributes:
+      label: Critérios de aceite
+      description: Cada linha precisa dar para responder sim ou não.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: input
+    id: requisitos
+    attributes:
+      label: Requisitos
+      description: Os códigos atendidos, da seção 📋 Requisitos do README.
+      placeholder: RF05, RN04
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área principal
+      options:
+        - Back
+        - Front
+        - Requisitos
+        - Teste
+        - Documentação
+    validations:
+      required: true
+
+  - type: dropdown
+    id: estimativa
+    attributes:
+      label: Estimativa
+      description: "P: até meio dia · M: 1 a 2 dias · G: 3 dias ou mais · GG: precisa ser quebrada"
+      options:
+        - P
+        - M
+        - G
+        - GG
+    validations:
+      required: false
