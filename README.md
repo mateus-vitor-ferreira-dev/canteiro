@@ -291,31 +291,11 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 
 ## 🏛️ Arquitetura
 
-```mermaid
-flowchart TB
-    subgraph NAV["🌐 Navegador · Svelte + TypeScript"]
-        TELAS["Telas"] --> ESTADO["estado: partida · teclado"]
-        ESTADO --> CANVAS["Tabuleiro (Canvas)"]
-    end
+<p align="center">
+<img src="docs/imagens/arquitetura.svg" alt="Arquitetura: o navegador fala com o backend por WebSocket e REST; no backend, api → controle → modelo, e a persistência grava em ~/.canteiro/" width="900">
+</p>
 
-    subgraph JVM["☕ Backend · Java 17 · 127.0.0.1:7070"]
-        API["<b>canteiro.api</b><br/>rotas REST · WebSocket · DTOs"]
-        CTRL["<b>canteiro.controle</b><br/>sessões · fila de comandos · laço 60 Hz"]
-        MOD["<b>canteiro.modelo</b> · pecas · materiais · estruturas · fisica<br/>MotorJogo · Tabuleiro · Peca · Material<br/><i>sem Javalin, sem JSON, sem gráfico</i>"]
-        PERS["<b>canteiro.persistencia</b><br/>materiais · ranking · repetições"]
-        API --> CTRL --> MOD
-        CTRL --> PERS
-        MOD -. "observador" .-> CTRL
-    end
-
-    ESTADO -- "comandos (WebSocket)" --> API
-    API -- "estado + eventos (WebSocket)" --> ESTADO
-    TELAS -- "ranking, materiais, repetições (REST)" --> API
-    PERS <--> ARQ[("~/.canteiro/")]
-
-    style MOD fill:#1F3864,stroke:#0f1e38,color:#fff
-    style NAV fill:#E8F4FB,stroke:#61DAFB,color:#000
-```
+<sub>Os diagramas deste README saem de <a href="docs/imagens/diagramas/gerar.py"><code>docs/imagens/diagramas/gerar.py</code></a>. Para mudar um, edite o script e rode <code>python3 docs/imagens/diagramas/gerar.py</code>.</sub>
 
 O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega**: pergunta ao `Tabuleiro` se há colisão, pede ao `AnalisadorEstrutural` a verificação de equilíbrio e ao `GeradorPecas` o próximo elemento. A **`SessaoPartida`** é dona de um motor, da fila de comandos e do laço; ela se inscreve como observadora do motor e, a cada mudança, publica o estado no WebSocket.
 
@@ -467,7 +447,7 @@ canteiro/
 │   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
 │   ├── EQUIPE.md                    manual da equipe (a criar, #18)
 │   ├── testes/                      roteiros de teste manual (a criar, #17)
-│   └── imagens/
+│   └── imagens/                     imagens do README e o gerador dos diagramas
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
 └── README.md
@@ -539,24 +519,9 @@ canteiro/
 
 A partida é uma **máquina de estados finita** no backend. A cada ciclo, o motor olha o estado atual e executa só as transições previstas para ele. O estado vai em toda mensagem, e **o frontend decide qual tela ou camada mostrar a partir dele**. O menu é uma tela do frontend: a partida só passa a existir quando o jogador a cria.
 
-```mermaid
-stateDiagram-v2
-    [*] --> GERANDO_PECA: partida criada
-    GERANDO_PECA --> PECA_CAINDO
-    GERANDO_PECA --> FIM_DE_JOGO: peça nasce colidindo
-    PECA_CAINDO --> PECA_CAINDO: move · gira · desce
-    PECA_CAINDO --> PAUSA: PAUSAR · conexão caiu · aba sem foco
-    PAUSA --> PECA_CAINDO: RETOMAR
-    PECA_CAINDO --> FIXANDO: colidiu embaixo
-    FIXANDO --> GERANDO_PECA: estável, sem linha
-    FIXANDO --> ELIMINANDO_LINHAS: linha completa
-    FIXANDO --> COLAPSO: desvio > limite
-    ELIMINANDO_LINHAS --> GERANDO_PECA
-    ELIMINANDO_LINHAS --> COLAPSO: desvio > limite
-    COLAPSO --> GERANDO_PECA: reacomodou
-    COLAPSO --> FIM_DE_JOGO: pilha > 18 linhas
-    FIM_DE_JOGO --> [*]
-```
+<p align="center">
+<img src="docs/imagens/estados.svg" alt="Máquina de estados da partida: GERANDO_PECA, PECA_CAINDO, FIXANDO, ELIMINANDO_LINHAS, PAUSA, COLAPSO e FIM_DE_JOGO" width="900">
+</p>
 
 ### Do aperto da tecla ao desenho
 
