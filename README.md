@@ -42,6 +42,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [🧬 Onde entra cada conceito da disciplina](#-onde-entra-cada-conceito-da-disciplina)
 - [📋 Requisitos](#-requisitos) ← **o que já está pronto e o que falta**
 - [🏛️ Arquitetura](#️-arquitetura)
+- [🧭 Onde mexer](#-onde-mexer) ← **peguei uma tarefa: em qual pasta eu mexo?**
 - [📂 Estrutura de pastas](#-estrutura-de-pastas)
 - [🔄 Ciclo de vida da partida](#-ciclo-de-vida-da-partida)
 - [🛠️ Stack](#️-stack)
@@ -348,6 +349,76 @@ Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` 
 
 ---
 
+## 🧭 Onde mexer
+
+> **Para quem está chegando agora.** Esta seção responde uma pergunta só: *"peguei uma tarefa, em qual pasta eu mexo?"*. A explicação técnica de cada pasta vem logo depois, em [📂 Estrutura de pastas](#-estrutura-de-pastas).
+
+### O projeto em três pastas
+
+| Pasta | O que é | Pense nela como |
+|---|---|---|
+| 📁 **`backend/`** | O jogo de verdade, em Java: regras, física, pontos, arquivos | **O juiz.** Decide tudo: se a peça cabe, se a obra caiu, quantos pontos vale |
+| 📁 **`frontend/`** | A tela, em Svelte: o que o jogador vê e as teclas que ele aperta | **O placar.** Só mostra o que o juiz decidiu e avisa quando o jogador aperta uma tecla |
+| 📁 **`docs/`** | Os documentos: proposta, apresentação, e em breve o manual da equipe e os roteiros de teste | **A pasta do professor.** Tudo o que é para ler, não para rodar |
+
+Se você está na dúvida entre o backend e o frontend, faça a pergunta: **"isso é uma regra do jogo?"** Se for, é backend. O frontend nunca calcula nada, só desenha.
+
+### Quero fazer… vou para…
+
+| Quero… | Vou para | Tarefas no board |
+|---|---|---|
+| Criar ou mudar uma peça ou um material | `backend/src/main/java/canteiro/modelo/pecas/` e `.../modelo/materiais/` | #9, #10 |
+| Mexer no tabuleiro, no motor ou nas regras de pontos | `backend/src/main/java/canteiro/modelo/` | #11, #20, #21, #22 |
+| Mexer na sacola de peças, na fila, na reserva ou no histórico | `backend/src/main/java/canteiro/modelo/estruturas/` | #12, #13, #14 |
+| Mexer no centro de massa e no colapso | `backend/src/main/java/canteiro/modelo/fisica/` | #28 |
+| Ler ou gravar arquivo (ranking, configurações, replay) | `backend/src/main/java/canteiro/persistencia/`, com os valores padrão em `backend/src/main/resources/dados/` | #24, #31, #35 |
+| Criar uma rota nova na API | `backend/.../api/rotas/` (a rota, com `@OpenApi`) e `backend/.../api/dto/` (o formato do JSON). Depois, o mesmo tipo em `frontend/src/api/protocolo.ts` e a função em `frontend/src/api/cliente.ts` | #23, #31 |
+| Criar ou mudar uma tela | `frontend/src/telas/<NomeDaTela>/` (uma pasta por tela) | #25, #26, #32 |
+| Criar um pedaço de tela usado por **mais de uma** tela | `frontend/src/componentes/` | #29 |
+| Mudar cores, fontes ou as texturas dos materiais | `frontend/src/estilos/` | — |
+| Colocar um som ou uma imagem | `frontend/public/sons/` ou `frontend/public/imagens/` | #38 |
+| Escrever um teste automático do backend | `backend/src/test/java/canteiro/`, **no mesmo pacote** da classe testada | toda tarefa de programação |
+| Escrever um teste automático do frontend | Ao lado do arquivo testado, com o final `.test.ts` | toda tarefa de programação |
+| Escrever um roteiro de teste manual | `docs/testes/` | #17, #27 |
+| Escrever o manual da equipe | `docs/EQUIPE.md` | #18 |
+| Atualizar o andamento de um requisito | Este README, seção [📋 Requisitos](#-requisitos) | #19 |
+| Relatório, slides, documentos de entrega | `docs/` | #39 |
+| Registrar um bug ou uma ideia | Não é pasta: é uma **issue nova**, com o modelo certo, no [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5) | — |
+
+### Um exemplo de ponta a ponta: a lista de dificuldades
+
+A tela de escolher a dificuldade já funciona. Seguir o caminho dela pelos arquivos é o jeito mais rápido de entender como as pastas conversam. Toda funcionalidade nova vai seguir o mesmo caminho.
+
+| Passo | Arquivo | O que ele faz |
+|---|---|---|
+| 1. A regra | [`modelo/Dificuldade.java`](backend/src/main/java/canteiro/modelo/Dificuldade.java) | Diz quais são as três dificuldades e os valores de cada uma. **É aqui que se muda um valor do jogo** |
+| 2. O formato do JSON | [`api/dto/DificuldadeDto.java`](backend/src/main/java/canteiro/api/dto/DificuldadeDto.java) | Transforma a regra no formato que vai para o navegador |
+| 3. A rota | [`api/rotas/RotasDificuldades.java`](backend/src/main/java/canteiro/api/rotas/RotasDificuldades.java) | Responde em `GET /api/dificuldades`. A anotação `@OpenApi` faz ela aparecer no Swagger (`/api/docs`) |
+| 4. O tipo no frontend | [`src/api/protocolo.ts`](frontend/src/api/protocolo.ts) | O mesmo formato do passo 2, agora em TypeScript |
+| 5. A chamada | [`src/api/cliente.ts`](frontend/src/api/cliente.ts) | A função `listarDificuldades()`, que busca os dados no backend |
+| 6. A tela | [`src/telas/NovaPartida/NovaPartida.svelte`](frontend/src/telas/NovaPartida/NovaPartida.svelte) | Chama a função do passo 5 e desenha os três cartões |
+
+E cada passo tem o seu teste: [`DificuldadeTest`](backend/src/test/java/canteiro/modelo/DificuldadeTest.java) (passo 1), [`ServidorWebTest`](backend/src/test/java/canteiro/api/ServidorWebTest.java) (passos 2 e 3), [`cliente.test.ts`](frontend/src/api/cliente.test.ts) (passo 5) e [`NovaPartida.test.ts`](frontend/src/telas/NovaPartida/NovaPartida.test.ts) (passo 6).
+
+### As pastas de cada um
+
+| Quem | Onde vai trabalhar na maior parte do tempo |
+|---|---|
+| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, física), `backend/.../api/` e `controle/` (servidor e WebSocket), `frontend/src/telas/Partida/` e `componentes/` |
+| **Marcelo** | `backend/.../modelo/estruturas/` (sacola, fila, pilha, histórico), `backend/.../persistencia/` (arquivos e ranking) e as telas de apoio em `frontend/src/telas/` (Menu, Ranking, Repetições, Relatório, Configurações) |
+| **Wanessa** | `docs/` (roteiros de teste, manual da equipe, relatório), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
+
+### O que ninguém edita à mão
+
+| Pasta ou arquivo | Por quê |
+|---|---|
+| `backend/target/`, `frontend/node_modules/`, `frontend/dist/` | São gerados pelo Maven e pelo npm, e nem vão para o GitHub. Se algo estranho acontecer, pode apagar: eles voltam no próximo build |
+| `frontend/package-lock.json` | O npm atualiza sozinho quando alguém instala uma dependência. Vai no commit, mas não se edita |
+| `backend/mvnw`, `backend/mvnw.cmd`, `backend/.mvn/` | O Maven Wrapper. Só se usa, nunca se mexe |
+| Arquivos `.gitkeep` | Só existem para a pasta vazia aparecer no GitHub. Quando a pasta ganhar o primeiro arquivo de verdade, pode apagar o `.gitkeep` dela |
+
+---
+
 ## 📂 Estrutura de pastas
 
 ```
@@ -394,6 +465,8 @@ canteiro/
 ├── docs/
 │   ├── Proposta_Projeto_Canteiro.pdf  proposta do projeto
 │   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
+│   ├── EQUIPE.md                    manual da equipe (a criar, #18)
+│   ├── testes/                      roteiros de teste manual (a criar, #17)
 │   └── imagens/
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
@@ -450,7 +523,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, e as imagens deste README |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README e, em breve, o manual da equipe (`EQUIPE.md`) e os roteiros de teste manual (`testes/`) |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
