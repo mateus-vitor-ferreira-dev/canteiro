@@ -84,15 +84,13 @@ class MotorJogoTest {
     }
 
     @Test
-    void giraERecusaGiroQueColidiria() {
-        MotorJogo motor = motor(Forma.I);
+    void giraNosDoisSentidos() {
+        MotorJogo motor = motor(Forma.T);
         motor.aplicar(Comando.GIRAR_HORARIO);
         assertEquals(1, motor.pecaAtual().rotacao());
-        repetir(motor, Comando.ESQUERDA, 5);
-        motor.aplicar(Comando.GIRAR_HORARIO);
-        assertEquals(1, motor.pecaAtual().rotacao(), "deitar a I na parede sairia da grade");
         motor.aplicar(Comando.GIRAR_ANTI_HORARIO);
-        assertEquals(1, motor.pecaAtual().rotacao());
+        motor.aplicar(Comando.GIRAR_ANTI_HORARIO);
+        assertEquals(3, motor.pecaAtual().rotacao());
     }
 
     @Test
@@ -212,8 +210,9 @@ class MotorJogoTest {
 
     private MotorJogo jogarAteOFim() {
         MotorJogo motor = new MotorJogo(Dificuldade.NORMAL, new FonteFixa(madeira, Forma.values()));
-        Comando[] roteiro = {Comando.ESQUERDA, Comando.GIRAR_HORARIO, Comando.DIREITA, Comando.DIREITA,
-            Comando.GIRAR_ANTI_HORARIO, Comando.ESQUERDA, Comando.DESCER};
+        // gira e derruba sempre no centro: a pilha cresce sem fechar linha, e a partida acaba
+        Comando[] roteiro = {Comando.GIRAR_HORARIO, Comando.GIRAR_ANTI_HORARIO, Comando.GIRAR_HORARIO,
+            Comando.DESCER, Comando.QUEDA_INSTANTANEA};
         for (int passo = 0; passo < 100_000 && !motor.estado().encerrada(); passo++) {
             motor.avancarCiclo();
             if (passo % 7 == 0) {

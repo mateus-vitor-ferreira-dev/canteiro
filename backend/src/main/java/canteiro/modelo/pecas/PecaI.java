@@ -10,6 +10,8 @@ import canteiro.modelo.materiais.Material;
  */
 public final class PecaI extends Peca {
 
+    private static final int[][] DESLOCAMENTOS = {{0, -1}, {0, 1}, {0, -2}, {0, 2}, {-2, 0}};
+
     private static final int[][][] FORMAS = rotacoesDe(new int[][] {
         {0, 0, 0, 0},
         {1, 1, 1, 1},
@@ -33,5 +35,16 @@ public final class PecaI extends Peca {
     @Override
     protected int[][][] formas() {
         return FORMAS;
+    }
+
+    /**
+     * A I é longa: deitada no chão, só fica em pé subindo duas linhas. Por
+     * isso a última tentativa sobe duas, e não uma.
+     *
+     * @return os deslocamentos da I, na ordem em que devem ser tentados
+     */
+    @Override
+    protected int[][] deslocamentosDeRotacao() {
+        return DESLOCAMENTOS;
     }
 }
