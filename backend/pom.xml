@@ -353,7 +353,7 @@
                     <doclint>all</doclint>
                     <failOnWarnings>true</failOnWarnings>
                     <show>public</show>
-                    <windowTitle>CANTEIRO ${project.version}</windowTitle>
+                    <windowtitle>CANTEIRO ${project.version}</windowtitle>
                     <doctitle>CANTEIRO — documentação do código</doctitle>
                 </configuration>
             </plugin>

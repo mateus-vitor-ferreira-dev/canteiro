@@ -1,5 +1,6 @@
 # Roda os testes do backend e do frontend em todo PR e em todo push na develop.
-# O JAR completo fica anexado ao resultado, para quem quiser testar o jogo sem compilar.
+# O JAR completo fica anexado ao resultado, para quem quiser testar o jogo sem compilar,
+# e é aberto no Linux, no Windows e no macOS para conferir que sobe em até 3 segundos.
 name: CI
 
 on:
@@ -76,3 +77,26 @@ jobs:
           name: canteiro-jar
           path: backend/target/canteiro.jar
           retention-days: 14
+
+  sistemas:
+    name: JAR no ${{ matrix.nome }}
+    needs: jar
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, nome: Linux }
+          - { os: windows-latest, nome: Windows }
+          - { os: macos-latest, nome: macOS }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/download-artifact@v7
+        with:
+          name: canteiro-jar
+      - name: Abre o JAR e confere a tela e a API em até 3 s
+        run: python .github/scripts/testar_jar.py canteiro.jar
