@@ -1,5 +1,6 @@
 <!-- A partida: tabuleiro, placar, próximas peças e legenda. Teclado vira comando pelo WebSocket. -->
 <script lang="ts">
+    import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
     import Tabuleiro from "@/componentes/Tabuleiro.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { comandoDaTecla } from "@/estado/teclado";
@@ -46,13 +47,16 @@
 
 <div class="partida">
     {#if partida.estado}
-        <Placar placar={partida.estado.placar} estabilidade={partida.estado.estabilidade} />
+        <div class="lateral">
+            <Placar placar={partida.estado.placar} />
+            <PainelEstabilidade estabilidade={partida.estado.estabilidade} />
+        </div>
     {:else}
         <p class="aviso">{partida.conectado ? "Preparando a obra…" : "Conectando…"}</p>
     {/if}
 
     <div class="palco">
-        <Tabuleiro estado={partida.estado} />
+        <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} />
         {#if partida.pausada}
             <div class="camada" role="status">
                 <h2>Pausado</h2>

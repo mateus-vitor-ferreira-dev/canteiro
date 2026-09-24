@@ -1,12 +1,10 @@
-<!-- Pontos, linhas, nível e colapsos, e a estabilidade em números. O painel completo vem na #29. -->
+<!-- Pontos, nível, linhas e colapsos. -->
 <script lang="ts">
-    import type { EstabilidadeDto, PlacarDto } from "@/api/protocolo";
-    import { formatarColunas } from "@/util/formatacao";
+    import type { PlacarDto } from "@/api/protocolo";
 
-    let { placar, estabilidade }: { placar: PlacarDto; estabilidade: EstabilidadeDto } = $props();
+    let { placar }: { placar: PlacarDto } = $props();
 
     const pontos = new Intl.NumberFormat("pt-BR");
-    const indice = $derived(Math.round(estabilidade.indice * 100));
 </script>
 
 <section class="placar" aria-label="Placar">
@@ -19,14 +17,6 @@
         <dd>{placar.linhas}</dd>
         <dt>Colapsos</dt>
         <dd>{placar.colapsos}</dd>
-    </dl>
-    <h2>Estabilidade</h2>
-    <p class="indice" class:alerta={estabilidade.alerta}>{indice} %</p>
-    <dl>
-        <dt>Desvio</dt>
-        <dd>{formatarColunas(estabilidade.desvio)}</dd>
-        <dt>Limite</dt>
-        <dd>{formatarColunas(estabilidade.limite)}</dd>
     </dl>
 </section>
 
@@ -41,15 +31,11 @@
         text-transform: uppercase;
         color: var(--cor-ambar);
     }
-    .pontos,
-    .indice {
+    .pontos {
         margin: 0 0 1rem;
         font-size: 2rem;
         font-weight: 800;
         color: var(--cor-marinho);
-    }
-    .indice.alerta {
-        color: var(--cor-vermelho);
     }
     dl {
         display: grid;

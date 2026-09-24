@@ -1,4 +1,4 @@
-import type { EstadoDto, Posicao } from "@/api/protocolo";
+import type { EstadoDto, Posicao, QuedaDto } from "@/api/protocolo";
 import { corDoMaterial } from "@/estilos/materiais";
 
 /** Linhas ocultas no topo da grade: o backend manda, mas a tela não mostra (RN01). */
@@ -13,6 +13,11 @@ const COR_EIXO = "#56d364";
 const COR_CENTRO = "#f47067";
 const COR_CENTRO_ALERTA = "#ff3b30";
 const FOLGA = 1;
+const COR_CLARAO = "244, 112, 103";
+const OPACIDADE_CLARAO = 0.45;
+
+/** Quanto dura a animação do colapso, em milissegundos (seção 2.6.2 da especificação: "aproximadamente um segundo"). */
+export const DURACAO_COLAPSO_MS = 1000;
 
 /** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
 export function desenharTabuleiro(
@@ -109,4 +114,52 @@ function desenharEquilibrio(
         2 * Math.PI,
     );
     ctx.fill();
+}
+
+/**
+ * Onde um bloco que está caindo aparece, num instante da animação. A queda
+ * acelera como na gravidade: devagar no começo, rápida no fim.
+ *
+ * @param progresso de 0 (na origem) a 1 (no destino); valores fora disso são limitados
+ */
+export function posicaoNaQueda(
+    queda: QuedaDto,
+    progresso: number,
+): { linha: number; coluna: number } {
+    const p = Math.min(1, Math.max(0, progresso));
+    const acelerado = p * p;
+    const [linhaOrigem, coluna] = queda.origem;
+    const [linhaDestino] = queda.destino;
+    return { linha: linhaOrigem + (linhaDestino - linhaOrigem) * acelerado, coluna };
+}
+
+/**
+ * Desenha o colapso por cima do tabuleiro já desenhado: cada bloco que caiu
+ * sai do destino (onde o estado novo já o colocou) e aparece a caminho, da
+ * origem ao destino. Um clarão vermelho vai sumindo junto.
+ */
+export function desenharColapso(
+    ctx: CanvasRenderingContext2D,
+    estado: EstadoDto,
+    quedas: QuedaDto[],
+    progresso: number,
+    celula: number,
+): void {
+    for (const queda of quedas) {
+        const destino = naTela(queda.destino, celula);
+        if (destino) {
+            ctx.fillStyle = COR_FUNDO;
+            ctx.fillRect(destino.x, destino.y, celula, celula);
+        }
+    }
+    for (const queda of quedas) {
+        const material = estado.tabuleiro[queda.destino[0]]?.[queda.destino[1]];
+        const { linha, coluna } = posicaoNaQueda(queda, progresso);
+        if (material) {
+            pintar(ctx, [linha, coluna], corDoMaterial(material), celula);
+        }
+    }
+    const opacidade = OPACIDADE_CLARAO * (1 - Math.min(1, Math.max(0, progresso)));
+    ctx.fillStyle = `rgba(${COR_CLARAO}, ${opacidade})`;
+    ctx.fillRect(0, 0, COLUNAS * celula, LINHAS_VISIVEIS * celula);
 }
