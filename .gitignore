@@ -1,0 +1,44 @@
+# Build do Maven
+target/
+
+# Frontend (npm, Vite e o Node baixado pelo frontend-maven-plugin)
+node_modules/
+dist/
+frontend/node/
+*.tsbuildinfo
+
+# Compilados e pacotes
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Trava criada pelo LibreOffice/Word enquanto um documento está aberto
+.~lock.*#
+~$*
+
+# Arquivos gerados pelo jogo durante testes manuais
+ranking.csv
+repeticao_*.txt
+
+# Especificação interna: fica só na máquina de quem mantém, não vai para o GitHub
+docs/ESPECIFICACAO.md

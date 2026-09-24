@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>canteiro</groupId>
+    <artifactId>canteiro</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>CANTEIRO</name>
+    <description>Jogo de encaixe de blocos com restrição de estabilidade estrutural.</description>
+    <url>https://github.com/mateus-vitor-ferreira-dev/canteiro</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <organization>
+        <name>Universidade Federal de Lavras — Programação Aplicada à Engenharia</name>
+    </organization>
+
+    <properties>
+        <!-- RNF04: Java 17 ou superior; o JAR já leva as dependências dentro -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <classe.principal>canteiro.app.Aplicacao</classe.principal>
+
+        <!-- RNF16: o frontend é compilado no package e vai para dentro do JAR.
+             ./mvnw package -Dfrontend.pular=true gera o JAR sem ele, mais rápido. -->
+        <frontend.pasta>${project.basedir}/../frontend</frontend.pasta>
+        <frontend.pular>false</frontend.pular>
+        <node.version>v24.21.0</node.version>
+
+        <javalin.version>7.2.3</javalin.version>
+        <javalin-openapi.version>7.2.3</javalin-openapi.version>
+        <jackson.version>2.22.3</jackson.version>
+        <slf4j.version>2.0.18</slf4j.version>
+        <junit.version>5.14.4</junit.version>
+
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
+        <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+        <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
+        <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
+        <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+        <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+        <frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Premissa 2.11: biblioteca padrão do Java mais Javalin, Jackson e SLF4J.
+         Só canteiro.app e canteiro.api podem usá-las (ArquiteturaTest). -->
+    <dependencies>
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
+        </dependency>
+        <!-- Documentação das rotas: OpenAPI gerado das anotações @OpenApi e Swagger UI em /api/docs -->
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-openapi-plugin</artifactId>
+            <version>${javalin-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-swagger-plugin</artifactId>
+            <version>${javalin-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- target/canteiro.jar, sem a versão no nome, com as dependências dentro -->
+        <finalName>canteiro</finalName>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven-clean-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+
+                <!-- Só para o VS Code e o Eclipse (m2e): não rodar o build do frontend a cada
+                     arquivo salvo. Não muda nada no ./mvnw. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>com.github.eirslett</groupId>
+                                        <artifactId>frontend-maven-plugin</artifactId>
+                                        <versionRange>[0,)</versionRange>
+                                        <goals>
+                                            <goal>install-node-and-npm</goal>
+                                            <goal>npm</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>exige-versoes</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[17,)</version>
+                                    <message>O CANTEIRO exige Java 17 ou superior (RNF04).</message>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>[3.9,)</version>
+                                    <message>Use o wrapper do projeto: ./mvnw (Linux/macOS) ou mvnw.cmd (Windows).</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
+                    <!-- Lê as anotações @OpenApi das rotas e gera a especificação durante a compilação -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>io.javalin.community.openapi</groupId>
+                            <artifactId>openapi-annotation-processor</artifactId>
+                            <version>${javalin-openapi.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <!-- RNF08: as regras rodam sem abrir janela -->
+                    <systemPropertyVariables>
+                        <java.awt.headless>true</java.awt.headless>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${classe.principal}</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- RNF16: compila o frontend com um Node próprio, baixado em target/node.
+                 Fica no prepare-package: ./mvnw test não mexe no frontend. -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${frontend-maven-plugin.version}</version>
+                <configuration>
+                    <workingDirectory>${frontend.pasta}</workingDirectory>
+                    <installDirectory>${project.build.directory}</installDirectory>
+                    <skip>${frontend.pular}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>instala-node</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>instala-dependencias</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>ci --no-audit --no-fund</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compila-frontend</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copia frontend/dist para /publico dentro do JAR, onde o ServidorWeb procura -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copia-frontend</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${frontend.pular}</skip>
+                            <outputDirectory>${project.build.outputDirectory}/publico</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${frontend.pasta}/dist</directory>
+                                    <excludes>
+                                        <exclude>**/.gitkeep</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- RNF16: um único JAR, com Javalin, Jackson e SLF4J embutidos -->
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <!-- assinaturas das dependências não valem para o JAR combinado -->
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                                        <!-- licenças repetidas entre as dependências; as do Apache
+                                             são combinadas pelos transformadores abaixo -->
+                                        <exclude>META-INF/LICENSE.md</exclude>
+                                        <exclude>META-INF/NOTICE.md</exclude>
+                                        <exclude>META-INF/LICENSE.txt</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>${classe.principal}</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ./mvnw compile exec:java sobe o backend para desenvolvimento -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <configuration>
+                    <mainClass>${classe.principal}</mainClass>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <configuration>
+                    <!-- RNF07: Javadoc sem advertência de elemento não documentado -->
+                    <doclint>all</doclint>
+                    <failOnWarnings>true</failOnWarnings>
+                    <show>public</show>
+                    <windowTitle>CANTEIRO ${project.version}</windowTitle>
+                    <doctitle>CANTEIRO — documentação do código</doctitle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
