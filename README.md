@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 11 prontos e 7 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 15 prontos e 9 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -241,13 +241,13 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
 | RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22) |
-| RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ⬜ |  |
-| RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ⬜ |  |
+| RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |
+| RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | 🟡 | Índice, desvio, limite, centro de massa e eixo calculados no backend (#28); falta a tela (#29) |
 | RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ⬜ |  |
-| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ⬜ |  |
-| RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | 🟡 | Sobe a cada 10 linhas e acelera a queda (#22); o limite de desvio do nível entra em uso com o colapso (#28) |
+| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva por coluna, penalidade e evento COLAPSO com as quedas (#28) |
+| RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ✅ | Sobe a cada 10 linhas, acelera a queda e aperta o limite de desvio (#22, #28) |
 | RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | 🟡 | PAUSAR e RETOMAR no motor (#20); falta o comando chegar pela tela (#23, #25) |
-| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ⬜ |  |
+| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | 🟡 | O motor encerra a partida nas duas condições da RN13 (#20, #28); falta a tela de fim (#32) |
 | RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ⬜ |  |
 | RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ⬜ |  |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ⬜ |  |
@@ -270,7 +270,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | Código | Categoria | Descrição | Status | Onde está |
 |---|---|---|:-:|---|
 | RNF01 | Desempenho | O frontend deve desenhar o tabuleiro a 60 quadros por segundo e o backend deve atualizar o estado 60 vezes por segundo, em máquina com processador de dois núcleos e 4 GB de memória | ⬜ |  |
-| RNF02 | Desempenho | O recálculo do centro de massa deve ser incremental, em tempo constante por bloco alterado, sem percorrer o tabuleiro a cada quadro | ⬜ |  |
+| RNF02 | Desempenho | O recálculo do centro de massa deve ser incremental, em tempo constante por bloco alterado, sem percorrer o tabuleiro a cada quadro | ✅ | Dois acumuladores (massa e momento), O(1) por bloco; confere com a varredura após 500 peças (#28) |
 | RNF03 | Desempenho | O tempo entre o pressionamento de uma tecla e a resposta visual não deve passar de 50 ms, contando a ida e a volta pelo WebSocket | ⬜ |  |
 | RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | ⬜ |  |
 | RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ⬜ |  |
@@ -278,7 +278,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
 | RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido na revisão de cada PR |
-| RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ⬜ |  |
+| RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | 🟡 | Testes de colisão, rotação, linhas e centro de massa (#11, #20, #21, #28); falta a serialização do protocolo (#23) |
 | RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
 | RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |

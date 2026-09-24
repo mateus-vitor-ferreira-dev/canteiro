@@ -55,6 +55,17 @@ public final class Pontuacao {
     }
 
     /**
+     * Quanto um colapso desconta: o equivalente a duas linhas eliminadas no
+     * nível atual, sem bônus de material (RN12).
+     *
+     * @param nivel nível atual, a partir de 1
+     * @return pontos a descontar
+     */
+    public static int penalidadeColapso(int nivel) {
+        return BASE[2] * nivel;
+    }
+
+    /**
      * O material com mais blocos. No empate, vence o que tem o maior bônus,
      * que é também o mais pesado.
      *

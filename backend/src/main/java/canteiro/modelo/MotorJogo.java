@@ -3,6 +3,9 @@ package canteiro.modelo;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
+import canteiro.modelo.fisica.AnalisadorEstrutural;
+import canteiro.modelo.fisica.Colapso;
+import canteiro.modelo.fisica.Estabilidade;
 import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Peca;
 
@@ -12,11 +15,13 @@ import java.util.Objects;
 
 /**
  * Coordena a partida: gera a peça, faz ela cair, aplica os comandos, fixa
- * quando ela bate embaixo, elimina as linhas completas e soma os pontos.
+ * quando ela bate embaixo, elimina as linhas completas, soma os pontos e
+ * derruba a estrutura quando ela perde o equilíbrio.
  *
  * <p>O motor <strong>não implementa regra, só delega</strong>: pergunta ao
- * {@link Tabuleiro} se há colisão, pede a ele que fixe e elimine linhas, e
- * pede à {@link FontePecas} a próxima peça. A partida é uma máquina de
+ * {@link Tabuleiro} se há colisão, pede a ele que fixe e elimine linhas, pede
+ * ao {@link AnalisadorEstrutural} a estabilidade, ao {@link Colapso} o
+ * desabamento e à {@link FontePecas} a próxima peça. A partida é uma máquina de
  * estados ({@link EstadoPartida}) e avança em ciclos, não no relógio: a mesma
  * sequência de comandos sempre dá a mesma partida.</p>
  *
@@ -34,6 +39,7 @@ public final class MotorJogo {
     private final Tabuleiro tabuleiro = new Tabuleiro();
     private final FontePecas fonte;
     private final Placar placar;
+    private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
     private int ciclosPorQueda;
     private final List<ObservadorPartida> observadores = new ArrayList<>();
 
@@ -181,10 +187,15 @@ public final class MotorJogo {
 
     private void assentar() {
         estado = EstadoPartida.FIXANDO;
-        tabuleiro.fixar(pecaAtual, linha, coluna);
+        for (Celula celula : tabuleiro.fixar(pecaAtual, linha, coluna)) {
+            analisador.registrar(celula, pecaAtual.material());
+        }
         emitir(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
         eliminarLinhas();
         pecaAtual = null;
+        if (estabilidade().passouDoLimite() && desabou()) {
+            return;
+        }
         estado = EstadoPartida.GERANDO_PECA;
         gerarPeca();
     }
@@ -196,12 +207,36 @@ public final class MotorJogo {
         }
         estado = EstadoPartida.ELIMINANDO_LINHAS;
         Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
+        for (int linhaCompleta : completas) {
+            for (int c = 0; c < Dimensoes.COLUNAS; c++) {
+                analisador.remover(new Celula(linhaCompleta, c), tabuleiro.bloco(linhaCompleta, c).material());
+            }
+        }
         tabuleiro.eliminarLinhasCompletas();
         emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
         if (placar.registrarLinhas(completas.size(), predominante)) {
             ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
             emitir(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
         }
+    }
+
+    /**
+     * Executa o colapso (RN11, RN12). Se a pilha estava acima do limite de
+     * altura, a partida acaba (RN13).
+     *
+     * @return {@code true} se a partida acabou
+     */
+    private boolean desabou() {
+        estado = EstadoPartida.COLAPSO;
+        boolean altaDemais = tabuleiro.alturaPilha() > Dimensoes.ALTURA_LIMITE_COLAPSO;
+        List<Queda> quedas = Colapso.executar(tabuleiro);
+        placar.registrarColapso();
+        emitir(new EventoPartida(EventoPartida.Tipo.COLAPSO, List.of(), quedas));
+        if (altaDemais) {
+            estado = EstadoPartida.FIM_DE_JOGO;
+            emitir(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO));
+        }
+        return altaDemais;
     }
 
     private void mudarEstadoSe(EstadoPartida esperado, EstadoPartida novo) {
@@ -312,6 +347,24 @@ public final class MotorJogo {
      */
     public int linhasEliminadas() {
         return placar.linhas();
+    }
+
+    /**
+     * Estabilidade atual da estrutura, com o limite do nível atual.
+     *
+     * @return índice, desvio, centro de massa, eixo da base e alerta
+     */
+    public Estabilidade estabilidade() {
+        return analisador.estabilidade(tabuleiro, Progressao.limiteDesvio(placar.nivel()));
+    }
+
+    /**
+     * Devolve o analisador estrutural, para leitura.
+     *
+     * @return o analisador da partida
+     */
+    public AnalisadorEstrutural analisador() {
+        return analisador;
     }
 
     /**

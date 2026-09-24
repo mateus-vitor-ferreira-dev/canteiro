@@ -152,6 +152,39 @@ public final class Tabuleiro {
     }
 
     /**
+     * Move um bloco para uma posição vazia. Usado pelo colapso, que faz os
+     * blocos desprendidos caírem.
+     *
+     * @param origem  posição do bloco
+     * @param destino posição vazia para onde ele vai
+     * @throws IllegalStateException se não houver bloco na origem ou o destino estiver ocupado
+     */
+    public void moverBloco(Celula origem, Celula destino) {
+        Bloco bloco = bloco(origem.linha(), origem.coluna());
+        if (bloco == null || ocupada(destino.linha(), destino.coluna())) {
+            throw new IllegalStateException("movimento inválido: " + origem + " -> " + destino);
+        }
+        grade[destino.linha()][destino.coluna()] = bloco;
+        grade[origem.linha()][origem.coluna()] = null;
+    }
+
+    /**
+     * Altura da pilha: quantas linhas, a partir do fundo, vão até o bloco mais alto.
+     *
+     * @return altura, em linhas; 0 se o tabuleiro estiver vazio
+     */
+    public int alturaPilha() {
+        for (int linha = 0; linha < Dimensoes.LINHAS; linha++) {
+            for (Bloco bloco : grade[linha]) {
+                if (bloco != null) {
+                    return Dimensoes.LINHAS - linha;
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Devolve o bloco de uma posição.
      *
      * @param linha  linha, a partir de zero no topo das linhas ocultas
