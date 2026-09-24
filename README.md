@@ -387,7 +387,8 @@ canteiro/
 ├── docs/
 │   ├── ESPECIFICACAO.md             especificação v2.1
 │   ├── CANTEIRO_Documentacao-1.pdf  especificação v1.0 (histórico)
-│   ├── Proposta_Projeto_Canteiro.*  proposta do projeto (.docx e .pdf)
+│   ├── Proposta_Projeto_Canteiro.pdf  proposta do projeto
+│   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
 │   └── imagens/
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
@@ -439,7 +440,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A especificação v2.1, a v1.0 em PDF, a proposta (em `.docx` para editar e em PDF para apresentar) e as imagens deste README |
+| `docs/` | A especificação v2.1, a v1.0 em PDF, a proposta e os slides da apresentação, em PDF, e as imagens deste README |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
@@ -1103,7 +1104,8 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
 - 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação à especificação, com o porquê. A [seção 0.2 da especificação](docs/ESPECIFICACAO.md#02-tabela-de-desvios) já registra os desvios da v2.0
 - 📄 **[Especificação 2.1](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
-- 🗂️ **Proposta do projeto** ([PDF](docs/Proposta_Projeto_Canteiro.pdf) · [DOCX](docs/Proposta_Projeto_Canteiro.docx)): resumo, requisitos, cronograma e riscos, para a apresentação
+- 🗂️ **[Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
+- 🎬 **[Apresentação](docs/Apresentacao_Canteiro.pdf)**: 15 slides em linguagem simples, para gravar a tela narrando
 
 ---
 
