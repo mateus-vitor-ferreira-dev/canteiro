@@ -26,6 +26,12 @@
 
         <classe.principal>canteiro.app.Aplicacao</classe.principal>
 
+        <!-- RNF16: o frontend é compilado no package e vai para dentro do JAR.
+             ./mvnw package -Dfrontend.pular=true gera o JAR sem ele, mais rápido. -->
+        <frontend.pasta>${project.basedir}/../frontend</frontend.pasta>
+        <frontend.pular>false</frontend.pular>
+        <node.version>v24.21.0</node.version>
+
         <javalin.version>7.2.3</javalin.version>
         <jackson.version>2.22.3</jackson.version>
         <slf4j.version>2.0.18</slf4j.version>
@@ -41,6 +47,7 @@
         <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
         <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+        <frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -160,6 +167,74 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <!-- RNF16: compila o frontend com um Node próprio, baixado em target/node.
+                 Fica no prepare-package: ./mvnw test não mexe no frontend. -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>${frontend-maven-plugin.version}</version>
+                <configuration>
+                    <workingDirectory>${frontend.pasta}</workingDirectory>
+                    <installDirectory>${project.build.directory}</installDirectory>
+                    <skip>${frontend.pular}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>instala-node</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>instala-dependencias</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>ci --no-audit --no-fund</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compila-frontend</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copia frontend/dist para /publico dentro do JAR, onde o ServidorWeb procura -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copia-frontend</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${frontend.pular}</skip>
+                            <outputDirectory>${project.build.outputDirectory}/publico</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${frontend.pasta}/dist</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- RNF16: um único JAR, com Javalin, Jackson e SLF4J embutidos -->

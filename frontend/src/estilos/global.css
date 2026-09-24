@@ -1,0 +1,31 @@
+/* Tokens de cor e tipografia: a identidade visual mora aqui (RNF06). */
+:root {
+    --cor-marinho: #1f3864;
+    --cor-ambar: #e3a322;
+    --cor-vermelho: #c0392b;
+    --cor-verde: #2e7d32;
+    --cor-fundo: #f6f4ef;
+    --cor-cartao: #ffffff;
+    --cor-borda: #e2ded5;
+    --cor-texto: #1b2432;
+    --cor-texto-suave: #5b6472;
+
+    --cor-madeira: #e6c48f;
+    --cor-alvenaria: #c8704b;
+    --cor-concreto: #9ea7b1;
+    --cor-aco: #4e5a6b;
+
+    font-family: Inter, "Noto Sans", system-ui, sans-serif;
+    color: var(--cor-texto);
+    background: var(--cor-fundo);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 1024px;
+    min-height: 100vh;
+}
