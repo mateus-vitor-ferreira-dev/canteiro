@@ -188,7 +188,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 4 prontos e 3 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 4 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -230,7 +230,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | 🟡 | `GET /api/dificuldades` (#4) e a tela de escolha (#8); falta criar a partida |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ⬜ |  |
-| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ⬜ |  |
+| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | 🟡 | Materiais e catálogo (#9); falta sortear o material de cada peça |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ⬜ |  |
 | RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ⬜ |  |
 | RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ⬜ |  |
