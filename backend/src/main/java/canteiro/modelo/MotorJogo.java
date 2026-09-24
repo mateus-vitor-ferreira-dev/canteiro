@@ -33,9 +33,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public final class MotorJogo {
 
-    /** Linha em que a peça nasce: a primeira das linhas ocultas. */
-    static final int LINHA_NASCIMENTO = 0;
-
     private final Tabuleiro tabuleiro = new Tabuleiro();
     private final FontePecas fonte;
     private final Placar placar;
@@ -44,9 +41,7 @@ public final class MotorJogo {
     private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
 
     private EstadoPartida estado = EstadoPartida.GERANDO_PECA;
-    private Peca pecaAtual;
-    private int linha;
-    private int coluna;
+    private PecaEmQueda emQueda;
     private long ciclo;
     private int ciclosDesdeQueda;
     private boolean mudou;
@@ -102,12 +97,15 @@ public final class MotorJogo {
 
     private void aplicarNaPeca(Comando comando) {
         switch (comando) {
-            case ESQUERDA -> mover(0, -1);
-            case DIREITA -> mover(0, 1);
+            case ESQUERDA -> mudou |= emQueda.mover(0, -1);
+            case DIREITA -> mudou |= emQueda.mover(0, 1);
             case DESCER -> descerOuFixar();
-            case QUEDA_INSTANTANEA -> quedaInstantanea();
-            case GIRAR_HORARIO -> girar(true);
-            case GIRAR_ANTI_HORARIO -> girar(false);
+            case QUEDA_INSTANTANEA -> {
+                emQueda.cairAtePouso();
+                assentar();
+            }
+            case GIRAR_HORARIO -> mudou |= emQueda.girar(true);
+            case GIRAR_ANTI_HORARIO -> mudou |= emQueda.girar(false);
             default -> {
                 // RESERVAR e DESFAZER dependem da reserva e do histórico (#13, #14, #26)
             }
@@ -115,12 +113,10 @@ public final class MotorJogo {
     }
 
     private void gerarPeca() {
-        pecaAtual = fonte.proxima();
-        linha = LINHA_NASCIMENTO;
-        coluna = (Dimensoes.COLUNAS - pecaAtual.tamanho()) / 2;
+        emQueda = PecaEmQueda.nascer(fonte.proxima(), tabuleiro);
         ciclosDesdeQueda = 0;
         mudou = true;
-        if (tabuleiro.colide(pecaAtual, linha, coluna)) {
+        if (emQueda.colide()) {
             estado = EstadoPartida.FIM_DE_JOGO;
             emitir(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO));
         } else {
@@ -128,71 +124,23 @@ public final class MotorJogo {
         }
     }
 
-    private boolean mover(int linhas, int colunas) {
-        if (tabuleiro.colide(pecaAtual, linha + linhas, coluna + colunas)) {
-            return false;
-        }
-        linha += linhas;
-        coluna += colunas;
-        mudou = true;
-        return true;
-    }
-
-    /**
-     * Gira a peça. Se o giro simples colidir, tenta os deslocamentos
-     * corretivos da peça, em ordem, e aplica o primeiro que couber (RF08).
-     * Se nenhum couber, desfaz o giro.
-     */
-    private void girar(boolean horario) {
-        girarPeca(horario);
-        if (!tabuleiro.colide(pecaAtual, linha, coluna)) {
-            mudou = true;
-            return;
-        }
-        for (int[] deslocamento : pecaAtual.deslocamentosCorretivos()) {
-            if (mover(deslocamento[0], deslocamento[1])) {
-                return;
-            }
-        }
-        girarPeca(!horario);
-    }
-
-    private void girarPeca(boolean horario) {
-        if (horario) {
-            pecaAtual.girarHorario();
-        } else {
-            pecaAtual.girarAntiHorario();
-        }
-    }
-
     private void descerOuFixar() {
         ciclosDesdeQueda = 0;
-        if (!mover(1, 0)) {
+        if (emQueda.mover(1, 0)) {
+            mudou = true;
+        } else {
             assentar();
         }
     }
 
-    private void quedaInstantanea() {
-        linha = linhaDePouso();
-        assentar();
-    }
-
-    private int linhaDePouso() {
-        int pouso = linha;
-        while (!tabuleiro.colide(pecaAtual, pouso + 1, coluna)) {
-            pouso++;
-        }
-        return pouso;
-    }
-
     private void assentar() {
         estado = EstadoPartida.FIXANDO;
-        for (Celula celula : tabuleiro.fixar(pecaAtual, linha, coluna)) {
-            analisador.registrar(celula, pecaAtual.material());
+        for (Celula celula : emQueda.fixar()) {
+            analisador.registrar(celula, emQueda.peca().material());
         }
         emitir(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
         eliminarLinhas();
-        pecaAtual = null;
+        emQueda = null;
         if (estabilidade().passouDoLimite() && desabou()) {
             return;
         }
@@ -216,6 +164,7 @@ public final class MotorJogo {
         emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
         if (placar.registrarLinhas(completas.size(), predominante)) {
             ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
+            fonte.nivelMudou(placar.nivel());
             emitir(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
         }
     }
@@ -286,7 +235,7 @@ public final class MotorJogo {
      * @return as quatro células, ou lista vazia se não houver peça caindo
      */
     public List<Celula> celulasPecaAtual() {
-        return pecaAtual == null ? List.of() : posicoes(linha);
+        return emQueda == null ? List.of() : emQueda.celulas();
     }
 
     /**
@@ -296,11 +245,7 @@ public final class MotorJogo {
      * @return as quatro células do pouso, ou lista vazia se não houver peça caindo
      */
     public List<Celula> celulasFantasma() {
-        return pecaAtual == null ? List.of() : posicoes(linhaDePouso());
-    }
-
-    private List<Celula> posicoes(int linhaDaPeca) {
-        return pecaAtual.celulas().stream().map(c -> c.deslocada(linhaDaPeca, coluna)).toList();
+        return emQueda == null ? List.of() : emQueda.celulasNoPouso();
     }
 
     /**
@@ -328,7 +273,7 @@ public final class MotorJogo {
      * @return a peça, ou {@code null} se nenhuma estiver caindo
      */
     public Peca pecaAtual() {
-        return pecaAtual;
+        return emQueda == null ? null : emQueda.peca();
     }
 
     /**
