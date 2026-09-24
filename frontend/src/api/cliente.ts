@@ -1,4 +1,10 @@
-import type { DificuldadeDto, ErroDto } from "./protocolo";
+import type {
+    CodigoDificuldade,
+    DificuldadeDto,
+    ErroDto,
+    NovaPartidaDto,
+    PartidaCriadaDto,
+} from "./protocolo";
 
 /** Código usado quando o backend nem chegou a responder. */
 export const SEM_CONEXAO = "SEM_CONEXAO";
@@ -25,10 +31,26 @@ export function listarDificuldades(): Promise<DificuldadeDto[]> {
     return buscarJson<DificuldadeDto[]>("/api/dificuldades");
 }
 
-async function buscarJson<T>(caminho: string): Promise<T> {
+/**
+ * Cria uma partida na dificuldade escolhida (RF02). Ela começa quando o
+ * navegador conecta em `/ws/partidas/{id}`.
+ */
+export function criarPartida(dificuldade: CodigoDificuldade): Promise<PartidaCriadaDto> {
+    const corpo: NovaPartidaDto = { dificuldade };
+    return buscarJson<PartidaCriadaDto>("/api/partidas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+    });
+}
+
+async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
     let resposta: Response;
     try {
-        resposta = await fetch(caminho, { headers: { Accept: "application/json" } });
+        resposta = await fetch(caminho, {
+            ...opcoes,
+            headers: { Accept: "application/json", ...opcoes.headers },
+        });
     } catch {
         throw new ErroApi(
             SEM_CONEXAO,
