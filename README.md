@@ -292,10 +292,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ## 🏛️ Arquitetura
 
 <p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/imagens/arquitetura-escuro.svg">
-  <img src="docs/imagens/arquitetura-claro.svg" alt="Arquitetura: o navegador fala com o backend por WebSocket e REST; no backend, api → controle → modelo, e a persistência grava em ~/.canteiro/" width="900">
-</picture>
+<img src="docs/imagens/arquitetura.svg" alt="Arquitetura: o navegador fala com o backend por WebSocket e REST; no backend, api → controle → modelo, e a persistência grava em ~/.canteiro/" width="900">
 </p>
 
 <sub>Os diagramas deste README saem de <a href="docs/imagens/diagramas/gerar.py"><code>docs/imagens/diagramas/gerar.py</code></a>. Para mudar um, edite o script e rode <code>python3 docs/imagens/diagramas/gerar.py</code>.</sub>
@@ -523,10 +520,7 @@ canteiro/
 A partida é uma **máquina de estados finita** no backend. A cada ciclo, o motor olha o estado atual e executa só as transições previstas para ele. O estado vai em toda mensagem, e **o frontend decide qual tela ou camada mostrar a partir dele**. O menu é uma tela do frontend: a partida só passa a existir quando o jogador a cria.
 
 <p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/imagens/estados-escuro.svg">
-  <img src="docs/imagens/estados-claro.svg" alt="Máquina de estados da partida: GERANDO_PECA, PECA_CAINDO, FIXANDO, ELIMINANDO_LINHAS, PAUSA, COLAPSO e FIM_DE_JOGO" width="900">
-</picture>
+<img src="docs/imagens/estados.svg" alt="Máquina de estados da partida: GERANDO_PECA, PECA_CAINDO, FIXANDO, ELIMINANDO_LINHAS, PAUSA, COLAPSO e FIM_DE_JOGO" width="900">
 </p>
 
 ### Do aperto da tecla ao desenho

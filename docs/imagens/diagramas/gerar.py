@@ -1,4 +1,6 @@
-"""Gera os diagramas do README em SVG, nas versões clara e escura.
+"""Gera os diagramas do README em SVG, no tema escuro, com fundo próprio.
+
+O fundo vem dentro do SVG, então a imagem fica igual no GitHub claro e no escuro.
 
 Para mudar um diagrama: edite este arquivo e rode, da raiz do repositório,
     python3 docs/imagens/diagramas/gerar.py
@@ -11,14 +13,11 @@ SAIDA = Path(__file__).resolve().parent.parent
 FONTE = "Inter, 'Segoe UI', Helvetica, Arial, sans-serif"
 
 TEMAS = {
-    "claro": dict(texto="#1B2432", suave="#57606A", painel="#F6F8FA", borda_painel="#D0D7DE",
-                  no="#FFFFFF", borda_no="#C9D1D9", seta="#6E7781", fundo_rotulo="#FFFFFF",
-                  modelo="#1F3864", borda_modelo="#1F3864", texto_modelo="#FFFFFF", chip="#2D4A80",
-                  ambar="#B7791F", verde="#2E7D32", vermelho="#C0392B", titulo_painel="#57606A"),
     "escuro": dict(texto="#E6EDF3", suave="#8B949E", painel="#161B22", borda_painel="#30363D",
                    no="#0D1117", borda_no="#3D444D", seta="#8B949E", fundo_rotulo="#0D1117",
                    modelo="#1F3864", borda_modelo="#4A6AA8", texto_modelo="#FFFFFF", chip="#2D4A80",
-                   ambar="#E3A322", verde="#56D364", vermelho="#F47067", titulo_painel="#8B949E"),
+                   ambar="#E3A322", verde="#56D364", vermelho="#F47067", titulo_painel="#8B949E",
+                   fundo="#0D1117", borda_fundo="#30363D"),
 }
 
 
@@ -79,7 +78,9 @@ class Svg:
             f'orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="{cor}"/></marker>'
             for cor in sorted(self._marcadores))
         svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.l}" height="{self.a}" viewBox="0 0 {self.l} {self.a}" '
-               f'font-family="{FONTE}"><defs>{marcadores}</defs>{"".join(self.partes)}</svg>\n')
+               f'font-family="{FONTE}"><defs>{marcadores}</defs>'
+               f'<rect x="0.5" y="0.5" width="{self.l - 1}" height="{self.a - 1}" rx="16" fill="{self.c["fundo"]}" '
+               f'stroke="{self.c["borda_fundo"]}"/>{"".join(self.partes)}</svg>\n')
         (SAIDA / nome).write_text(svg, encoding="utf-8")
         Svg._marcadores = set()
 
@@ -140,7 +141,7 @@ def arquitetura(tema):
     # rodapé
     s.texto(560, 562, "Tudo roda na máquina do jogador e sai num único JAR. O servidor só aceita conexões da própria máquina.",
             13.5, c["suave"])
-    s.salvar(f"arquitetura-{tema}.svg")
+    s.salvar("arquitetura.svg")
 
 
 def estados(tema):
@@ -185,11 +186,10 @@ def estados(tema):
     s.seta([(1081, 400), (1106, 400)])
     for nome, (x, y) in pos.items():
         s.no(x, y, larg[nome], 44, nome, destaque=cores.get(nome))
-    s.salvar(f"estados-{tema}.svg")
+    s.salvar("estados.svg")
 
 
 if __name__ == "__main__":
-    for tema in TEMAS:
-        arquitetura(tema)
-        estados(tema)
+    arquitetura("escuro")
+    estados("escuro")
     print("diagramas gerados em", SAIDA)
