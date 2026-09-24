@@ -7,7 +7,7 @@ import java.util.List;
  *
  * <p>Cada dificuldade define as condições iniciais da partida: o intervalo de
  * queda, o limite de desvio do centro de massa e os materiais liberados. Os
- * valores partem da tabela de progressão da especificação (seção 4.4): a
+ * valores partem da tabela de progressão por nível (README, "A curva de dificuldade"): a
  * dificuldade fácil começa como o nível 1, a normal como o nível 3 e a difícil
  * como o nível 5. São valores iniciais, a ajustar nos testes com jogadores.</p>
  *
