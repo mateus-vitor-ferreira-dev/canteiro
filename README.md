@@ -188,7 +188,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 4 prontos e 5 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 4 prontos e 7 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -233,11 +233,11 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | 🟡 | Materiais e catálogo (#9); falta sortear o material de cada peça |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ⬜ |  |
 | RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ⬜ |  |
-| RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ⬜ |  |
+| RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | 🟡 | Colisão com as bordas e com os blocos no tabuleiro (#11); falta o motor aplicar o movimento (#20) |
 | RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | 🟡 | Peças e rotação simples nos dois sentidos, padrão SRS (#10); falta o deslocamento corretivo (#21) |
 | RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ⬜ |  |
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ⬜ |  |
-| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ⬜ |  |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | 🟡 | Fixação na grade, com o efeito do material (#11); falta o motor detectar a colisão embaixo (#20) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ⬜ |  |
 | RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ⬜ |  |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ⬜ |  |
