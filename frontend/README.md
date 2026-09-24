@@ -25,13 +25,15 @@ O Vite repassa `/api` e `/ws` para o backend, então para o navegador parece um 
 
 ## Onde fica cada coisa
 
-| Pasta              | O que mora aqui                                                                                                     |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `src/api/`         | `cliente.ts` (REST) e `protocolo.ts` (tipos espelhados dos DTOs do backend). **Único lugar que fala com o backend** |
-| `src/telas/`       | Um componente por tela. Hoje: `NovaPartida` (escolha da dificuldade)                                                |
-| `src/componentes/` | Peças reutilizáveis da interface, como o tabuleiro e o painel de estabilidade                                       |
-| `src/estado/`      | Estado compartilhado em módulos `.svelte.ts`: partida, teclado e navegação                                          |
-| `src/estilos/`     | Cores, fontes e texturas dos materiais                                                                              |
-| `src/util/`        | Funções puras, como formatação de números e conversão de cor                                                        |
+| Pasta              | O que mora aqui                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `src/api/`         | `cliente.ts` (REST) e `protocolo.ts` (tipos espelhados dos DTOs do backend). **Único lugar que fala com o backend**          |
+| `src/telas/`       | Uma pasta por tela, com o componente, o teste e os componentes que só ela usa. Hoje: `NovaPartida/` (escolha da dificuldade) |
+| `src/componentes/` | Só o que mais de uma tela usa, como o tabuleiro e o painel de estabilidade                                                   |
+| `src/estado/`      | Estado compartilhado em módulos `.svelte.ts`: partida, teclado e navegação                                                   |
+| `src/estilos/`     | Cores, fontes e texturas dos materiais                                                                                       |
+| `src/util/`        | Funções puras, como formatação de números e conversão de cor                                                                 |
 
-Os testes ficam ao lado do arquivo testado, com o sufixo `.test.ts`. As convenções completas estão no [README principal](../README.md#-convenções-de-código).
+Os testes ficam ao lado do arquivo testado, com o sufixo `.test.ts`. Sons e imagens vão em `public/sons/` e `public/imagens/`.
+
+**Imports:** `@/` aponta para `src/` (`import { listarDificuldades } from "@/api/cliente"`). Caminho relativo só para arquivos da mesma pasta. As convenções completas estão no [README principal](../README.md#-convenções-de-código).

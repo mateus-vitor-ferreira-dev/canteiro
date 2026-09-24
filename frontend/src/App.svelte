@@ -1,6 +1,6 @@
 <!-- Moldura do jogo. As telas passam a ser trocadas por estado/navegacao.svelte.ts quando houver mais de uma. -->
 <script lang="ts">
-    import NovaPartida from "./telas/NovaPartida.svelte";
+    import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
 </script>
 
 <header>

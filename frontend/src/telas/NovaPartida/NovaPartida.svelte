@@ -1,7 +1,7 @@
 <!-- Escolha da dificuldade antes de começar a partida (RF02). -->
 <script lang="ts">
-    import { listarDificuldades } from "../api/cliente";
-    import { formatarColunas, formatarSegundos } from "../util/formatacao";
+    import { listarDificuldades } from "@/api/cliente";
+    import { formatarColunas, formatarSegundos } from "@/util/formatacao";
 
     const NOMES_MATERIAIS: Record<string, string> = {
         MADEIRA: "madeira",

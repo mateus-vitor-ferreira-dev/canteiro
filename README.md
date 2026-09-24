@@ -143,7 +143,7 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 
 **Em máquina lenta, perde-se o desenho, nunca a regra.** O backend simula a 60 ciclos por segundo, sempre. O frontend guarda o último estado recebido e redesenha o Canvas a cada `requestAnimationFrame`. Se o computador não aguentar, o que cai é a taxa de quadros da tela. A partida continua igual, porque um jogo que muda de comportamento conforme o hardware está quebrado.
 
-**O modelo não sabe que existe um servidor.** Os pacotes `modelo`, `fisica`, `estruturas`, `controle`, `persistencia` e `util` **não podem importar Javalin, JSON nem nada gráfico**. Isso é garantido por um teste que reprova o build. É o que permite criar um `MotorJogo`, rodar milhares de jogadas e conferir o resultado num teste JUnit, sem subir servidor nem abrir navegador (RNF08).
+**O modelo não sabe que existe um servidor.** O `modelo` (com todos os subpacotes), o `controle` e a `persistencia` **não podem importar Javalin, JSON nem nada gráfico**. Isso é garantido por um teste que reprova o build. É o que permite criar um `MotorJogo`, rodar milhares de jogadas e conferir o resultado num teste JUnit, sem subir servidor nem abrir navegador (RNF08).
 
 **O frontend não tem regra de jogo.** Ele não calcula colisão, pontuação nem estabilidade: recebe tudo pronto e desenha. Isso mantém o conteúdo da disciplina no Java e deixa o Svelte simples para quem está começando. **A pontuação do ranking nunca vem do navegador**: o frontend manda só o id da partida e o nome, e o backend lê a pontuação da própria sessão.
 
@@ -300,7 +300,7 @@ flowchart TB
     subgraph JVM["☕ Backend · Java 17 · 127.0.0.1:7070"]
         API["<b>canteiro.api</b><br/>rotas REST · WebSocket · DTOs"]
         CTRL["<b>canteiro.controle</b><br/>sessões · fila de comandos · laço 60 Hz"]
-        MOD["<b>canteiro.modelo</b> · fisica · estruturas<br/>MotorJogo · Tabuleiro · Peca · Material<br/><i>sem Javalin, sem JSON, sem gráfico</i>"]
+        MOD["<b>canteiro.modelo</b> · pecas · materiais · estruturas · fisica<br/>MotorJogo · Tabuleiro · Peca · Material<br/><i>sem Javalin, sem JSON, sem gráfico</i>"]
         PERS["<b>canteiro.persistencia</b><br/>materiais · ranking · repetições"]
         API --> CTRL --> MOD
         CTRL --> PERS
@@ -355,15 +355,18 @@ canteiro/
 │   │   ├── main/
 │   │   │   ├── java/canteiro/
 │   │   │   │   ├── app/             main: sobe o servidor e abre o navegador
-│   │   │   │   ├── api/             rotas REST, WebSocket e DTOs
+│   │   │   │   ├── api/             ServidorWeb
+│   │   │   │   │   ├── rotas/       uma classe por recurso: RotasDificuldades...
+│   │   │   │   │   ├── ws/          CanalPartida (WebSocket)
+│   │   │   │   │   └── dto/         records do protocolo + conversão
 │   │   │   │   ├── controle/        sessões, fila de comandos, laço
-│   │   │   │   ├── modelo/          motor, tabuleiro, estados da partida
+│   │   │   │   ├── modelo/          TODA a regra do jogo: motor, tabuleiro, dificuldades
 │   │   │   │   │   ├── pecas/       Peca + as 7 formas
-│   │   │   │   │   └── materiais/   Material + os 4 materiais
-│   │   │   │   ├── estruturas/      sacola, fila, pilha, histórico
-│   │   │   │   ├── fisica/          centro de massa, estabilidade, colapso
-│   │   │   │   ├── persistencia/    ranking, materiais, repetições
-│   │   │   │   └── util/            constantes e auxiliares
+│   │   │   │   │   ├── materiais/   Material + os 4 materiais
+│   │   │   │   │   ├── estruturas/  sacola, fila, pilha, histórico
+│   │   │   │   │   ├── fisica/      centro de massa, estabilidade, colapso
+│   │   │   │   │   └── constantes/  dimensões e limites do jogo
+│   │   │   │   └── persistencia/    ranking, materiais, repetições
 │   │   │   └── resources/
 │   │   │       └── dados/           valores padrão dos arquivos
 │   │   └── test/
@@ -375,12 +378,14 @@ canteiro/
 ├── frontend/                        A INTERFACE (Svelte + TypeScript)
 │   ├── src/
 │   │   ├── api/                     cliente REST, WebSocket, tipos do protocolo
-│   │   ├── telas/                   menu, partida, ranking, relatório...
-│   │   ├── componentes/             Tabuleiro, PainelEstabilidade, FilaProximas...
+│   │   ├── telas/                   uma pasta por tela
+│   │   │   ├── NovaPartida/         NovaPartida.svelte + NovaPartida.test.ts
+│   │   │   └── Partida/             Partida.svelte + os componentes só dela
+│   │   ├── componentes/             só o que mais de uma tela usa: Tabuleiro...
 │   │   ├── estado/                  partida, teclado, navegacao
 │   │   ├── estilos/                 cores, fontes, texturas dos materiais
 │   │   └── util/                    funções puras
-│   ├── public/                      ícone, sons, imagens
+│   ├── public/                      ícone, sons/, imagens/
 │   ├── index.html
 │   ├── package.json                 a receita do frontend
 │   └── vite.config.ts
@@ -398,23 +403,26 @@ canteiro/
 
 ### Por que o backend está dividido assim
 
-**A pasta diz de qual camada é o código, e a camada diz o que ele pode usar.** Para decidir onde uma classe nova vai morar, pergunte *"isso é regra do jogo, é coordenação ou é comunicação?"*. Regra vai para `modelo`, `fisica` ou `estruturas`. Coordenação da partida vai para `controle`. Rota, WebSocket e JSON vão para `api`. Arquivo vai para `persistencia`.
+**A pasta diz de qual camada é o código, e a camada diz o que ele pode usar.** Para decidir onde uma classe nova vai morar, pergunte *"isso é regra do jogo, é coordenação ou é comunicação?"*. Regra vai para `modelo` (ou um subpacote dele). Coordenação da partida vai para `controle`. Rota, WebSocket e JSON vão para `api`. Arquivo vai para `persistencia`. **Na raiz de `canteiro/` só existem essas cinco camadas**, e o `ArquiteturaTest` reprova o build se aparecer uma sexta.
 
 | Pasta | O que mora aqui | Por que separado | Javalin / JSON? |
 |---|---|---|---|
 | `app/` | Só a classe `Aplicacao`, com o `main` | É o único lugar que conhece **todas** as camadas e as liga. Também abre o navegador (RF29) | ✅ |
-| `api/` | `ServidorWeb`, rotas REST, `CanalPartida`, DTOs (`record`s) e a conversão entre modelo e DTO | **Tudo o que sabe que existe HTTP fica aqui.** Se amanhã trocássemos o Javalin, só esta pasta mudaria | ✅ |
+| `api/` | `ServidorWeb`, que liga tudo | **Tudo o que sabe que existe HTTP fica aqui.** Se amanhã trocássemos o Javalin, só esta pasta mudaria | ✅ |
+| `api/rotas/` | Uma classe por recurso: `RotasDificuldades`, `RotasRanking`... | O `ServidorWeb` não cresce a cada rota nova; cada recurso fica num arquivo pequeno | ✅ |
+| `api/ws/` | `CanalPartida`: comandos chegando, estado e eventos saindo | O WebSocket tem ciclo de vida próprio (conectar, cair, reconectar) | ✅ |
+| `api/dto/` | Os `record`s do protocolo e a conversão entre modelo e DTO | Espelho de `frontend/src/api/protocolo.ts`. **Não podem importar o Javalin** | só JSON |
 | `controle/` | `GerenciadorPartidas`, `SessaoPartida`, `Comando` | Coordena uma partida no tempo: recebe comandos, roda o laço, avisa quando o estado muda. Não sabe o que é JSON | ❌ |
-| `modelo/` | `MotorJogo`, `Tabuleiro`, `Bloco`, estados da partida | **O coração do jogo.** Tem que dar para rodar uma partida inteira num teste, sem servidor | ❌ |
+| `modelo/` | `MotorJogo`, `Tabuleiro`, `Bloco`, `Dificuldade`, estados da partida | **O coração do jogo, e toda regra mora aqui dentro.** Tem que dar para rodar uma partida inteira num teste, sem servidor | ❌ |
 | `modelo/pecas/` | `Peca` (abstrata) e as 7 formas | Uma hierarquia inteira de herança, junta para ser fácil de achar e comparar | ❌ |
 | `modelo/materiais/` | `Material` (abstrata) e os 4 materiais | A segunda hierarquia, independente da primeira. A cor é um número RGB, não `java.awt.Color` | ❌ |
-| `estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
-| `fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
+| `modelo/estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
+| `modelo/fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
+| `modelo/constantes/` | `COLUNAS = 10`, `LINHAS = 20`... | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 | `persistencia/` | Catálogo de materiais, configurações, ranking, repetições | Arquivo tem outro tipo de erro (sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
-| `util/` | Constantes (`COLUNAS = 10`, `LINHAS = 20`...) e auxiliares | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 
 > [!IMPORTANT]
-> **O ❌ não é sugestão, é teste.** O `ArquiteturaTest` lê os `import` de cada arquivo desses pacotes e **reprova o build** se encontrar Javalin, Jackson, `java.awt`, `javax.swing` ou uma camada de cima.
+> **O ❌ não é sugestão, é teste.** O `ArquiteturaTest` lê os `import` de cada arquivo desses pacotes, **incluindo os subpacotes**, e reprova o build se encontrar Javalin, Jackson, `java.awt`, `javax.swing` ou uma camada de cima.
 
 ### Por que o frontend está dividido assim
 
@@ -423,19 +431,21 @@ canteiro/
 | Pasta | O que mora aqui | Por que separado |
 |---|---|---|
 | `api/` | `cliente.ts` (REST), `conexao.ts` (WebSocket com reconexão) e `protocolo.ts` (tipos) | **Único lugar que fala com o backend.** As telas não fazem `fetch` direto; chamam funções daqui |
-| `telas/` | Um componente por tela: `Menu`, `NovaPartida`, `Partida`, `FimDePartida`, `Ranking`, `Repeticoes`, `Relatorio`, `Configuracoes` | Qual tela aparece é decidido por `estado/navegacao.svelte.ts`, sem biblioteca de rotas. Uma tela junta componentes e estado, e quase não tem lógica própria |
-| `componentes/` | `Tabuleiro` (Canvas), `PainelEstabilidade`, `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas` | Pedaços reaproveitáveis que recebem dados por *props* (`$props()`) e desenham. Fáceis de testar sozinhos |
+| `telas/` | **Uma pasta por tela**: `Menu`, `NovaPartida`, `Partida`, `FimDePartida`, `Ranking`, `Repeticoes`, `Relatorio`, `Configuracoes`. Dentro dela, o componente da tela, o teste e os componentes que só ela usa (em `Partida/`: `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas`) | Quem mexe numa tela acha tudo num lugar só. Qual tela aparece é decidido por `estado/navegacao.svelte.ts`, sem biblioteca de rotas |
+| `componentes/` | Só o que **mais de uma tela** usa: `Tabuleiro` (Canvas, usado na partida e no replay) e `PainelEstabilidade` | Pedaços reaproveitáveis que recebem dados por *props* (`$props()`) e desenham. Um componente começa na pasta da tela e só vem para cá quando a segunda tela precisar dele |
 | `estado/` | Módulos `.svelte.ts` com runas: `partida` (conecta, guarda o último estado, envia comandos), `teclado` (tecla → comando) e `navegacao` (tela atual) | O estado que várias telas usam, fora dos componentes para eles ficarem pequenos |
 | `estilos/` | Cores, fontes e as texturas de cada material | Um lugar só para a identidade visual e para o padrão de daltonismo (RNF06) |
 | `util/` | Funções puras: converter cor RGB, formatar números e tempo | Sem Svelte, sem rede: as mais fáceis de testar |
-| `public/` | Ícone, sons, imagens | Arquivos servidos como estão, sem passar pelo build |
+| `public/` | `icone.svg`, `sons/`, `imagens/` | Arquivos servidos como estão, sem passar pelo build. Um som em `public/sons/colapso.mp3` é usado como `/sons/colapso.mp3` |
+
+**Imports com `@/`.** `@/` aponta para `src/`, então `import { listarDificuldades } from "@/api/cliente"` funciona igual de qualquer pasta, sem `../../`. Use caminho relativo (`./`) só para arquivos da mesma pasta.
 
 ### E as outras pastas
 
 | Pasta ou arquivo | Para que serve |
 |---|---|
 | `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`, `configuracoes.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11) |
-| `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest` |
+| `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
 | `docs/` | A proposta do projeto e os slides da apresentação, em PDF, e as imagens deste README |
@@ -672,7 +682,7 @@ cd frontend && npm test        # Vitest
 
 | Teste | O que garante |
 |---|---|
-| `ArquiteturaTest` | Separação de camadas: nada de Javalin, JSON ou classe gráfica fora de `app` e `api` (RNF08) |
+| `ArquiteturaTest` | Separação de camadas: só as cinco camadas na raiz · nada de Javalin, JSON ou classe gráfica fora de `app` e `api` · DTOs sem Javalin (RNF08) |
 | `ServidorWebTest` | `GET /api/dificuldades` devolve as três dificuldades em JSON (RF02) · o servidor recusa conexão pelo IP de rede da máquina (RNF13) |
 | `DificuldadeTest` | Cada dificuldade cai mais rápido, tolera menos desvio e libera ao menos os materiais da anterior (RF02) |
 | `cliente.test.ts` 🌐 | O cliente REST devolve as dificuldades · transforma a resposta de erro da API em `ErroApi` · avisa quando o backend não está rodando |
@@ -759,10 +769,10 @@ public double centroDeMassa() { ... }
 ```svelte
 <!-- Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). -->
 <script lang="ts">
-  import type { EstabilidadeDto } from "../api/protocolo";
+  import type { EstabilidadeDto } from "@/api/protocolo";
   import BarraProgresso from "./BarraProgresso.svelte";
-  import { LIMIAR_ALERTA } from "../util/constantes";
-  import { formatarColunas } from "../util/formatacao";
+  import { LIMIAR_ALERTA } from "@/util/constantes";
+  import { formatarColunas } from "@/util/formatacao";
 
   /** Estabilidade da estrutura, como veio na última mensagem do backend. */
   let { estabilidade }: { estabilidade: EstabilidadeDto } = $props();

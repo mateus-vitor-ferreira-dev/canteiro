@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ErroApi, listarDificuldades } from "../api/cliente";
+import { ErroApi, listarDificuldades } from "@/api/cliente";
 import NovaPartida from "./NovaPartida.svelte";
 
-vi.mock("../api/cliente", async (original) => ({
-    ...(await original<typeof import("../api/cliente")>()),
+vi.mock("@/api/cliente", async (original) => ({
+    ...(await original<typeof import("@/api/cliente")>()),
     listarDificuldades: vi.fn(),
 }));
 
