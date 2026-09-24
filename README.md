@@ -10,6 +10,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
   <a href="docs/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
+  <a href="https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mateus-vitor-ferreira-dev/canteiro/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"/></a>
 </p>
 
 <p>
@@ -719,6 +720,8 @@ A maior parte do esforço de teste fica nos **testes de unidade do modelo, no ba
 cd backend && ./mvnw test      # JUnit 5
 cd frontend && npm test        # Vitest
 ```
+
+**O CI roda tudo sozinho em todo PR** ([GitHub Actions](https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml)): testes, arquitetura e Javadoc do backend; ESLint, Prettier, tipos, testes e build do frontend. Com os dois verdes, ele gera o **JAR completo** e deixa para baixar em *Actions → a execução → Artifacts → canteiro-jar*. É o jeito mais fácil de testar o jogo de um PR sem compilar nada.
 
 **Já existem:**
 
