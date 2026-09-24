@@ -43,7 +43,7 @@ class ServidorWebTest {
 
     @BeforeEach
     void subirServidor() {
-        servidor = new ServidorWeb();
+        servidor = new ServidorWeb(ServidoresDeTeste.gerenciador());
         porta = servidor.iniciar(PORTA_LIVRE);
     }
 
@@ -76,6 +76,7 @@ class ServidorWebTest {
         assertEquals("CANTEIRO — API", especificacao.at("/info/title").asText());
         assertEquals("listarDificuldades",
                 especificacao.at("/paths/~1api~1dificuldades/get/operationId").asText());
+        assertEquals("criarPartida", especificacao.at("/paths/~1api~1partidas/post/operationId").asText());
     }
 
     @Test

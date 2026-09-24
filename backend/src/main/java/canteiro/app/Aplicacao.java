@@ -1,6 +1,9 @@
 package canteiro.app;
 
 import canteiro.api.ServidorWeb;
+import canteiro.controle.GerenciadorPartidas;
+import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.materiais.CatalogoMateriais;
 import io.javalin.util.JavalinBindException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ public final class Aplicacao {
      * @param args argumentos de linha de comando; não utilizados
      */
     public static void main(String[] args) {
-        ServidorWeb servidor = new ServidorWeb();
+        ServidorWeb servidor = new ServidorWeb(criarGerenciador());
         int porta;
         try {
             porta = servidor.iniciar(ServidorWeb.PORTA_PADRAO);
@@ -54,6 +57,16 @@ public final class Aplicacao {
         } else {
             LOG.info("Frontend não embutido (modo de desenvolvimento). Suba o Vite e abra {}", ENDERECO_VITE);
         }
+    }
+
+    /**
+     * Monta o gerenciador de partidas. A fonte de peças ainda é a provisória;
+     * quando o gerador por sacola (#12) ficar pronto, é só trocar aqui.
+     */
+    private static GerenciadorPartidas criarGerenciador() {
+        CatalogoMateriais catalogo = CatalogoMateriais.padrao();
+        return new GerenciadorPartidas(dificuldade ->
+                new FonteSimples(System.nanoTime(), catalogo, dificuldade.materiaisLiberados()));
     }
 
     private static void abrirNavegador(URI endereco) {

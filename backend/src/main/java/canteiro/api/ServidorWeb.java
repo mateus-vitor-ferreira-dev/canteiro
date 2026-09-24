@@ -2,6 +2,9 @@ package canteiro.api;
 
 import canteiro.api.dto.ErroDto;
 import canteiro.api.rotas.RotasDificuldades;
+import canteiro.api.rotas.RotasPartidas;
+import canteiro.api.ws.CanalPartida;
+import canteiro.controle.GerenciadorPartidas;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.RoutesConfig;
@@ -10,6 +13,8 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /**
  * Servidor HTTP do jogo: rotas da API e, no JAR final, os arquivos do frontend.
@@ -35,13 +40,17 @@ public final class ServidorWeb {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServidorWeb.class);
 
+    private final GerenciadorPartidas partidas;
     private final boolean frontendEmbutido;
     private final Javalin javalin;
 
     /**
      * Configura o servidor e registra as rotas, sem começar a escutar.
+     *
+     * @param partidas onde as partidas ficam guardadas
      */
-    public ServidorWeb() {
+    public ServidorWeb(GerenciadorPartidas partidas) {
+        this.partidas = Objects.requireNonNull(partidas, "partidas");
         this.frontendEmbutido = ServidorWeb.class.getResource(PASTA_FRONTEND) != null;
         this.javalin = Javalin.create(this::configurar);
     }
@@ -59,9 +68,10 @@ public final class ServidorWeb {
     }
 
     /**
-     * Para o servidor e libera a porta.
+     * Encerra as partidas, para o servidor e libera a porta.
      */
     public void parar() {
+        partidas.encerrarTodas();
         javalin.stop();
     }
 
@@ -85,8 +95,10 @@ public final class ServidorWeb {
         registrarRotas(config.routes);
     }
 
-    private static void registrarRotas(RoutesConfig rotas) {
+    private void registrarRotas(RoutesConfig rotas) {
         RotasDificuldades.registrar(rotas);
+        new RotasPartidas(partidas).registrar(rotas);
+        new CanalPartida(partidas).registrar(rotas);
 
         rotas.exception(Exception.class, (erro, ctx) -> {
             LOG.error("Erro inesperado em {} {}", ctx.method(), ctx.path(), erro);

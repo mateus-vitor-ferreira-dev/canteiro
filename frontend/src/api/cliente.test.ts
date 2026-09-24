@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ErroApi, SEM_CONEXAO, listarDificuldades } from "./cliente";
+import { ErroApi, SEM_CONEXAO, criarPartida, listarDificuldades } from "./cliente";
 import type { DificuldadeDto } from "./protocolo";
 
 const NORMAL: DificuldadeDto = {
@@ -46,5 +46,27 @@ describe("listarDificuldades", () => {
 
         expect(erro).toBeInstanceOf(ErroApi);
         expect(erro).toMatchObject({ codigo: SEM_CONEXAO, status: 0 });
+    });
+});
+
+describe("criarPartida", () => {
+    it("manda a dificuldade e devolve o id", async () => {
+        responder({ id: "a1b2c3d4" }, 201);
+
+        await expect(criarPartida("NORMAL")).resolves.toEqual({ id: "a1b2c3d4" });
+
+        const [caminho, opcoes] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+        expect(caminho).toBe("/api/partidas");
+        expect(opcoes.method).toBe("POST");
+        expect(JSON.parse(opcoes.body as string)).toEqual({ dificuldade: "NORMAL" });
+    });
+
+    it("transforma a dificuldade inválida em ErroApi", async () => {
+        responder({ erro: "DIFICULDADE_INVALIDA", mensagem: "Escolha uma dificuldade." }, 400);
+
+        await expect(criarPartida("NORMAL")).rejects.toMatchObject({
+            codigo: "DIFICULDADE_INVALIDA",
+            status: 400,
+        });
     });
 });

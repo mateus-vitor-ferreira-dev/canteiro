@@ -9,9 +9,9 @@ import canteiro.modelo.fisica.Estabilidade;
 import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Peca;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Coordena a partida: gera a peça, faz ela cair, aplica os comandos, fixa
@@ -41,7 +41,7 @@ public final class MotorJogo {
     private final Placar placar;
     private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
     private int ciclosPorQueda;
-    private final List<ObservadorPartida> observadores = new ArrayList<>();
+    private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
 
     private EstadoPartida estado = EstadoPartida.GERANDO_PECA;
     private Peca pecaAtual;
@@ -269,6 +269,15 @@ public final class MotorJogo {
      */
     public void inscrever(ObservadorPartida observador) {
         observadores.add(Objects.requireNonNull(observador, "observador"));
+    }
+
+    /**
+     * Tira um observador.
+     *
+     * @param observador quem para de ouvir
+     */
+    public void desinscrever(ObservadorPartida observador) {
+        observadores.remove(observador);
     }
 
     /**
