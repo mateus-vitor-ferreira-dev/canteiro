@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 4 prontos e 7 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 8 prontos e 8 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -230,23 +230,23 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 |---|---|:-:|:-:|:-:|---|
 | RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | 🟡 | `GET /api/dificuldades` (#4) e a tela de escolha (#8); falta criar a partida |
-| RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ⬜ |  |
+| RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | 🟡 | O motor gera peças continuamente a partir de uma FontePecas (#20); falta a sacola (#12) |
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | 🟡 | Materiais e catálogo (#9); falta sortear o material de cada peça |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ⬜ |  |
-| RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ⬜ |  |
-| RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | 🟡 | Colisão com as bordas e com os blocos no tabuleiro (#11); falta o motor aplicar o movimento (#20) |
+| RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | 🟡 | Queda no intervalo da dificuldade, contada em ciclos (#20); falta mudar por nível (#22) |
+| RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ✅ | Colisão no tabuleiro (#11) e movimento no motor (#20) |
 | RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | 🟡 | Peças e rotação simples nos dois sentidos, padrão SRS (#10); falta o deslocamento corretivo (#21) |
-| RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ⬜ |  |
+| RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ✅ | Queda instantânea até o primeiro apoio, com peça fantasma (#20) |
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ⬜ |  |
-| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | 🟡 | Fixação na grade, com o efeito do material (#11); falta o motor detectar a colisão embaixo (#20) |
-| RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ⬜ |  |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20) |
+| RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
 | RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ⬜ |  |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ⬜ |  |
 | RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ⬜ |  |
 | RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ⬜ |  |
 | RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ⬜ |  |
 | RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ⬜ |  |
-| RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ⬜ |  |
+| RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | 🟡 | PAUSAR e RETOMAR no motor (#20); falta o comando chegar pela tela (#23, #25) |
 | RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ⬜ |  |
 | RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ⬜ |  |
 | RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ⬜ |  |
