@@ -1,6 +1,7 @@
 <!-- Escolha da dificuldade antes de começar a partida (RF02). -->
 <script lang="ts">
-    import { listarDificuldades } from "@/api/cliente";
+    import { criarPartida, listarDificuldades } from "@/api/cliente";
+    import type { CodigoDificuldade } from "@/api/protocolo";
     import { formatarColunas, formatarSegundos } from "@/util/formatacao";
 
     const NOMES_MATERIAIS: Record<string, string> = {
@@ -10,7 +11,25 @@
         ACO: "aço",
     };
 
+    /** Chamado com o id da partida criada. */
+    let { aoCriar }: { aoCriar: (id: string) => void } = $props();
+
     const dificuldades = listarDificuldades();
+    let criando = $state(false);
+    let erroAoCriar = $state<string | null>(null);
+
+    async function escolher(codigo: CodigoDificuldade) {
+        criando = true;
+        erroAoCriar = null;
+        try {
+            aoCriar((await criarPartida(codigo)).id);
+        } catch (erro) {
+            erroAoCriar =
+                erro instanceof Error ? erro.message : "Não foi possível criar a partida.";
+        } finally {
+            criando = false;
+        }
+    }
 
     function nomesDosMateriais(codigos: string[]): string {
         return codigos.map((codigo) => NOMES_MATERIAIS[codigo] ?? codigo).join(", ");
@@ -25,19 +44,31 @@
     {:then lista}
         <ul class="opcoes">
             {#each lista as dificuldade (dificuldade.codigo)}
-                <li class="opcao">
-                    <h3>{dificuldade.nome}</h3>
-                    <dl>
-                        <dt>Queda</dt>
-                        <dd>uma linha a cada {formatarSegundos(dificuldade.intervaloQuedaMs)}</dd>
-                        <dt>Limite de desvio</dt>
-                        <dd>{formatarColunas(dificuldade.limiteDesvio)}</dd>
-                        <dt>Materiais</dt>
-                        <dd>{nomesDosMateriais(dificuldade.materiaisLiberados)}</dd>
-                    </dl>
+                <li>
+                    <button
+                        type="button"
+                        class="opcao"
+                        disabled={criando}
+                        onclick={() => escolher(dificuldade.codigo)}
+                    >
+                        <h3>{dificuldade.nome}</h3>
+                        <dl>
+                            <dt>Queda</dt>
+                            <dd>
+                                uma linha a cada {formatarSegundos(dificuldade.intervaloQuedaMs)}
+                            </dd>
+                            <dt>Limite de desvio</dt>
+                            <dd>{formatarColunas(dificuldade.limiteDesvio)}</dd>
+                            <dt>Materiais</dt>
+                            <dd>{nomesDosMateriais(dificuldade.materiaisLiberados)}</dd>
+                        </dl>
+                    </button>
                 </li>
             {/each}
         </ul>
+        {#if erroAoCriar}
+            <p class="aviso erro" role="alert">{erroAoCriar}</p>
+        {/if}
     {:catch erro}
         <p class="aviso erro" role="alert">{erro.message}</p>
     {/await}
@@ -56,10 +87,20 @@
         list-style: none;
     }
     .opcao {
+        width: 100%;
+        height: 100%;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
         padding: 1.5rem;
         background: var(--cor-cartao);
         border: 1px solid var(--cor-borda);
         border-radius: 16px;
+    }
+    .opcao:hover:not(:disabled),
+    .opcao:focus-visible {
+        border-color: var(--cor-ambar);
+        box-shadow: 0 0 0 3px rgb(227 163 34 / 30%);
     }
     .opcao h3 {
         margin: 0 0 1rem;

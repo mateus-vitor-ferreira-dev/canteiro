@@ -72,7 +72,7 @@ export type Posicao = [number, number];
 export type PecaDto = {
     forma: "I" | "O" | "T" | "S" | "Z" | "J" | "L";
     material: string;
-    /** Células ocupadas; vazia para as próximas peças. */
+    /** Células ocupadas: no tabuleiro, para a peça atual; no quadrado da forma, para as próximas. */
     blocos: Posicao[];
 };
 

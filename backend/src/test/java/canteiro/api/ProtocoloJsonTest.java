@@ -67,6 +67,7 @@ class ProtocoloJsonTest {
         assertEquals(22, estado.get("tabuleiro").size());
         assertEquals(10, estado.get("tabuleiro").get(0).size());
         assertEquals(3, estado.get("proximas").size());
+        assertEquals(4, estado.at("/proximas/0/blocos").size(), "as próximas vêm com a forma, para a tela desenhar");
         assertEquals(4, estado.get("pecaFantasma").size());
     }
 
