@@ -78,6 +78,7 @@ public final class ServidorWeb {
     private void configurar(JavalinConfig config) {
         config.startup.showJavalinBanner = false;
         config.jsonMapper(new JavalinJackson());
+        DocumentacaoApi.registrar(config);
         if (frontendEmbutido) {
             config.staticFiles.add(PASTA_FRONTEND, Location.CLASSPATH);
         }

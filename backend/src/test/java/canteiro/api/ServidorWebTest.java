@@ -68,6 +68,25 @@ class ServidorWebTest {
     }
 
     @Test
+    void publicaAEspecificacaoOpenApiComAsRotas() throws IOException, InterruptedException {
+        HttpResponse<String> resposta = get(DocumentacaoApi.CAMINHO_ESPECIFICACAO);
+
+        assertEquals(OK, resposta.statusCode());
+        JsonNode especificacao = json.readTree(resposta.body());
+        assertEquals("CANTEIRO — API", especificacao.at("/info/title").asText());
+        assertEquals("listarDificuldades",
+                especificacao.at("/paths/~1api~1dificuldades/get/operationId").asText());
+    }
+
+    @Test
+    void mostraATelaDoSwagger() throws IOException, InterruptedException {
+        HttpResponse<String> resposta = get(DocumentacaoApi.CAMINHO_SWAGGER);
+
+        assertEquals(OK, resposta.statusCode());
+        assertTrue(resposta.body().contains("swagger-ui"), "a página deveria carregar o Swagger UI");
+    }
+
+    @Test
     void recusaConexaoPeloEnderecoDeRedeDaMaquina() throws IOException {
         Optional<InetAddress> enderecoDeRede = enderecoDeRede();
         assumeTrue(enderecoDeRede.isPresent(), "a máquina não tem endereço de rede além do local");
