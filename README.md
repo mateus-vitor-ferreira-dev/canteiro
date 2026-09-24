@@ -187,7 +187,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 2 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 4 prontos e 3 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -227,7 +227,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | Código | Descrição | Prior. | Lado | Status | Onde está |
 |---|---|:-:|:-:|:-:|---|
 | RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
-| RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | 🟡 | `GET /api/dificuldades` pronto (#4); falta a tela e a criação da partida |
+| RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | 🟡 | `GET /api/dificuldades` (#4) e a tela de escolha (#8); falta criar a partida |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ⬜ |  |
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ⬜ |  |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ⬜ |  |
@@ -254,7 +254,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ | ⬜ |  |
 | RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | ⬜ |  |
 | RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ⬜ |  |
-| RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | 🟡 | Sobe o servidor e abre o navegador (#4); falta o frontend dentro do JAR |
+| RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | ✅ | Sobe o servidor e abre o navegador (#4), com o frontend dentro do JAR (#8) |
 | RF30 | Pausar a partida automaticamente quando a conexão com o navegador cair ou quando a aba do jogo perder o foco | E | ☕ 🌐 | ⬜ |  |
 | RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ⬜ |  |
 
@@ -281,8 +281,8 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
 | RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | 🟡 | Rotas REST respondem erro em JSON sem derrubar o servidor (#4); falta o WebSocket |
-| RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado (seção 3.5) e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ⬜ |  |
-| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | 🟡 | JAR único com as dependências do backend (#4); falta embutir o frontend |
+| RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | 🟡 | `protocolo.ts` espelha os DTOs, com `strict` e `no-explicit-any` no ESLint (#8); falta o WebSocket |
+| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8) |
 
 </details>
 
@@ -393,8 +393,8 @@ canteiro/
 └── README.md
 ```
 
-> [!IMPORTANT]
-> **A migração para a v2.0 está em andamento.** O `backend/` já roda com Javalin: o pacote `api/` tem o `ServidorWeb` e a primeira rota, `GET /api/dificuldades`. O `frontend/` ainda está vazio; o projeto Svelte entra no próximo PR. A árvore acima é o destino.
+> [!NOTE]
+> A árvore mostra o destino. Algumas pastas ainda estão vazias (só com `.gitkeep`) e vão sendo preenchidas conforme o [cronograma](#️-cronograma).
 
 ### Por que o backend está dividido assim
 
@@ -558,8 +558,8 @@ Javalin.create(config -> {
 
 ## 🚀 Rodando localmente
 
-> [!IMPORTANT]
-> Enquanto a [migração para a v2.0](#-estrutura-de-pastas) não termina, só o **backend** roda: `./mvnw compile exec:java` sobe o servidor e `http://127.0.0.1:7070/api/dificuldades` já responde, mas ainda não há telas. Os comandos de frontend e o JAR com o jogo completo valem a partir do próximo PR.
+> [!NOTE]
+> **O que já dá para ver:** a tela de escolha da dificuldade, com os dados vindos do backend. A partida em si chega com o modelo, a partir das semanas 3 – 4.
 
 ### 1. Pré-requisitos
 
@@ -567,7 +567,7 @@ Javalin.create(config -> {
 |---|---|---|---|
 | **JDK** | 17 ou superior | todos | `java -version` e `javac -version` |
 | **Git** | recente | todos | `git --version` |
-| **Node.js** | 20 ou superior | só quem mexe no **frontend** | `node -v` |
+| **Node.js** | 20.19+ ou 22.12+ (o Vite 8 exige) | só quem mexe no **frontend** | `node -v` |
 
 **Não precisa instalar o Maven.** O `backend/` traz o **Maven Wrapper** (`mvnw`): na primeira execução ele baixa a versão certa sozinho, e todos usam exatamente a mesma.
 
@@ -612,7 +612,9 @@ cd backend
 java -jar target/canteiro.jar     # ou dois cliques no arquivo
 ```
 
-O `package` compila o frontend com um Node próprio, baixado dentro do projeto só para isso, e coloca o resultado dentro do JAR. **Quem for só jogar não precisa de Node.**
+O `package` compila o frontend com um Node próprio, baixado em `backend/target/node` só para isso, e coloca o resultado dentro do JAR. **Quem for só jogar não precisa de Node.** A primeira vez demora mais, por causa do download.
+
+Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=true`.
 
 ### 5. Comandos
 
@@ -623,7 +625,7 @@ O `package` compila o frontend com um Node próprio, baixado dentro do projeto s
 | `./mvnw compile exec:java` | Sobe o backend para desenvolvimento |
 | `./mvnw test` | Roda os testes do backend. **Não mexe no frontend**, por isso é rápido |
 | `./mvnw verify` | Compila, testa e empacota. **Rode antes de abrir um PR** |
-| `./mvnw package` | Gera `target/canteiro.jar`, com o frontend dentro |
+| `./mvnw package` | Gera `target/canteiro.jar`, com o frontend dentro. Com `-Dfrontend.pular=true`, gera sem o frontend |
 | `./mvnw javadoc:javadoc` | Gera a documentação em `target/reports/apidocs/`. **Falha se algo público estiver sem Javadoc** (RNF07) |
 | `./mvnw clean` | Apaga a pasta `target/` |
 
@@ -633,9 +635,11 @@ O `package` compila o frontend com um Node próprio, baixado dentro do projeto s
 |---|---|
 | `npm install` | Instala as dependências (cria `node_modules/`) |
 | `npm run dev` | Sobe o Vite em `http://localhost:5173`, com recarga instantânea |
-| `npm test` | Roda os testes com Vitest |
-| `npm run lint` | Confere o código com ESLint |
-| `npm run build` | Checa os tipos e gera o build de produção em `dist/` |
+| `npm test` | Roda os testes com Vitest (`npm run test:watch` fica rodando a cada mudança) |
+| `npm run check` | Confere os tipos do TypeScript e dos componentes Svelte |
+| `npm run lint` | Confere o código com ESLint e a formatação com Prettier |
+| `npm run format` | Formata tudo com Prettier |
+| `npm run build` | Confere os tipos e gera o build de produção em `dist/` |
 
 ### 6. Problemas comuns
 
@@ -671,6 +675,9 @@ cd frontend && npm test        # Vitest
 | `ArquiteturaTest` | Separação de camadas: nada de Javalin, JSON ou classe gráfica fora de `app` e `api` (RNF08) |
 | `ServidorWebTest` | `GET /api/dificuldades` devolve as três dificuldades em JSON (RF02) · o servidor recusa conexão pelo IP de rede da máquina (RNF13) |
 | `DificuldadeTest` | Cada dificuldade cai mais rápido, tolera menos desvio e libera ao menos os materiais da anterior (RF02) |
+| `cliente.test.ts` 🌐 | O cliente REST devolve as dificuldades · transforma a resposta de erro da API em `ErroApi` · avisa quando o backend não está rodando |
+| `NovaPartida.test.ts` 🌐 | A tela mostra queda, limite e materiais de cada dificuldade · mostra a mensagem de erro quando o backend não responde |
+| `formatacao.test.ts` 🌐 | Colunas e segundos com vírgula decimal e plural certo · cor RGB do backend vira cor CSS |
 
 **Previstos:**
 
