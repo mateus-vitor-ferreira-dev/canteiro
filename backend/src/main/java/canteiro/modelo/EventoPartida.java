@@ -41,6 +41,8 @@ public record EventoPartida(Tipo tipo, List<Integer> linhas) {
         PECA_FIXADA,
         /** Uma ou mais linhas foram eliminadas. */
         LINHAS_ELIMINADAS,
+        /** O jogador subiu de nível. */
+        NIVEL_SUBIU,
         /** A partida acabou. */
         FIM_DE_JOGO
     }
