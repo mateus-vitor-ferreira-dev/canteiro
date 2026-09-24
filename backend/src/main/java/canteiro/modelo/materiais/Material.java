@@ -1,5 +1,9 @@
 package canteiro.modelo.materiais;
 
+import canteiro.modelo.Celula;
+import canteiro.modelo.Tabuleiro;
+
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,6 +65,19 @@ public abstract class Material {
      * @return bônus por linha, em pontos
      */
     public abstract int bonusLinha();
+
+    /**
+     * Reação do material no instante em que a peça é assentada. Por padrão,
+     * nada acontece; o material que tiver um efeito sobrescreve este método,
+     * como o aço, que consolida os blocos logo abaixo. O tabuleiro chama isto
+     * sem saber qual é o material.
+     *
+     * @param tabuleiro tabuleiro em que a peça foi fixada
+     * @param ocupadas  células em que a peça acabou de ser fixada
+     */
+    public void aoFixar(Tabuleiro tabuleiro, List<Celula> ocupadas) {
+        // a maioria dos materiais não tem efeito ao ser assentada
+    }
 
     /**
      * Massa de um bloco deste material: a densidade vezes o volume do bloco (RN07).
