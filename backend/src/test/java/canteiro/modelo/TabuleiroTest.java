@@ -153,6 +153,40 @@ class TabuleiroTest {
     }
 
     @Test
+    void semLinhaCompletaNadaEEliminado() {
+        tabuleiro.fixar(new PecaI(madeira), FUNDO - 1, 0);
+        assertFalse(tabuleiro.linhaCompleta(FUNDO));
+        assertEquals(List.of(), tabuleiro.eliminarLinhasCompletas());
+        assertTrue(tabuleiro.ocupada(FUNDO, 0));
+    }
+
+    @Test
+    void eliminaLinhasNaoVizinhasEDesceOQueSobra() {
+        completarLinhaComSobraNaDireita(FUNDO);
+        completarLinhaComSobraNaDireita(FUNDO - 2);
+        assertTrue(tabuleiro.linhaCompleta(FUNDO));
+        assertTrue(tabuleiro.linhaCompleta(FUNDO - 2));
+        assertFalse(tabuleiro.linhaCompleta(FUNDO - 1));
+
+        assertEquals(List.of(FUNDO - 2, FUNDO), tabuleiro.eliminarLinhasCompletas());
+
+        assertTrue(tabuleiro.ocupada(FUNDO, 8), "a sobra entre as duas linhas desceu uma");
+        assertTrue(tabuleiro.ocupada(FUNDO - 1, 9), "a sobra de cima desceu duas");
+        assertFalse(tabuleiro.ocupada(FUNDO, 0));
+        assertFalse(tabuleiro.ocupada(FUNDO - 2, 8));
+    }
+
+    /**
+     * Completa a linha com duas I deitadas (colunas 0 a 7) e uma O nas colunas
+     * 8 e 9. A O ocupa também a linha de cima, que fica com sobra só na direita.
+     */
+    private void completarLinhaComSobraNaDireita(int linha) {
+        tabuleiro.fixar(new PecaI(madeira), linha - 1, 0);
+        tabuleiro.fixar(new PecaI(madeira), linha - 1, 4);
+        tabuleiro.fixar(new PecaO(madeira), linha - 1, 8);
+    }
+
+    @Test
     void posicaoForaDaGradeEErro() {
         assertThrows(IndexOutOfBoundsException.class, () -> tabuleiro.bloco(-1, 0));
         assertThrows(IndexOutOfBoundsException.class, () -> tabuleiro.bloco(0, Dimensoes.COLUNAS));

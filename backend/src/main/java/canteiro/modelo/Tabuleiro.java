@@ -80,6 +80,44 @@ public final class Tabuleiro {
     }
 
     /**
+     * Informa se uma linha tem as 10 posições ocupadas (RN06).
+     *
+     * @param linha linha a conferir
+     * @return {@code true} se não houver nenhuma posição vazia
+     */
+    public boolean linhaCompleta(int linha) {
+        for (Bloco bloco : grade[linha]) {
+            if (bloco == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Elimina as linhas completas e desce as de cima, que continuam nas mesmas
+     * colunas (RN06).
+     *
+     * @return os índices das linhas eliminadas, de cima para baixo, na
+     *         numeração de antes da eliminação; vazia se nenhuma estava completa
+     */
+    public List<Integer> eliminarLinhasCompletas() {
+        List<Integer> eliminadas = new ArrayList<>();
+        int destino = Dimensoes.LINHAS - 1;
+        for (int origem = Dimensoes.LINHAS - 1; origem >= 0; origem--) {
+            if (linhaCompleta(origem)) {
+                eliminadas.add(0, origem);
+            } else {
+                grade[destino--] = grade[origem];
+            }
+        }
+        while (destino >= 0) {
+            grade[destino--] = new Bloco[Dimensoes.COLUNAS];
+        }
+        return eliminadas;
+    }
+
+    /**
      * Devolve o bloco de uma posição.
      *
      * @param linha  linha, a partir de zero no topo das linhas ocultas
