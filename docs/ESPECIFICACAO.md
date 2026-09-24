@@ -7,7 +7,8 @@ Universidade Federal de Lavras · Programação Aplicada à Engenharia · Projet
 | Versão | Data | Descrição |
 |---|---|---|
 | 1.0 | 2026-09 | Especificação original, com interface em Swing ([PDF](CANTEIRO_Documentacao-1.pdf)) |
-| **2.0** | **2026-09-23** | **Arquitetura cliente-servidor local: backend em Java com Javalin e frontend em React com TypeScript. Este documento substitui a versão 1.0** |
+| 2.0 | 2026-09-23 | Arquitetura cliente-servidor local: backend em Java com Javalin e frontend em React com TypeScript. Este documento substitui a versão 1.0 |
+| **2.1** | **2026-09-24** | **Frontend passa de React para Svelte 5 com TypeScript. Backend, protocolo e requisitos não mudam** |
 
 | Integrante | GitHub |
 |---|---|
@@ -33,7 +34,7 @@ Universidade Federal de Lavras · Programação Aplicada à Engenharia · Projet
 A versão 1.0 previa um aplicativo desktop com interface em Swing. Na versão 2.0, o jogo passa a ter **duas partes**:
 
 - um **backend em Java**, que continua dono de **todas as regras do jogo**: física, colisão, estruturas de dados e persistência;
-- um **frontend em React com TypeScript**, que roda no navegador e só **desenha o estado** e **envia os comandos** do jogador.
+- um **frontend em Svelte 5 com TypeScript**, que roda no navegador e só **desenha o estado** e **envia os comandos** do jogador.
 
 As duas partes conversam **na própria máquina do jogador**. O jogo continua local, monousuário e sem internet, e continua sendo entregue como **um único arquivo JAR**. Ao ser aberto, ele sobe o servidor e abre o navegador sozinho.
 
@@ -42,7 +43,9 @@ As duas partes conversam **na própria máquina do jogador**. O jogo continua lo
 - **Interface mais rica com menos esforço.** Animações, sobreposições translúcidas, gráficos do relatório e texturas para daltonismo são bem mais simples de fazer com HTML, CSS e Canvas do que desenhando componente por componente no Swing.
 - **Separação de camadas mais forte.** Na versão 1.0, a proibição de o modelo depender da interface era uma regra de disciplina. Agora a interface está em **outra linguagem e outro processo**: o modelo simplesmente não tem como chamar a tela.
 - **O conteúdo da disciplina fica onde estava.** Herança, polimorfismo, pilha, fila, lista, tabela hash, recursividade e exceções continuam todos no código Java. O frontend não tem regra de jogo.
-- **Formação da equipe.** Contato com uma arquitetura cliente-servidor, um protocolo de mensagens e a pilha de frontend mais usada no mercado.
+- **Formação da equipe.** Contato com uma arquitetura cliente-servidor, um protocolo de mensagens e um framework de frontend moderno.
+
+**Por que Svelte e não React.** O frontend do CANTEIRO é fino: recebe o estado, desenha num Canvas e troca de tela. O Svelte 5 faz isso com menos código de apoio. Um estado reativo é só `$state`, sem `useState`, `useEffect`, `useRef` nem lista de dependências para manter em dia, e o laço de `requestAnimationFrame` do tabuleiro lê uma variável comum, sem cuidados para não disparar renderizações. Como o Svelte é compilado, o pacote final também fica menor, o que ajuda no JAR único (RNF16) e em máquina fraca (RNF01). A versão 2.0 desta especificação previa React; a troca foi feita na 2.1, antes de existir código no frontend.
 
 ### 0.2. Tabela de desvios
 
@@ -50,10 +53,10 @@ Esta tabela alimenta o entregável *Relatório de plataforma e desvios* (seção
 
 | Item | Versão 1.0 | Versão 2.0 | Justificativa |
 |---|---|---|---|
-| Interface | Swing, dentro do JDK | React 19 + TypeScript, no navegador | Interface mais rica e separação de camadas garantida por construção |
+| Interface | Swing, dentro do JDK | Svelte 5 + TypeScript, no navegador | Interface mais rica e separação de camadas garantida por construção |
 | Laço de atualização | `javax.swing.Timer` de ~16 ms | `ScheduledExecutorService` de ~16 ms no backend; `requestAnimationFrame` no frontend | O laço de regras deixa de depender da interface |
 | Comunicação modelo → visão | Observadores dentro do mesmo processo | Observadores no backend, que publicam o estado por **WebSocket** | A visão agora está em outro processo |
-| Dependências | Só a biblioteca padrão do Java, exceto os testes (premissa 2.11) | Backend: Javalin, Jackson e SLF4J. Frontend: React, React Router e Recharts | Não existe servidor WebSocket no JDK. O Javalin foi escolhido em vez do Spring Boot por ser pequeno e explícito (seção 3.1) |
+| Dependências | Só a biblioteca padrão do Java, exceto os testes (premissa 2.11) | Backend: Javalin, Jackson e SLF4J. Frontend: Svelte e Chart.js | Não existe servidor WebSocket no JDK. O Javalin foi escolhido em vez do Spring Boot por ser pequeno e explícito (seção 3.1) |
 | Pacote `canteiro.visao` | Telas em Swing | **Removido.** Substituído por `canteiro.api` (rotas e WebSocket) e pela pasta `frontend/` | A visão passou para o frontend |
 | Execução | Duplo clique no JAR abre a janela | Duplo clique no JAR sobe o servidor em `127.0.0.1` e abre o navegador | Mantém o entregável "executável único" |
 | Plataforma | Java 17 em Windows, Linux e macOS | Java 17 e um navegador atual. Node.js 20+ **só para quem desenvolve o frontend** | O jogador final continua precisando só do Java |
@@ -94,7 +97,7 @@ O CANTEIRO fica no espaço entre as três: a precisão da grade discreta, a cons
 
 #### 1.3.1. Objetivo geral
 
-Desenvolver um jogo de encaixe de blocos, o **CANTEIRO**, com as regras escritas em **Java** e a interface em **React com TypeScript**, em que a validade da estrutura construída depende do equilíbrio da sua distribuição de massa, aplicando de forma justificada os conceitos de programação orientada a objetos e de estruturas de dados estudados na disciplina.
+Desenvolver um jogo de encaixe de blocos, o **CANTEIRO**, com as regras escritas em **Java** e a interface em **Svelte 5 com TypeScript**, em que a validade da estrutura construída depende do equilíbrio da sua distribuição de massa, aplicando de forma justificada os conceitos de programação orientada a objetos e de estruturas de dados estudados na disciplina.
 
 #### 1.3.2. Objetivos específicos
 
@@ -103,7 +106,7 @@ Desenvolver um jogo de encaixe de blocos, o **CANTEIRO**, com as regras escritas
 - Implementar o **cálculo incremental do centro de massa** e a regra de colapso associada.
 - Usar **fila** para as próximas peças e os comandos de entrada, **pilha** para a reserva e o histórico, **lista** para a composição das peças e **tabela hash** para o catálogo de materiais, o ranking e as sessões de partida.
 - Expor o jogo por uma **API REST** e um **canal WebSocket**, com um protocolo de mensagens documentado e tipado dos dois lados.
-- Construir a interface em **React com TypeScript**, com desenho do tabuleiro em Canvas a 60 quadros por segundo e indicação visual contínua do índice de estabilidade.
+- Construir a interface em **Svelte 5 com TypeScript**, com desenho do tabuleiro em Canvas a 60 quadros por segundo e indicação visual contínua do índice de estabilidade.
 - Persistir ranking, configurações e repetições em arquivo, permitindo reexecutar uma partida encerrada.
 - Documentar todas as classes públicas com Javadoc e cobrir as regras críticas com testes automatizados nos dois lados.
 - Entregar tudo como **um único JAR executável**.
@@ -132,7 +135,7 @@ Ao mesmo tempo, o sistema faz a análise estrutural da pilha. A cada elemento fi
 
 ```mermaid
 flowchart LR
-    J["🧑 Jogador"] -- "teclado" --> F["<b>Frontend</b><br/>React + TypeScript<br/>no navegador"]
+    J["🧑 Jogador"] -- "teclado" --> F["<b>Frontend</b><br/>Svelte + TypeScript<br/>no navegador"]
     F -- "comandos<br/>(WebSocket)" --> B["<b>Backend</b><br/>Java + Javalin<br/>127.0.0.1"]
     B -- "estado da partida<br/>(WebSocket)" --> F
     F -- "ranking, materiais,<br/>repetições (REST)" --> B
@@ -220,7 +223,7 @@ Inalteradas em relação à versão 1.0.
 | RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por **padrão de textura**, atendendo jogadores com daltonismo |
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc |
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, **sem dependência de Javalin, de JSON nem de classes gráficas**, permitindo testá-las sem servidor e sem navegador |
-| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente React com mais de 200 linhas |
+| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas |
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados |
 | RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão |
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação |
@@ -513,9 +516,9 @@ As proibições são verificadas por um teste de arquitetura, que reprova o buil
 | Pasta | Responsabilidade |
 |---|---|
 | `src/api/` | Cliente REST, conexão WebSocket com reconexão e os **tipos do protocolo** (espelho dos DTOs do backend) |
-| `src/telas/` | Uma pasta por tela: menu, dificuldade, partida, fim de partida, ranking, repetições, relatório, configurações |
+| `src/telas/` | Um componente por tela: menu, dificuldade, partida, fim de partida, ranking, repetições, relatório, configurações |
 | `src/componentes/` | Peças reutilizáveis: `Tabuleiro` (Canvas), `PainelEstabilidade`, `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas` |
-| `src/hooks/` | Lógica de tela reutilizável: `usePartida` (estado recebido do WebSocket), `useTeclado` (teclas → comandos) |
+| `src/estado/` | Estado reativo compartilhado, em módulos `.svelte.ts`: `partida` (estado recebido do WebSocket), `teclado` (teclas → comandos) e `navegacao` (tela atual) |
 | `src/estilos/` | Tokens de cor e tipografia, e as texturas dos materiais para daltonismo |
 | `src/util/` | Funções puras, como conversão de cor RGB e formatação de números |
 
@@ -539,7 +542,7 @@ Não há banco de dados. A persistência é feita em arquivos de texto na pasta 
 - A simulação de massa é **bidimensional**, com blocos de volume unitário. Não há simulação de momento fletor, esforço cortante ou deformação.
 - O colapso reacomoda os blocos por gravidade vertical simples, sem tombamento lateral nem rotação de blocos.
 - O backend usa só a biblioteca padrão do Java, **mais** Javalin (servidor HTTP e WebSocket), Jackson (JSON) e SLF4J (log). Os testes usam JUnit 5.
-- O frontend usa React, React Router e Recharts. Os testes usam Vitest e Testing Library.
+- O frontend usa Svelte e Chart.js. Os testes usam Vitest e Testing Library.
 - **O servidor nunca fica exposto na rede**: escuta apenas em `127.0.0.1` (RNF13).
 - Uma partida por vez. Abrir o jogo em duas abas cria duas partidas independentes.
 
@@ -569,8 +572,8 @@ Não há banco de dados. A persistência é feita em arquivos de texto na pasta 
 | **Backend** | Java 17 (LTS), com `record`s, `switch` como expressão e classes seladas onde fizer sentido |
 | **Servidor** | **Javalin 7**: rotas e WebSocket declarados em poucas linhas, dentro de um `main` comum, sem anotações nem injeção automática de dependências |
 | **JSON e log** | Jackson (usado pelo Javalin) e SLF4J com saída simples no terminal |
-| **Frontend** | **React 19 + TypeScript** em modo `strict`, com **Vite** como servidor de desenvolvimento e empacotador |
-| **Navegação e gráficos** | React Router para as telas; Recharts para o gráfico de estabilidade do relatório |
+| **Frontend** | **Svelte 5 + TypeScript** em modo `strict`, com **Vite** como servidor de desenvolvimento e empacotador. Sem SvelteKit: o backend já serve a página, e o jogo não precisa de renderização no servidor |
+| **Navegação e gráficos** | Sem biblioteca de rotas: a tela atual é um estado em `navegacao.svelte.ts`, e na partida ela sai do estado enviado pelo backend (seção 2.8). Chart.js para o gráfico de estabilidade do relatório |
 | **Desenho do tabuleiro** | `<canvas>` 2D, redesenhado a cada `requestAnimationFrame` |
 | **Build** | **Maven** (via Maven Wrapper) para o backend. O `frontend-maven-plugin` compila o frontend durante o empacotamento e o coloca dentro do JAR |
 | **Testes** | JUnit 5 no backend; Vitest e Testing Library no frontend |
@@ -584,10 +587,10 @@ Não há banco de dados. A persistência é feita em arquivos de texto na pasta 
 ```mermaid
 flowchart TB
     subgraph NAV["Navegador"]
-        TELAS["Telas React"] --> HOOKS["usePartida · useTeclado"]
-        HOOKS --> WS_C["Conexão WebSocket"]
+        TELAS["Telas Svelte"] --> ESTADO["estado: partida · teclado"]
+        ESTADO --> WS_C["Conexão WebSocket"]
         TELAS --> REST_C["Cliente REST"]
-        HOOKS --> CANVAS["Tabuleiro (Canvas)"]
+        ESTADO --> CANVAS["Tabuleiro (Canvas)"]
     end
 
     subgraph JVM["Backend · Java 17 · 127.0.0.1:7070"]
@@ -627,7 +630,7 @@ A comunicação do modelo para fora continua sendo por **observador**. A `Sessao
 
 **Gerais**
 
-- Todo o código, incluindo identificadores e comentários, é escrito **em português**, com exceção dos termos da própria linguagem e das bibliotecas (`useState`, `onClick`, `ctx`).
+- Todo o código, incluindo identificadores e comentários, é escrito **em português**, com exceção dos termos da própria linguagem e das bibliotecas (`$state`, `onclick`, `ctx`).
 - Nenhum número mágico: dimensões, limites e intervalos em constantes nomeadas ou em arquivo de configuração.
 
 **Backend (Java)**
@@ -640,11 +643,11 @@ A comunicação do modelo para fora continua sendo por **observador**. A `Sessao
 
 **Frontend (TypeScript)**
 
-- Componentes em `PascalCase`, um por arquivo (`Tabuleiro.tsx`). Hooks começam com `use` (`usePartida.ts`). Tipos em `PascalCase`.
-- Só componentes funcionais e hooks. Nada de `any`: o TypeScript roda em modo `strict`.
+- Componentes em `PascalCase`, um por arquivo (`Tabuleiro.svelte`). Módulos de estado em `camelCase` com extensão `.svelte.ts` (`partida.svelte.ts`). Tipos em `PascalCase`.
+- Sintaxe do Svelte 5: runas (`$state`, `$derived`, `$props`, `$effect`) e `<script lang="ts">`. Nada de `any`: o TypeScript roda em modo `strict`.
 - Componentes com no máximo 200 linhas (RNF09). Passou disso, divida.
 - **Componentes não calculam regra de jogo.** Recebem o estado pronto e desenham.
-- Tipos exportados e hooks têm comentário TSDoc (`/** ... */`).
+- Tipos exportados, funções dos módulos de estado e propriedades dos componentes têm comentário TSDoc (`/** ... */`).
 
 ```java
 /**
@@ -660,19 +663,26 @@ A comunicação do modelo para fora continua sendo por **observador**. A `Sessao
 public double centroDeMassa() { ... }
 ```
 
-```tsx
-/** Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). */
-export function PainelEstabilidade({ estabilidade }: { estabilidade: EstabilidadeDto }) {
-  const emAlerta = estabilidade.indice < LIMIAR_ALERTA;
-  return (
-    <section className={emAlerta ? "painel painel--alerta" : "painel"}>
-      <h2>Estabilidade</h2>
-      <BarraProgresso valor={estabilidade.indice} />
-      <p>Desvio: {formatarColunas(estabilidade.desvio)}</p>
-      <p>Limite: {formatarColunas(estabilidade.limite)}</p>
-    </section>
-  );
-}
+```svelte
+<!-- Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). -->
+<script lang="ts">
+  import type { EstabilidadeDto } from "../api/protocolo";
+  import BarraProgresso from "./BarraProgresso.svelte";
+  import { LIMIAR_ALERTA } from "../util/constantes";
+  import { formatarColunas } from "../util/formatacao";
+
+  /** Estabilidade da estrutura, como veio na última mensagem do backend. */
+  let { estabilidade }: { estabilidade: EstabilidadeDto } = $props();
+
+  const emAlerta = $derived(estabilidade.indice < LIMIAR_ALERTA);
+</script>
+
+<section class="painel" class:painel--alerta={emAlerta}>
+  <h2>Estabilidade</h2>
+  <BarraProgresso valor={estabilidade.indice} />
+  <p>Desvio: {formatarColunas(estabilidade.desvio)}</p>
+  <p>Limite: {formatarColunas(estabilidade.limite)}</p>
+</section>
 ```
 
 ### 3.4. Uso de herança e polimorfismo
@@ -818,7 +828,7 @@ Cada ciclo executa:
 6. Se o desvio passar do limite, executar o colapso e aplicar a penalidade.
 7. Se algo mudou, avisar os observadores. A sessão converte o estado em DTO e o envia pelo WebSocket.
 
-**No frontend**, o desenho é separado da chegada das mensagens. O `usePartida` guarda o último estado recebido, e o `Tabuleiro` redesenha o Canvas a cada `requestAnimationFrame` com o que tiver. Em máquina lenta, o que cai é a taxa de quadros da tela; **a simulação no backend continua no mesmo ritmo**, porque um jogo que muda de comportamento conforme o equipamento está quebrado.
+**No frontend**, o desenho é separado da chegada das mensagens. O módulo `partida.svelte.ts` guarda o último estado recebido, e o `Tabuleiro` redesenha o Canvas a cada `requestAnimationFrame` com o que tiver. Em máquina lenta, o que cai é a taxa de quadros da tela; **a simulação no backend continua no mesmo ritmo**, porque um jogo que muda de comportamento conforme o equipamento está quebrado.
 
 #### 3.6.2. Detecção de colisão
 
@@ -1017,7 +1027,7 @@ O terceiro registro é o mais importante. Um colapso que o jogador não consegue
 
 | Entregável | Descrição |
 |---|---|
-| Código-fonte | O repositório completo: `backend/` com o projeto Maven e os testes, `frontend/` com o projeto React e os testes, e os arquivos de dados de exemplo |
+| Código-fonte | O repositório completo: `backend/` com o projeto Maven e os testes, `frontend/` com o projeto Svelte e os testes, e os arquivos de dados de exemplo |
 | Executável | Um único JAR com o frontend embutido, que abre com dois cliques |
 | Documentação Javadoc | Páginas geradas a partir dos comentários do código do backend |
 | Relatório de plataforma e desvios | Ambiente usado, as mudanças em relação à versão 1.0 (seção 0.2) e as feitas durante o desenvolvimento, com a justificativa de cada uma |
@@ -1028,7 +1038,7 @@ O terceiro registro é o mais importante. Um colapso que o jogador não consegue
 | Semanas | Atividade | Lado | Produto |
 |---|---|---|---|
 | 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | Especificação 1.0 ✅ |
-| 3 | Revisão da arquitetura; Javalin no backend; projeto React; build único; protocolo | B+F | Especificação 2.0 e esqueleto ponta a ponta |
+| 3 | Revisão da arquitetura; Javalin no backend; projeto Svelte; build único; protocolo | B+F | Especificação 2.1 e esqueleto ponta a ponta |
 | 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | B | Núcleo testado, sem interface |
 | 5 – 6 | Motor, rotação com deslocamento, linhas, pontuação; laço e WebSocket; tela de partida mínima | B+F | Jogável no navegador, ainda sem estabilidade |
 | 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | B+F | **Mecânica diferencial completa** |
@@ -1041,7 +1051,7 @@ O terceiro registro é o mais importante. Um colapso que o jogador não consegue
 | Risco | Probabilidade / impacto | Ação prevista |
 |---|---|---|
 | A mecânica de colapso deixar o jogo frustrante ou injusto | Média / Alto | Testar com pessoas de fora do grupo já na semana 8 e ajustar o limite de desvio antes de seguir |
-| **Parte da equipe sem experiência com React e TypeScript** | **Alta / Alto** | Frontend "burro", que só desenha o estado; componentes pequenos; exemplos no README; programação em par nas primeiras telas |
+| **Parte da equipe sem experiência com Svelte e TypeScript** | **Alta / Alto** | Frontend "burro", que só desenha o estado; componentes pequenos; exemplos no README; programação em par nas primeiras telas |
 | **Backend e frontend saírem de sincronia no protocolo** | **Média / Alto** | Protocolo documentado na seção 3.5, tipado dos dois lados, alterado sempre no mesmo PR e conferido por teste de serialização |
 | **Latência do WebSocket deixar os controles "moles"** | **Baixa / Médio** | Comunicação só local; mensagens pequenas; medir a latência desde o primeiro protótipo (semana 5) |
 | **Build único ficar lento ou quebrar na máquina de alguém** | **Média / Médio** | O `frontend-maven-plugin` baixa um Node próprio; testes do backend não dependem do frontend; problemas comuns documentados no README |
@@ -1071,12 +1081,12 @@ A arquitetura cliente-servidor é usada **apenas localmente**. O servidor não f
 
 ## 5. Conclusão
 
-Este documento apresentou a especificação do CANTEIRO na sua versão 2.0: um jogo de encaixe de blocos em que a estrutura construída pelo jogador precisa ficar equilibrada sobre a base, agora organizado em um backend Java, que é dono de todas as regras, e um frontend React com TypeScript, que só desenha e envia comandos.
+Este documento apresentou a especificação do CANTEIRO na sua versão 2.1: um jogo de encaixe de blocos em que a estrutura construída pelo jogador precisa ficar equilibrada sobre a base, agora organizado em um backend Java, que é dono de todas as regras, e um frontend Svelte com TypeScript, que só desenha e envia comandos.
 
 O levantamento resultou em **31 requisitos funcionais** e **16 não funcionais**, ancorados em **15 regras de negócio**. A matriz de rastreabilidade da seção 2.12 mostra que cada conceito da disciplina tem no sistema um uso legítimo. A fila existe porque há uma sequência de peças a consumir em ordem e comandos a processar na ordem em que chegaram. A pilha existe porque a reserva e o desfazer operam sobre o último elemento inserido. A tabela hash existe porque materiais e sessões são buscados por código milhares de vezes. Nenhuma estrutura foi colocada só para satisfazer o enunciado.
 
 A mudança de arquitetura foi feita **sem mover o conteúdo da disciplina de lugar**. Herança, polimorfismo e estruturas de dados continuam no Java, e a proibição de o modelo depender da interface, antes uma regra de disciplina, passou a ser garantida pela própria separação em dois processos, além de verificada por teste.
 
-O risco central continua sendo o da proposta original: uma mecânica original é, por definição, uma mecânica não testada, e a sua aceitação pelo jogador não pode ser presumida. A ele se soma a curva de aprendizado de React e TypeScript para parte da equipe, tratada com um frontend deliberadamente simples, que só desenha o que o backend manda.
+O risco central continua sendo o da proposta original: uma mecânica original é, por definição, uma mecânica não testada, e a sua aceitação pelo jogador não pode ser presumida. A ele se soma a curva de aprendizado de Svelte e TypeScript para parte da equipe, tratada com um frontend deliberadamente simples, que só desenha o que o backend manda.
 
 Espera-se entregar um sistema que seja, ao mesmo tempo, um jogo divertido e uma demonstração honesta dos conceitos estudados, em que a escolha de cada estrutura de dados e de cada relação de herança possa ser justificada por uma necessidade real do problema, e não pela exigência de um enunciado.

@@ -9,14 +9,14 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 <p>
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
-  <a href="docs/ESPECIFICACAO.md"><img src="https://img.shields.io/badge/especificação-v2.0-1F3864?style=for-the-badge" alt="Especificação v2.0"/></a>
+  <a href="docs/ESPECIFICACAO.md"><img src="https://img.shields.io/badge/especificação-v2.1-1F3864?style=for-the-badge" alt="Especificação v2.1"/></a>
 </p>
 
 <p>
   <img src="https://img.shields.io/badge/Java-17_LTS-ED8B00?style=flat-square&logo=openjdk&logoColor=white" alt="Java 17"/>
   <img src="https://img.shields.io/badge/Javalin-7-0A0A0A?style=flat-square" alt="Javalin 7"/>
   <img src="https://img.shields.io/badge/Maven-build-C71A36?style=flat-square&logo=apachemaven&logoColor=white" alt="Maven"/>
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 19"/>
+  <img src="https://img.shields.io/badge/Svelte-5-FF3E00?style=flat-square&logo=svelte&logoColor=white" alt="Svelte 5"/>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Vite-build-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite"/>
   <img src="https://img.shields.io/badge/JUnit_5_·_Vitest-testes-25A162?style=flat-square&logo=junit5&logoColor=white" alt="JUnit 5 e Vitest"/>
@@ -52,7 +52,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **A fonte da verdade é a [especificação v2.0](docs/ESPECIFICACAO.md).** Ela traz todos os requisitos, os diagramas, o protocolo completo entre backend e frontend e o que mudou em relação à [versão 1.0](docs/CANTEIRO_Documentacao-1.pdf). Este README é o resumo prático.
+> **A fonte da verdade é a [especificação v2.1](docs/ESPECIFICACAO.md).** Ela traz todos os requisitos, os diagramas, o protocolo completo entre backend e frontend e o que mudou em relação à [versão 1.0](docs/CANTEIRO_Documentacao-1.pdf). Este README é o resumo prático.
 
 ---
 
@@ -73,7 +73,7 @@ Quando o desvio ultrapassa o limite do nível, as camadas acima da linha crític
 **Como ele é construído.** O jogo tem duas partes que rodam **na máquina do próprio jogador**:
 
 - o **backend em Java**, dono de todas as regras: física, colisão, estruturas de dados, pontuação e arquivos;
-- o **frontend em React com TypeScript**, que roda no navegador, desenha o que o backend manda e envia as teclas.
+- o **frontend em Svelte 5 com TypeScript**, que roda no navegador, desenha o que o backend manda e envia as teclas.
 
 Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e abrem o jogo no navegador. Não precisa de internet, e o jogador só precisa ter o Java instalado.
 
@@ -144,11 +144,11 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 
 **O modelo não sabe que existe um servidor.** Os pacotes `modelo`, `fisica`, `estruturas`, `controle`, `persistencia` e `util` **não podem importar Javalin, JSON nem nada gráfico**. Isso é garantido por um teste que reprova o build. É o que permite criar um `MotorJogo`, rodar milhares de jogadas e conferir o resultado num teste JUnit, sem subir servidor nem abrir navegador (RNF08).
 
-**O frontend não tem regra de jogo.** Ele não calcula colisão, pontuação nem estabilidade: recebe tudo pronto e desenha. Isso mantém o conteúdo da disciplina no Java e deixa o React simples para quem está começando. **A pontuação do ranking nunca vem do navegador**: o frontend manda só o id da partida e o nome, e o backend lê a pontuação da própria sessão.
+**O frontend não tem regra de jogo.** Ele não calcula colisão, pontuação nem estabilidade: recebe tudo pronto e desenha. Isso mantém o conteúdo da disciplina no Java e deixa o Svelte simples para quem está começando. **A pontuação do ranking nunca vem do navegador**: o frontend manda só o id da partida e o nome, e o backend lê a pontuação da própria sessão.
 
 **Duas hierarquias em vez de uma: 11 classes em vez de 28.** Forma e material são dimensões independentes. Juntar as duas numa hierarquia só exigiria uma classe para cada combinação (7 × 4). Separadas e ligadas por composição, ficam 7 subclasses de `Peca` e 4 de `Material`. **Criar um quinto material é escrever uma classe e registrá-la no catálogo**, sem tocar no motor.
 
-**Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o React com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
+**Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o Svelte com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
 
 **Local de verdade.** O servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
 
@@ -179,9 +179,9 @@ Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma exist
 
 ```mermaid
 flowchart TB
-    subgraph NAV["🌐 Navegador · React + TypeScript"]
-        TELAS["Telas"] --> HOOKS["usePartida · useTeclado"]
-        HOOKS --> CANVAS["Tabuleiro (Canvas)"]
+    subgraph NAV["🌐 Navegador · Svelte + TypeScript"]
+        TELAS["Telas"] --> ESTADO["estado: partida · teclado"]
+        ESTADO --> CANVAS["Tabuleiro (Canvas)"]
     end
 
     subgraph JVM["☕ Backend · Java 17 · 127.0.0.1:7070"]
@@ -194,8 +194,8 @@ flowchart TB
         MOD -. "observador" .-> CTRL
     end
 
-    HOOKS -- "comandos (WebSocket)" --> API
-    API -- "estado + eventos (WebSocket)" --> HOOKS
+    ESTADO -- "comandos (WebSocket)" --> API
+    API -- "estado + eventos (WebSocket)" --> ESTADO
     TELAS -- "ranking, materiais, repetições (REST)" --> API
     PERS <--> ARQ[("~/.canteiro/")]
 
@@ -259,12 +259,12 @@ canteiro/
 │   ├── .mvn/wrapper/                configuração do Maven Wrapper
 │   ├── mvnw · mvnw.cmd              Maven sem precisar instalar
 │   └── pom.xml                      a receita do backend
-├── frontend/                        A INTERFACE (React + TypeScript)
+├── frontend/                        A INTERFACE (Svelte + TypeScript)
 │   ├── src/
 │   │   ├── api/                     cliente REST, WebSocket, tipos do protocolo
 │   │   ├── telas/                   menu, partida, ranking, relatório...
 │   │   ├── componentes/             Tabuleiro, PainelEstabilidade, FilaProximas...
-│   │   ├── hooks/                   usePartida, useTeclado
+│   │   ├── estado/                  partida, teclado, navegacao
 │   │   ├── estilos/                 cores, fontes, texturas dos materiais
 │   │   └── util/                    funções puras
 │   ├── public/                      ícone, sons, imagens
@@ -272,7 +272,7 @@ canteiro/
 │   ├── package.json                 a receita do frontend
 │   └── vite.config.ts
 ├── docs/
-│   ├── ESPECIFICACAO.md             especificação v2.0
+│   ├── ESPECIFICACAO.md             especificação v2.1
 │   ├── CANTEIRO_Documentacao-1.pdf  especificação v1.0 (histórico)
 │   └── imagens/
 ├── .github/pull_request_template.md
@@ -281,7 +281,7 @@ canteiro/
 ```
 
 > [!IMPORTANT]
-> **A migração para a v2.0 está em andamento.** Hoje o `backend/` ainda tem o esqueleto da v1.0, com um pacote `visao/` em Swing, e o `frontend/` está vazio. O Javalin, o pacote `api/` e o projeto React entram nos próximos PRs. A árvore acima é o destino.
+> **A migração para a v2.0 está em andamento.** Hoje o `backend/` ainda tem o esqueleto da v1.0, com um pacote `visao/` em Swing, e o `frontend/` está vazio. O Javalin, o pacote `api/` e o projeto Svelte entram nos próximos PRs. A árvore acima é o destino.
 
 ### Por que o backend está dividido assim
 
@@ -310,11 +310,11 @@ canteiro/
 | Pasta | O que mora aqui | Por que separado |
 |---|---|---|
 | `api/` | `cliente.ts` (REST), `conexao.ts` (WebSocket com reconexão) e `protocolo.ts` (tipos) | **Único lugar que fala com o backend.** As telas não fazem `fetch` direto; chamam funções daqui |
-| `telas/` | Uma pasta por tela: `Menu`, `NovaPartida`, `Partida`, `FimDePartida`, `Ranking`, `Repeticoes`, `Relatorio`, `Configuracoes` | Cada tela é uma rota do React Router. Uma tela junta componentes e hooks, e quase não tem lógica própria |
-| `componentes/` | `Tabuleiro` (Canvas), `PainelEstabilidade`, `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas` | Pedaços reaproveitáveis que recebem dados por *props* e desenham. Fáceis de testar sozinhos |
-| `hooks/` | `usePartida` (conecta, guarda o último estado, envia comandos) e `useTeclado` (tecla → comando) | A lógica de tela que várias telas usam, fora dos componentes para eles ficarem pequenos |
+| `telas/` | Um componente por tela: `Menu`, `NovaPartida`, `Partida`, `FimDePartida`, `Ranking`, `Repeticoes`, `Relatorio`, `Configuracoes` | Qual tela aparece é decidido por `estado/navegacao.svelte.ts`, sem biblioteca de rotas. Uma tela junta componentes e estado, e quase não tem lógica própria |
+| `componentes/` | `Tabuleiro` (Canvas), `PainelEstabilidade`, `FilaProximas`, `Reserva`, `Placar`, `LegendaTeclas` | Pedaços reaproveitáveis que recebem dados por *props* (`$props()`) e desenham. Fáceis de testar sozinhos |
+| `estado/` | Módulos `.svelte.ts` com runas: `partida` (conecta, guarda o último estado, envia comandos), `teclado` (tecla → comando) e `navegacao` (tela atual) | O estado que várias telas usam, fora dos componentes para eles ficarem pequenos |
 | `estilos/` | Cores, fontes e as texturas de cada material | Um lugar só para a identidade visual e para o padrão de daltonismo (RNF06) |
-| `util/` | Funções puras: converter cor RGB, formatar números e tempo | Sem React, sem rede: as mais fáceis de testar |
+| `util/` | Funções puras: converter cor RGB, formatar números e tempo | Sem Svelte, sem rede: as mais fáceis de testar |
 | `public/` | Ícone, sons, imagens | Arquivos servidos como estão, sem passar pelo build |
 
 ### E as outras pastas
@@ -363,7 +363,7 @@ stateDiagram-v2
 ### Do aperto da tecla ao desenho
 
 ```
-navegador   keydown → useTeclado traduz a tecla → envia { COMANDO } pelo WebSocket
+navegador   keydown → teclado.svelte.ts traduz a tecla → envia { COMANDO } pelo WebSocket
 backend     CanalPartida valida → coloca na fila de comandos da sessão
 backend     próximo ciclo (≤ 16 ms):
               1. consome a fila → move/gira, sempre testando colisão antes
@@ -372,7 +372,7 @@ backend     próximo ciclo (≤ 16 ms):
               4. atualiza os acumuladores → centro de massa → índice
               5. desvio > limite? colapso e penalidade
               6. algo mudou? a sessão converte o estado em DTO e envia { ESTADO }
-navegador   usePartida guarda o estado → o Canvas redesenha no próximo quadro (≤ 16 ms)
+navegador   partida.svelte.ts guarda o estado → o Canvas redesenha no próximo quadro (≤ 16 ms)
 ```
 
 Tudo isso precisa caber em **50 ms** (RNF03). Localmente, sem internet no caminho, o esperado é bem menos.
@@ -398,13 +398,13 @@ Tudo isso precisa caber em **50 ms** (RNF03). Localmente, sem internet no caminh
     </tr>
     <tr>
       <td rowspan="3"><strong>Frontend</strong></td>
-      <td><img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black"/> <img src="https://img.shields.io/badge/TypeScript_strict-3178C6?style=flat-square&logo=typescript&logoColor=white"/>: componentes funcionais e hooks, sem <code>any</code></td>
+      <td><img src="https://img.shields.io/badge/Svelte_5-FF3E00?style=flat-square&logo=svelte&logoColor=white"/> <img src="https://img.shields.io/badge/TypeScript_strict-3178C6?style=flat-square&logo=typescript&logoColor=white"/>: componentes com runas (<code>$state</code>, <code>$props</code>), sem <code>any</code></td>
     </tr>
     <tr>
       <td><img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white"/>: servidor de desenvolvimento com recarga instantânea e build de produção</td>
     </tr>
     <tr>
-      <td><img src="https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white"/> <img src="https://img.shields.io/badge/Recharts-22B5BF?style=flat-square"/> e <code>&lt;canvas&gt;</code> 2D para o tabuleiro</td>
+      <td><img src="https://img.shields.io/badge/Chart.js-FF6384?style=flat-square&logo=chartdotjs&logoColor=white"/> para o gráfico do relatório e <code>&lt;canvas&gt;</code> 2D para o tabuleiro</td>
     </tr>
     <tr>
       <td><strong>Qualidade</strong></td>
@@ -412,7 +412,7 @@ Tudo isso precisa caber em **50 ms** (RNF03). Localmente, sem internet no caminh
     </tr>
     <tr>
       <td><strong>Empacotamento</strong></td>
-      <td><code>frontend-maven-plugin</code> compila o React durante o <code>./mvnw package</code> e o coloca dentro do JAR, que sai com todas as dependências embutidas</td>
+      <td><code>frontend-maven-plugin</code> compila o Svelte durante o <code>./mvnw package</code> e o coloca dentro do JAR, que sai com todas as dependências embutidas</td>
     </tr>
     <tr>
       <td><strong>Versionamento</strong></td>
@@ -565,8 +565,8 @@ cd frontend && npm test        # Vitest
 | **Repetição** | Reexecutar uma partida gravada tem que dar a mesma pontuação e o mesmo tabuleiro final | ☕ |
 | **API e WebSocket** | Cada rota com entrada válida e inválida · JSON malformado vira `ERRO` · fechar a conexão pausa a partida | ☕ |
 | **Protocolo** | O JSON gerado bate com os exemplos fixos · mensagem de estado abaixo de 4 KB | ☕ |
-| **Componentes** | Alerta de estabilidade abaixo do limiar · legenda segue as teclas configuradas · tela de reconexão | ⚛️ |
-| **Teclado** | Tecla configurada gera o comando certo · tecla segurada não duplica comando | ⚛️ |
+| **Componentes** | Alerta de estabilidade abaixo do limiar · legenda segue as teclas configuradas · tela de reconexão | 🌐 |
+| **Teclado** | Tecla configurada gera o comando certo · tecla segurada não duplica comando | 🌐 |
 
 ### Metas de desempenho
 
@@ -588,7 +588,7 @@ cd frontend && npm test        # Vitest
 
 | Regra | Detalhe |
 |---|---|
-| 🇧🇷 **Português** | Classes, funções, variáveis e comentários em português. Só os termos da linguagem e das bibliotecas ficam em inglês (`useState`, `onClick`, `@Override`) |
+| 🇧🇷 **Português** | Classes, funções, variáveis e comentários em português. Só os termos da linguagem e das bibliotecas ficam em inglês (`$state`, `onclick`, `@Override`) |
 | 🔢 **Sem números mágicos** | Dimensões, limites e intervalos em constantes nomeadas |
 | 🔌 **Protocolo nos dois lados** | Mudou um DTO em `canteiro.api`? Muda o tipo em `frontend/src/api/protocolo.ts` **no mesmo PR** |
 
@@ -607,12 +607,12 @@ cd frontend && npm test        # Vitest
 
 | Regra | Detalhe |
 |---|---|
-| 🔤 **Nomes** | Componentes em `PascalCase`, um por arquivo (`Tabuleiro.tsx`) · hooks começam com `use` (`usePartida.ts`) · funções e variáveis em `camelCase` |
-| 🧩 **Componentes** | Só funcionais, com hooks. No máximo **200 linhas**; passou disso, divida |
+| 🔤 **Nomes** | Componentes em `PascalCase`, um por arquivo (`Tabuleiro.svelte`) · módulos de estado terminam em `.svelte.ts` (`partida.svelte.ts`) · funções e variáveis em `camelCase` |
+| 🧩 **Componentes** | Sintaxe do Svelte 5, com runas (`$state`, `$derived`, `$props`) e `<script lang="ts">`. No máximo **200 linhas**; passou disso, divida |
 | 🛡️ **Tipos** | TypeScript `strict`, **nada de `any`**. Todo dado que vem do backend tem tipo em `protocolo.ts` |
 | 🎨 **Sem regra de jogo** | Componente recebe o estado pronto e desenha. Não calcula colisão, pontos nem estabilidade |
 | 🌐 **Rede só em `api/`** | Telas e componentes não chamam `fetch` nem abrem WebSocket direto |
-| 📝 **TSDoc** | Tipos exportados e hooks com comentário `/** ... */` |
+| 📝 **TSDoc** | Tipos exportados, funções de `estado/` e *props* dos componentes com comentário `/** ... */` |
 
 ```java
 /**
@@ -627,18 +627,25 @@ cd frontend && npm test        # Vitest
 public double centroDeMassa() { ... }
 ```
 
-```tsx
-/** Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). */
-export function PainelEstabilidade({ estabilidade }: { estabilidade: EstabilidadeDto }) {
-  const emAlerta = estabilidade.indice < LIMIAR_ALERTA;
-  return (
-    <section className={emAlerta ? "painel painel--alerta" : "painel"}>
-      <h2>Estabilidade</h2>
-      <BarraProgresso valor={estabilidade.indice} />
-      <p>Desvio: {formatarColunas(estabilidade.desvio)}</p>
-    </section>
-  );
-}
+```svelte
+<!-- Barra do índice de estabilidade, com alerta ao se aproximar do limite (RF15, RF16). -->
+<script lang="ts">
+  import type { EstabilidadeDto } from "../api/protocolo";
+  import BarraProgresso from "./BarraProgresso.svelte";
+  import { LIMIAR_ALERTA } from "../util/constantes";
+  import { formatarColunas } from "../util/formatacao";
+
+  /** Estabilidade da estrutura, como veio na última mensagem do backend. */
+  let { estabilidade }: { estabilidade: EstabilidadeDto } = $props();
+
+  const emAlerta = $derived(estabilidade.indice < LIMIAR_ALERTA);
+</script>
+
+<section class="painel" class:painel--alerta={emAlerta}>
+  <h2>Estabilidade</h2>
+  <BarraProgresso valor={estabilidade.indice} />
+  <p>Desvio: {formatarColunas(estabilidade.desvio)}</p>
+</section>
 ```
 
 ---
@@ -958,13 +965,13 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | Semanas | Etapa | Lado | Entrega |
 |---|---|---|---|
 | ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Especificação 1.0](docs/CANTEIRO_Documentacao-1.pdf) |
-| 🔄 3 | Revisão da arquitetura; Javalin; projeto React; build único; protocolo | ☕ ⚛️ | [Especificação 2.0](docs/ESPECIFICACAO.md) e esqueleto ponta a ponta |
+| 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | [Especificação 2.1](docs/ESPECIFICACAO.md) e esqueleto ponta a ponta |
 | ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
-| ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ ⚛️ | Jogável no navegador, ainda sem estabilidade |
-| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ ⚛️ | **Mecânica diferencial completa** |
-| ⬜ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | ⚛️ | Interface integrada |
-| ⬜ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ ⚛️ | Requisitos desejáveis |
-| ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ ⚛️ | **Entrega final** |
+| ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
+| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
+| ⬜ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada |
+| ⬜ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Requisitos desejáveis |
+| ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ 🌐 | **Entrega final** |
 
 ### Entregáveis
 
@@ -972,7 +979,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
 - 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação à especificação, com o porquê. A [seção 0.2 da especificação](docs/ESPECIFICACAO.md#02-tabela-de-desvios) já registra os desvios da v2.0
-- 📄 **[Especificação 2.0](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
+- 📄 **[Especificação 2.1](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
 
 ---
 
