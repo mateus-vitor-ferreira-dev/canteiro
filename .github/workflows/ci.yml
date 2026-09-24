@@ -100,3 +100,5 @@ jobs:
           name: canteiro-jar
       - name: Abre o JAR e confere a tela e a API em até 3 s
         run: python .github/scripts/testar_jar.py canteiro.jar
+        env:
+          PYTHONIOENCODING: utf-8
