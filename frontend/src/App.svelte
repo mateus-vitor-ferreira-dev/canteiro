@@ -1,6 +1,9 @@
-<!-- Moldura do jogo. As telas passam a ser trocadas por estado/navegacao.svelte.ts quando houver mais de uma. -->
+<!-- Moldura do jogo. Por enquanto troca só entre escolher a dificuldade e jogar; o menu e a navegação completa vêm na #26. -->
 <script lang="ts">
     import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
+    import Partida from "@/telas/Partida/Partida.svelte";
+
+    let partidaId = $state<string | null>(null);
 </script>
 
 <header>
@@ -9,7 +12,13 @@
 </header>
 
 <main>
-    <NovaPartida />
+    {#if partidaId}
+        {#key partidaId}
+            <Partida id={partidaId} aoSair={() => (partidaId = null)} />
+        {/key}
+    {:else}
+        <NovaPartida aoCriar={(id) => (partidaId = id)} />
+    {/if}
 </main>
 
 <style>

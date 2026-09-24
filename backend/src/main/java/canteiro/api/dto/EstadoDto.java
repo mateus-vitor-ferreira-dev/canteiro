@@ -24,7 +24,7 @@ import java.util.List;
  * @param tabuleiro    grade de 22 × 10 com o código do material de cada bloco, ou {@code null} onde está vazio
  * @param pecaAtual    peça caindo, ou {@code null}
  * @param pecaFantasma onde a peça atual vai pousar, como pares [linha, coluna]
- * @param proximas     as três próximas peças
+ * @param proximas     as três próximas peças, com as células da forma relativas ao quadrado dela
  * @param placar       pontuação, linhas, nível, colapsos e tempo
  * @param estabilidade índice, desvio, limite, centro de massa, eixo e alerta
  * @author Mateus Vitor Ferreira
@@ -51,7 +51,7 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
         return new EstadoDto(TIPO, motor.ciclo(), motor.estado().name(), grade(motor),
                 atual == null ? null : PecaDto.de(atual, motor.celulasPecaAtual()),
                 pares(motor.celulasFantasma()),
-                motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, List.of())).toList(),
+                motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
                 PlacarDto.de(motor.placar(), motor.ciclo()), EstabilidadeDto.de(motor.estabilidade()));
     }
 
@@ -77,7 +77,8 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      *
      * @param forma    letra da forma
      * @param material código do material
-     * @param blocos   células como pares [linha, coluna]; vazia para as próximas
+     * @param blocos   células como pares [linha, coluna]: no tabuleiro, para a peça atual; no
+     *                 quadrado da forma, para as próximas
      */
     public record PecaDto(String forma, String material, List<List<Integer>> blocos) {
 
