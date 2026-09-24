@@ -40,6 +40,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [🎮 Como se joga](#-como-se-joga)
 - [✨ Destaques de engenharia](#-destaques-de-engenharia)
 - [🧬 Onde entra cada conceito da disciplina](#-onde-entra-cada-conceito-da-disciplina)
+- [📋 Requisitos](#-requisitos) ← **o que já está pronto e o que falta**
 - [🏛️ Arquitetura](#️-arquitetura)
 - [📂 Estrutura de pastas](#-estrutura-de-pastas)
 - [🔄 Ciclo de vida da partida](#-ciclo-de-vida-da-partida)
@@ -175,6 +176,118 @@ Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma exist
 
 ---
 
+## 📋 Requisitos
+
+A lista completa, com casos de uso, critérios de aceitação e rastreabilidade, está na [seção 2 da especificação](docs/ESPECIFICACAO.md#2-levantamento-de-requisitos). Aqui fica o resumo e, principalmente, **o andamento de cada requisito**.
+
+| Status | Significado |
+|---|---|
+| ✅ | Pronto e testado |
+| 🟡 | Começado: parte já está na `develop` |
+| ⬜ | Ainda não começado |
+| 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
+
+**Andamento:** 2 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+
+> [!TIP]
+> **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
+
+### Regras de negócio
+
+<details>
+<summary><strong>RN01 – RN15</strong>: as regras do jogo, todas no backend</summary>
+
+| Código | Regra |
+|---|---|
+| RN01 | O tabuleiro tem 10 colunas e 20 linhas visíveis, mais 2 linhas ocultas de geração no topo |
+| RN02 | Todo elemento é composto por exatamente quatro blocos unitários conexos, em uma das sete formas canônicas (I, O, T, S, Z, J, L) |
+| RN03 | O material do elemento é sorteado entre os liberados na fase e determina densidade, cor e multiplicador de pontos |
+| RN04 | A sequência de elementos é gerada pelo método da sacola: as sete formas são embaralhadas e distribuídas antes que qualquer uma se repita |
+| RN05 | O jogador pode reservar um elemento por vez. A troca só pode ser feita uma vez a cada elemento gerado |
+| RN06 | Uma linha é eliminada quando suas 10 posições estão ocupadas. Eliminações simultâneas de 2, 3 ou 4 linhas recebem bônus progressivo |
+| RN07 | A massa de um bloco é a densidade do seu material vezes o volume unitário. A massa da estrutura é a soma das massas dos blocos |
+| RN08 | O centro de massa horizontal é a média das colunas dos blocos, ponderada pela massa de cada um |
+| RN09 | O desvio é o módulo da diferença entre o centro de massa e o eixo central da base de apoio, em colunas |
+| RN10 | O índice de estabilidade é 100 % com desvio nulo e 0 % quando o desvio atinge o limite do nível, variando linearmente |
+| RN11 | Há colapso quando o desvio ultrapassa o limite do nível. Os blocos acima da linha de maior concentração de massa se desprendem e são reacomodados por gravidade, coluna a coluna |
+| RN12 | Cada colapso subtrai da pontuação o equivalente a duas linhas eliminadas e incrementa o contador de colapsos |
+| RN13 | A partida termina se um elemento recém-gerado colidir imediatamente com a estrutura, ou se houver colapso com a pilha ocupando mais de 18 linhas |
+| RN14 | O nível avança a cada 10 linhas eliminadas. A cada nível, o intervalo de queda diminui e o limite de desvio é reduzido |
+| RN15 | Só entram no ranking pontuações de partidas concluídas sem uso do desfazer |
+
+</details>
+
+### Requisitos funcionais
+
+**Prior.:** E = essencial, entra na versão mínima; D = desejável, se houver prazo. **Lado:** ☕ backend, 🌐 frontend.
+
+<details open>
+<summary><strong>RF01 – RF31</strong></summary>
+
+| Código | Descrição | Prior. | Lado | Status | Onde está |
+|---|---|:-:|:-:|:-:|---|
+| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
+| RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | 🟡 | `GET /api/dificuldades` pronto (#4); falta a tela e a criação da partida |
+| RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ⬜ |  |
+| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ⬜ |  |
+| RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ⬜ |  |
+| RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ⬜ |  |
+| RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ⬜ |  |
+| RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | ⬜ |  |
+| RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ⬜ |  |
+| RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ⬜ |  |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ⬜ |  |
+| RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ⬜ |  |
+| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ⬜ |  |
+| RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ⬜ |  |
+| RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ⬜ |  |
+| RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ⬜ |  |
+| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ⬜ |  |
+| RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ⬜ |  |
+| RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ⬜ |  |
+| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ⬜ |  |
+| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ⬜ |  |
+| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ⬜ |  |
+| RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ⬜ |  |
+| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
+| RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | ⬜ |  |
+| RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ | ⬜ |  |
+| RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | ⬜ |  |
+| RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ⬜ |  |
+| RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | 🟡 | Sobe o servidor e abre o navegador (#4); falta o frontend dentro do JAR |
+| RF30 | Pausar a partida automaticamente quando a conexão com o navegador cair ou quando a aba do jogo perder o foco | E | ☕ 🌐 | ⬜ |  |
+| RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ⬜ |  |
+
+</details>
+
+### Requisitos não funcionais
+
+<details open>
+<summary><strong>RNF01 – RNF16</strong></summary>
+
+| Código | Categoria | Descrição | Status | Onde está |
+|---|---|---|:-:|---|
+| RNF01 | Desempenho | O frontend deve desenhar o tabuleiro a 60 quadros por segundo e o backend deve atualizar o estado 60 vezes por segundo, em máquina com processador de dois núcleos e 4 GB de memória | ⬜ |  |
+| RNF02 | Desempenho | O recálculo do centro de massa deve ser incremental, em tempo constante por bloco alterado, sem percorrer o tabuleiro a cada quadro | ⬜ |  |
+| RNF03 | Desempenho | O tempo entre o pressionamento de uma tecla e a resposta visual não deve passar de 50 ms, contando a ida e a volta pelo WebSocket | ⬜ |  |
+| RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | ⬜ |  |
+| RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ⬜ |  |
+| RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ⬜ |  |
+| RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
+| RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
+| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido na revisão de cada PR |
+| RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ⬜ |  |
+| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
+| RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
+| RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |
+| RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | 🟡 | Rotas REST respondem erro em JSON sem derrubar o servidor (#4); falta o WebSocket |
+| RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado (seção 3.5) e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ⬜ |  |
+| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | 🟡 | JAR único com as dependências do backend (#4); falta embutir o frontend |
+
+</details>
+
+---
+
 ## 🏛️ Arquitetura
 
 ```mermaid
@@ -274,6 +387,7 @@ canteiro/
 ├── docs/
 │   ├── ESPECIFICACAO.md             especificação v2.1
 │   ├── CANTEIRO_Documentacao-1.pdf  especificação v1.0 (histórico)
+│   ├── Proposta_Projeto_Canteiro.*  proposta do projeto (.docx e .pdf)
 │   └── imagens/
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
@@ -325,7 +439,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A especificação v2.0, a v1.0 em PDF, a proposta e as imagens deste README |
+| `docs/` | A especificação v2.1, a v1.0 em PDF, a proposta (em `.docx` para editar e em PDF para apresentar) e as imagens deste README |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
@@ -551,7 +665,15 @@ cd backend && ./mvnw test      # JUnit 5
 cd frontend && npm test        # Vitest
 ```
 
-**Já existe:** o `ArquiteturaTest`, que garante a separação de camadas (RNF08). **Previstos:**
+**Já existem:**
+
+| Teste | O que garante |
+|---|---|
+| `ArquiteturaTest` | Separação de camadas: nada de Javalin, JSON ou classe gráfica fora de `app` e `api` (RNF08) |
+| `ServidorWebTest` | `GET /api/dificuldades` devolve as três dificuldades em JSON (RF02) · o servidor recusa conexão pelo IP de rede da máquina (RNF13) |
+| `DificuldadeTest` | Cada dificuldade cai mais rápido, tolera menos desvio e libera ao menos os materiais da anterior (RF02) |
+
+**Previstos:**
 
 | Alvo | O que vai ser testado | Lado |
 |---|---|---|
@@ -981,6 +1103,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
 - 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação à especificação, com o porquê. A [seção 0.2 da especificação](docs/ESPECIFICACAO.md#02-tabela-de-desvios) já registra os desvios da v2.0
 - 📄 **[Especificação 2.1](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
+- 🗂️ **Proposta do projeto** ([PDF](docs/Proposta_Projeto_Canteiro.pdf) · [DOCX](docs/Proposta_Projeto_Canteiro.docx)): resumo, requisitos, cronograma e riscos, para a apresentação
 
 ---
 
