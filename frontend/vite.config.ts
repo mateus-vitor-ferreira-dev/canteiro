@@ -8,6 +8,10 @@ const BACKEND = "http://127.0.0.1:7070";
 export default defineConfig({
     // svelteTesting só age dentro do Vitest: carrega o Svelte do navegador e limpa a tela entre os testes
     plugins: [svelte(), svelteTesting()],
+    // "@/" aponta para src/: import { listarDificuldades } from "@/api/cliente"
+    resolve: {
+        alias: { "@": "/src" },
+    },
     server: {
         port: 5173,
         strictPort: true,

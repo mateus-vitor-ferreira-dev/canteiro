@@ -1,5 +1,7 @@
 package canteiro.api;
 
+import canteiro.api.dto.ErroDto;
+import canteiro.api.rotas.RotasDificuldades;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.RoutesConfig;
@@ -83,7 +85,7 @@ public final class ServidorWeb {
     }
 
     private static void registrarRotas(RoutesConfig rotas) {
-        rotas.get("/api/dificuldades", ctx -> ctx.json(DificuldadeDto.todas()));
+        RotasDificuldades.registrar(rotas);
 
         rotas.exception(Exception.class, (erro, ctx) -> {
             LOG.error("Erro inesperado em {} {}", ctx.method(), ctx.path(), erro);

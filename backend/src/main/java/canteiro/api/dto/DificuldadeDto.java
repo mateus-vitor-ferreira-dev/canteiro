@@ -1,4 +1,4 @@
-package canteiro.api;
+package canteiro.api.dto;
 
 import canteiro.modelo.Dificuldade;
 

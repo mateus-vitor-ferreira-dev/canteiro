@@ -1,4 +1,4 @@
-package canteiro.api;
+package canteiro.api.dto;
 
 /**
  * Corpo de toda resposta de erro da API.
