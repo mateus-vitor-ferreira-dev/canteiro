@@ -15,13 +15,25 @@ export class PartidaAoVivo {
     ultimoEvento = $state<EventoDto | null>(null);
     /** Se a conexão está aberta. */
     conectado = $state(false);
+    /** A conexão caiu e está tentando voltar (RF31). */
+    reconectando = $state(false);
+    /** O servidor não conhece mais a partida, como depois de reiniciar: não há como continuar. */
+    perdida = $state(false);
 
     readonly #conexao: ConexaoPartida;
 
     constructor(id: string, conectar: Conectar = conectarPartida) {
         this.#conexao = conectar(id, {
-            aoAbrir: () => (this.conectado = true),
+            aoAbrir: () => {
+                this.conectado = true;
+                this.reconectando = false;
+            },
             aoFechar: () => (this.conectado = false),
+            aoReconectar: () => (this.reconectando = true),
+            aoDesistir: () => {
+                this.reconectando = false;
+                this.perdida = true;
+            },
             aoReceber: (mensagem) => this.#receber(mensagem),
         });
     }

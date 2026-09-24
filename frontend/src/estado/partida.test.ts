@@ -41,4 +41,17 @@ describe("PartidaAoVivo", () => {
         expect(conexao.enviar).toHaveBeenCalledWith("GIRAR_HORARIO");
         expect(conexao.fechar).toHaveBeenCalled();
     });
+
+    it("sabe quando está reconectando e quando a partida se perdeu", () => {
+        const { partida, ouvinte } = partidaFalsa();
+        ouvinte.aoReconectar?.(1, 500);
+        expect(partida.reconectando).toBe(true);
+        ouvinte.aoAbrir?.();
+        expect(partida.reconectando).toBe(false);
+
+        ouvinte.aoReconectar?.(1, 500);
+        ouvinte.aoDesistir?.();
+        expect(partida.reconectando).toBe(false);
+        expect(partida.perdida).toBe(true);
+    });
 });

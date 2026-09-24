@@ -57,7 +57,18 @@
 
     <div class="palco">
         <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} />
-        {#if partida.pausada}
+        {#if partida.perdida}
+            <div class="camada" role="alert">
+                <h2>Partida perdida</h2>
+                <p>O jogo foi reiniciado e esta partida não existe mais.</p>
+                <button type="button" onclick={aoSair}>Começar outra</button>
+            </div>
+        {:else if partida.reconectando}
+            <div class="camada" role="status">
+                <h2>Reconectando…</h2>
+                <p>A partida está pausada e volta do mesmo ponto.</p>
+            </div>
+        {:else if partida.pausada}
             <div class="camada" role="status">
                 <h2>Pausado</h2>
                 <p>Aperte <kbd>P</kbd> para continuar.</p>
@@ -98,6 +109,8 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
         color: #fff;
         background: rgb(27 36 50 / 80%);
         border-radius: 8px;
