@@ -20,6 +20,17 @@ class DificuldadeTest {
     }
 
     @Test
+    void cadaDificuldadeComecaNumNivelDaProgressao() {
+        assertEquals(1, Dificuldade.FACIL.nivelInicial());
+        assertEquals(3, Dificuldade.NORMAL.nivelInicial());
+        assertEquals(5, Dificuldade.DIFICIL.nivelInicial());
+        for (Dificuldade dificuldade : Dificuldade.values()) {
+            assertEquals(Progressao.intervaloQuedaMs(dificuldade.nivelInicial()), dificuldade.intervaloQuedaMs());
+            assertEquals(Progressao.limiteDesvio(dificuldade.nivelInicial()), dificuldade.limiteDesvio());
+        }
+    }
+
+    @Test
     void cadaDificuldadeTemQuedaMaisRapidaELimiteMaisApertadoQueAAnterior() {
         Dificuldade[] dificuldades = Dificuldade.values();
         for (int i = 1; i < dificuldades.length; i++) {

@@ -1,6 +1,7 @@
 package canteiro.modelo;
 
 import canteiro.modelo.constantes.Dimensoes;
+import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.ArrayList;
@@ -92,6 +93,39 @@ public final class Tabuleiro {
             }
         }
         return true;
+    }
+
+    /**
+     * Índices das linhas completas, sem eliminá-las.
+     *
+     * @return as linhas completas, de cima para baixo
+     */
+    public List<Integer> linhasCompletas() {
+        List<Integer> completas = new ArrayList<>();
+        for (int linha = 0; linha < Dimensoes.LINHAS; linha++) {
+            if (linhaCompleta(linha)) {
+                completas.add(linha);
+            }
+        }
+        return completas;
+    }
+
+    /**
+     * Materiais dos blocos das linhas dadas, para descobrir o predominante.
+     *
+     * @param linhas linhas a percorrer
+     * @return o material de cada bloco dessas linhas
+     */
+    public List<Material> materiaisDasLinhas(List<Integer> linhas) {
+        List<Material> materiais = new ArrayList<>();
+        for (int linha : linhas) {
+            for (Bloco bloco : grade[linha]) {
+                if (bloco != null) {
+                    materiais.add(bloco.material());
+                }
+            }
+        }
+        return materiais;
     }
 
     /**

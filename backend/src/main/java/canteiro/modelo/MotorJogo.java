@@ -3,6 +3,7 @@ package canteiro.modelo;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
+import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Objects;
 
 /**
  * Coordena a partida: gera a peça, faz ela cair, aplica os comandos, fixa
- * quando ela bate embaixo e elimina as linhas completas.
+ * quando ela bate embaixo, elimina as linhas completas e soma os pontos.
  *
  * <p>O motor <strong>não implementa regra, só delega</strong>: pergunta ao
  * {@link Tabuleiro} se há colisão, pede a ele que fixe e elimine linhas, e
@@ -32,7 +33,8 @@ public final class MotorJogo {
 
     private final Tabuleiro tabuleiro = new Tabuleiro();
     private final FontePecas fonte;
-    private final int ciclosPorQueda;
+    private final Placar placar;
+    private int ciclosPorQueda;
     private final List<ObservadorPartida> observadores = new ArrayList<>();
 
     private EstadoPartida estado = EstadoPartida.GERANDO_PECA;
@@ -41,7 +43,6 @@ public final class MotorJogo {
     private int coluna;
     private long ciclo;
     private int ciclosDesdeQueda;
-    private int linhasEliminadas;
     private boolean mudou;
 
     /**
@@ -53,7 +54,8 @@ public final class MotorJogo {
      */
     public MotorJogo(Dificuldade dificuldade, FontePecas fonte) {
         this.fonte = Objects.requireNonNull(fonte, "fonte de peças");
-        this.ciclosPorQueda = Tempo.ciclos(Objects.requireNonNull(dificuldade, "dificuldade").intervaloQuedaMs());
+        this.placar = new Placar(Objects.requireNonNull(dificuldade, "dificuldade").nivelInicial());
+        this.ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
     }
 
     /**
@@ -181,15 +183,25 @@ public final class MotorJogo {
         estado = EstadoPartida.FIXANDO;
         tabuleiro.fixar(pecaAtual, linha, coluna);
         emitir(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
-        List<Integer> completas = tabuleiro.eliminarLinhasCompletas();
-        if (!completas.isEmpty()) {
-            estado = EstadoPartida.ELIMINANDO_LINHAS;
-            linhasEliminadas += completas.size();
-            emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
-        }
+        eliminarLinhas();
         pecaAtual = null;
         estado = EstadoPartida.GERANDO_PECA;
         gerarPeca();
+    }
+
+    private void eliminarLinhas() {
+        List<Integer> completas = tabuleiro.linhasCompletas();
+        if (completas.isEmpty()) {
+            return;
+        }
+        estado = EstadoPartida.ELIMINANDO_LINHAS;
+        Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
+        tabuleiro.eliminarLinhasCompletas();
+        emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
+        if (placar.registrarLinhas(completas.size(), predominante)) {
+            ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
+            emitir(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
+        }
     }
 
     private void mudarEstadoSe(EstadoPartida esperado, EstadoPartida novo) {
@@ -299,7 +311,16 @@ public final class MotorJogo {
      * @return quantidade de linhas
      */
     public int linhasEliminadas() {
-        return linhasEliminadas;
+        return placar.linhas();
+    }
+
+    /**
+     * Devolve o placar: pontuação, linhas e nível.
+     *
+     * @return o placar da partida
+     */
+    public Placar placar() {
+        return placar;
     }
 
     /**

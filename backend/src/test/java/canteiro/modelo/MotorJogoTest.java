@@ -134,6 +134,34 @@ class MotorJogoTest {
     }
 
     @Test
+    void eliminacaoSomaPontosNoPlacar() {
+        MotorJogo motor = motor(Forma.O);
+        for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna += 2) {
+            posicionarEDerrubar(motor, coluna - 4);
+        }
+        assertEquals(Pontuacao.pontos(2, 1, madeira), motor.placar().pontuacao());
+        assertEquals(2, motor.placar().linhas());
+    }
+
+    @Test
+    void subirDeNivelAceleraAQueda() {
+        MotorJogo motor = new MotorJogo(Dificuldade.NORMAL, new FonteFixa(madeira, Forma.O));
+        motor.avancarCiclo();
+        Registro registro = new Registro();
+        motor.inscrever(registro);
+        assertEquals(39, motor.ciclosPorQueda(), "650 ms no nível 3");
+        for (int volta = 0; volta < 10; volta++) {
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna += 2) {
+                posicionarEDerrubar(motor, coluna - 4);
+            }
+        }
+        assertEquals(20, motor.placar().linhas());
+        assertEquals(5, motor.placar().nivel());
+        assertEquals(30, motor.ciclosPorQueda(), "500 ms no nível 5");
+        assertTrue(registro.eventos.contains(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU)));
+    }
+
+    @Test
     void linhasDeCimaDescemDepoisDaEliminacao() {
         MotorJogo motor = motor(Forma.I, Forma.I, Forma.O);
         posicionarEDerrubar(motor, -3);

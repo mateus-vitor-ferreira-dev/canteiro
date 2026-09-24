@@ -5,11 +5,9 @@ import java.util.List;
 /**
  * Dificuldades oferecidas ao criar uma partida (RF02).
  *
- * <p>Cada dificuldade define as condições iniciais da partida: o intervalo de
- * queda, o limite de desvio do centro de massa e os materiais liberados. Os
- * valores partem da tabela de progressão por nível (README, "A curva de dificuldade"): a
- * dificuldade fácil começa como o nível 1, a normal como o nível 3 e a difícil
- * como o nível 5. São valores iniciais, a ajustar nos testes com jogadores.</p>
+ * <p>Cada dificuldade é um nível inicial: a fácil começa no nível 1, a normal
+ * no 3 e a difícil no 5. O intervalo de queda, o limite de desvio e os
+ * materiais vêm da {@link Progressao} desse nível.</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -17,25 +15,20 @@ import java.util.List;
 public enum Dificuldade {
 
     /** Queda lenta, limite de desvio folgado e só os materiais leves. */
-    FACIL("Fácil", 800, 3.0, List.of("MADEIRA", "ALVENARIA")),
+    FACIL("Fácil", 1),
 
     /** Queda moderada e o concreto já liberado. */
-    NORMAL("Normal", 650, 2.5, List.of("MADEIRA", "ALVENARIA", "CONCRETO")),
+    NORMAL("Normal", 3),
 
     /** Queda rápida, limite apertado e todos os materiais desde o início. */
-    DIFICIL("Difícil", 500, 2.0, List.of("MADEIRA", "ALVENARIA", "CONCRETO", "ACO"));
+    DIFICIL("Difícil", 5);
 
     private final String nomeExibicao;
-    private final long intervaloQuedaMs;
-    private final double limiteDesvio;
-    private final List<String> materiaisLiberados;
+    private final int nivelInicial;
 
-    Dificuldade(String nomeExibicao, long intervaloQuedaMs, double limiteDesvio,
-                List<String> materiaisLiberados) {
+    Dificuldade(String nomeExibicao, int nivelInicial) {
         this.nomeExibicao = nomeExibicao;
-        this.intervaloQuedaMs = intervaloQuedaMs;
-        this.limiteDesvio = limiteDesvio;
-        this.materiaisLiberados = materiaisLiberados;
+        this.nivelInicial = nivelInicial;
     }
 
     /**
@@ -48,31 +41,38 @@ public enum Dificuldade {
     }
 
     /**
+     * Nível em que a partida começa.
+     *
+     * @return nível inicial, a partir de 1
+     */
+    public int nivelInicial() {
+        return nivelInicial;
+    }
+
+    /**
      * Devolve o intervalo inicial entre duas descidas da peça em queda.
      *
      * @return intervalo de queda, em milissegundos
      */
     public long intervaloQuedaMs() {
-        return intervaloQuedaMs;
+        return Progressao.intervaloQuedaMs(nivelInicial);
     }
 
     /**
-     * Devolve o desvio máximo tolerado entre o centro de massa e o eixo da base
-     * antes do colapso (RN11).
+     * Devolve o desvio máximo tolerado no início da partida (RN11).
      *
      * @return limite de desvio inicial, em colunas
      */
     public double limiteDesvio() {
-        return limiteDesvio;
+        return Progressao.limiteDesvio(nivelInicial);
     }
 
     /**
-     * Devolve os códigos dos materiais que podem ser sorteados no início da
-     * partida (RN03).
+     * Devolve os códigos dos materiais liberados no início da partida (RN03).
      *
      * @return lista imutável de códigos de material
      */
     public List<String> materiaisLiberados() {
-        return materiaisLiberados;
+        return Progressao.materiaisLiberados(nivelInicial);
     }
 }
