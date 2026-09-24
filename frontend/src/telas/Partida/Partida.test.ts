@@ -36,7 +36,7 @@ describe("Partida", () => {
         expect(screen.getByText("1.234")).toBeInTheDocument();
         expect(screen.getByText("68 %")).toBeInTheDocument();
         expect(screen.getByText("Queda instantânea")).toBeInTheDocument();
-        expect(screen.getByLabelText("Peça O de ACO")).toBeInTheDocument();
+        expect(screen.getByLabelText("Peça O de Aço")).toBeInTheDocument();
     });
 
     it("transforma teclas em comandos, sem repetir a tecla segurada", async () => {

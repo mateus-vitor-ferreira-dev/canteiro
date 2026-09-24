@@ -21,15 +21,12 @@
 </section>
 
 <style>
-    .placar {
-        min-width: 200px;
-    }
     h2 {
         margin: 0 0 0.25rem;
         font-size: 0.8rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--cor-ambar);
+        color: var(--cor-rotulo);
     }
     .pontos {
         margin: 0 0 1rem;
@@ -50,5 +47,20 @@
         margin: 0;
         font-weight: 700;
         text-align: right;
+    }
+    /* No celular, o painel encolhe para o tabuleiro caber na tela. */
+    @media (max-width: 767px) {
+        h2 {
+            font-size: 0.75rem;
+        }
+        .pontos {
+            margin-bottom: 0.25rem;
+            font-size: 1.5rem;
+        }
+        dl {
+            margin-bottom: 0;
+            gap: 0 0.5rem;
+            font-size: 0.875rem;
+        }
     }
 </style>

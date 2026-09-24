@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { estadoDeTeste } from "@/testes-apoio";
-import { desenharColapso, desenharTabuleiro, naTela, posicaoNaQueda } from "./desenho";
+import {
+    CELULA_MAXIMA,
+    CELULA_MINIMA,
+    desenharColapso,
+    desenharTabuleiro,
+    naTela,
+    posicaoNaQueda,
+    tamanhoDaCelula,
+} from "./desenho";
 
 /** Contexto 2D falso que só anota os quadrados pintados depois do fundo. */
 function contextoFalso() {
@@ -18,6 +26,7 @@ function contextoFalso() {
         lineTo() {},
         stroke() {},
         setLineDash() {},
+        quadraticCurveTo() {},
         arc() {},
         fill() {},
     };
@@ -98,5 +107,17 @@ describe("desenharColapso", () => {
         expect(pintados[0]).toBe("#1b2432@50,190");
         expect(pintados[1]).toBe("#4e5a6b@51,91");
         expect(pintados[2]).toMatch(/^rgba\(244, 112, 103, 0.45\)@0,0$/);
+    });
+});
+
+describe("tamanhoDaCelula", () => {
+    it("usa o que couber: 20 linhas na altura e 10 colunas na largura", () => {
+        expect(tamanhoDaCelula(1000, 500)).toBe(25);
+        expect(tamanhoDaCelula(220, 900)).toBe(22);
+    });
+
+    it("fica entre o mínimo e o máximo", () => {
+        expect(tamanhoDaCelula(50, 50)).toBe(CELULA_MINIMA);
+        expect(tamanhoDaCelula(5000, 5000)).toBe(CELULA_MAXIMA);
     });
 });
