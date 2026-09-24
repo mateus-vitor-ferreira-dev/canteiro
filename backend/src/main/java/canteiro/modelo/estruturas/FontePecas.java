@@ -29,4 +29,15 @@ public interface FontePecas {
      * @return as próximas peças, na ordem em que vão sair
      */
     List<Peca> espiar(int quantidade);
+
+    /**
+     * Avisa que o jogador subiu de nível, para a fonte passar a sortear os
+     * materiais do nível novo ({@code Progressao.materiaisLiberados(nivel)}).
+     * Por padrão, ignora. O nível inicial vem da dificuldade, ao criar a fonte.
+     *
+     * @param nivel o nível novo
+     */
+    default void nivelMudou(int nivel) {
+        // uma fonte que não muda com o nível não precisa fazer nada
+    }
 }

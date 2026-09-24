@@ -144,6 +144,25 @@ class MotorJogoTest {
     }
 
     @Test
+    void avisaAFonteQuandoONivelSobe() {
+        List<Integer> niveis = new ArrayList<>();
+        FonteFixa fonte = new FonteFixa(madeira, Forma.O) {
+            @Override
+            public void nivelMudou(int nivel) {
+                niveis.add(nivel);
+            }
+        };
+        MotorJogo motor = new MotorJogo(Dificuldade.FACIL, fonte);
+        motor.avancarCiclo();
+        for (int volta = 0; volta < 5; volta++) {
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna += 2) {
+                posicionarEDerrubar(motor, coluna - 4);
+            }
+        }
+        assertEquals(List.of(2), niveis, "10 linhas: do nível 1 para o 2");
+    }
+
+    @Test
     void subirDeNivelAceleraAQueda() {
         MotorJogo motor = new MotorJogo(Dificuldade.NORMAL, new FonteFixa(madeira, Forma.O));
         motor.avancarCiclo();

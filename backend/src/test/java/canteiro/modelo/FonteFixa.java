@@ -12,7 +12,7 @@ import java.util.List;
  * Fonte de peças para os testes: repete uma sequência conhecida de formas,
  * todas do mesmo material.
  */
-final class FonteFixa implements FontePecas {
+class FonteFixa implements FontePecas {
 
     private final Material material;
     private final Forma[] formas;
