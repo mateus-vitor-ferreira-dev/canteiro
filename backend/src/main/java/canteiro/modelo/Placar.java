@@ -3,7 +3,7 @@ package canteiro.modelo;
 import canteiro.modelo.materiais.Material;
 
 /**
- * Pontuação, linhas e nível da partida.
+ * Pontuação, linhas, nível e colapsos da partida.
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -13,6 +13,7 @@ public final class Placar {
     private int pontuacao;
     private int linhas;
     private int nivel;
+    private int colapsos;
 
     /**
      * Começa zerado, no nível inicial.
@@ -42,6 +43,24 @@ public final class Placar {
         linhas += quantidade;
         nivel += subidas;
         return nivel > nivelAntes;
+    }
+
+    /**
+     * Desconta a penalidade de um colapso, sem deixar a pontuação negativa, e
+     * soma um no contador (RN12).
+     */
+    public void registrarColapso() {
+        pontuacao = Math.max(0, pontuacao - Pontuacao.penalidadeColapso(nivel));
+        colapsos++;
+    }
+
+    /**
+     * Devolve quantos colapsos houve na partida.
+     *
+     * @return contador de colapsos
+     */
+    public int colapsos() {
+        return colapsos;
     }
 
     /**

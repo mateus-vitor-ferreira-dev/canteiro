@@ -23,6 +23,9 @@ public final class Dimensoes {
     /** Total de linhas da grade: as ocultas mais as visíveis. */
     public static final int LINHAS = LINHAS_OCULTAS + LINHAS_VISIVEIS;
 
+    /** Altura da pilha, em linhas, acima da qual um colapso encerra a partida (RN13). */
+    public static final int ALTURA_LIMITE_COLAPSO = 18;
+
     private Dimensoes() {
     }
 }
