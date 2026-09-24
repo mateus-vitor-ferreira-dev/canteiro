@@ -33,6 +33,7 @@
         <node.version>v24.21.0</node.version>
 
         <javalin.version>7.2.3</javalin.version>
+        <javalin-openapi.version>7.2.3</javalin-openapi.version>
         <jackson.version>2.22.3</jackson.version>
         <slf4j.version>2.0.18</slf4j.version>
         <junit.version>5.14.4</junit.version>
@@ -69,6 +70,17 @@
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
             <version>${javalin.version}</version>
+        </dependency>
+        <!-- Documentação das rotas: OpenAPI gerado das anotações @OpenApi e Swagger UI em /api/docs -->
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-openapi-plugin</artifactId>
+            <version>${javalin-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.javalin.community.openapi</groupId>
+            <artifactId>javalin-swagger-plugin</artifactId>
+            <version>${javalin-openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -142,6 +154,14 @@
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                     </compilerArgs>
+                    <!-- Lê as anotações @OpenApi das rotas e gera a especificação durante a compilação -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>io.javalin.community.openapi</groupId>
+                            <artifactId>openapi-annotation-processor</artifactId>
+                            <version>${javalin-openapi.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 

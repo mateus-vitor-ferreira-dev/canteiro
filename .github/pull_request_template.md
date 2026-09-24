@@ -16,5 +16,6 @@
 - [ ] `./mvnw verify` passa na minha máquina (dentro de `backend/`)
 - [ ] Classes e métodos públicos novos têm Javadoc (`@author`, `@param`, `@return`, `@throws`)
 - [ ] Nenhum `import javax.swing` / `java.awt` dentro do modelo
+- [ ] Rotas novas têm a anotação `@OpenApi` e aparecem em `/api/docs`
 - [ ] Métodos com até 40 linhas e classes com até 400
 - [ ] Atualizei o status dos requisitos atendidos na seção **📋 Requisitos** do README

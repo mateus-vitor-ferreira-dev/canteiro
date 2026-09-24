@@ -328,7 +328,9 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 | `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |
 | `GET /api/materiais` · `/api/dificuldades` · `/api/configuracoes` · `/api/repeticoes` | ambos | Catálogo, dificuldades, teclas e repetições |
 
-Os detalhes de cada mensagem ficam no próprio código, que é a referência: os `record`s de `canteiro.api` no backend e `frontend/src/api/protocolo.ts` no frontend.
+**As rotas REST estão documentadas no Swagger**, que vem junto com o backend: com ele rodando, abra **`http://127.0.0.1:7070/api/docs`** para ler cada rota e testá-la no navegador. A especificação em JSON fica em `/api/openapi.json`. O Swagger é gerado das anotações `@OpenApi` de cada rota, então ele nunca fica desatualizado.
+
+As mensagens do WebSocket não aparecem no Swagger. A referência delas é o código: os `record`s de `canteiro.api.dto` no backend e `frontend/src/api/protocolo.ts` no frontend.
 
 > [!IMPORTANT]
 > **O protocolo existe duas vezes, de propósito:** como `record`s Java em `canteiro.api` e como tipos TypeScript em `frontend/src/api/protocolo.ts`. **Mudou um lado, muda o outro no mesmo PR.**
@@ -514,7 +516,7 @@ Tudo isso precisa caber em **50 ms** (RNF03). Localmente, sem internet no caminh
       <td><img src="https://img.shields.io/badge/Javalin_7-0A0A0A?style=flat-square"/>: servidor HTTP e WebSocket, com rotas declaradas num <code>main</code> comum</td>
     </tr>
     <tr>
-      <td><img src="https://img.shields.io/badge/Jackson-JSON-2E7D32?style=flat-square"/> <img src="https://img.shields.io/badge/SLF4J-log-555555?style=flat-square"/>: JSON e log no terminal</td>
+      <td><img src="https://img.shields.io/badge/Jackson-JSON-2E7D32?style=flat-square"/> <img src="https://img.shields.io/badge/SLF4J-log-555555?style=flat-square"/> <img src="https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=flat-square&logo=swagger&logoColor=black"/>: JSON, log no terminal e documentação das rotas em <code>/api/docs</code></td>
     </tr>
     <tr>
       <td><img src="https://img.shields.io/badge/Maven_3.9-C71A36?style=flat-square&logo=apachemaven&logoColor=white"/> via <strong>Maven Wrapper</strong> (<code>./mvnw</code>): ninguém precisa instalar o Maven</td>
@@ -611,6 +613,8 @@ npm run dev
 
 O Vite repassa as chamadas `/api` e `/ws` para o backend, então para o navegador parece um servidor só.
 
+**Documentação das rotas:** `http://127.0.0.1:7070/api/docs` (Swagger), ou `http://localhost:5173/api/docs` pelo Vite.
+
 > [!TIP]
 > **No IntelliJ:** abra a pasta `canteiro/backend` (*File → Open*); ele reconhece o `pom.xml`. Para subir o backend, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** abra a pasta `canteiro` inteira e instale o *Extension Pack for Java*, o *ESLint* e o *Prettier*.
 
@@ -632,7 +636,7 @@ Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=tr
 
 | Comando | O que faz |
 |---|---|
-| `./mvnw compile exec:java` | Sobe o backend para desenvolvimento |
+| `./mvnw compile exec:java` | Sobe o backend para desenvolvimento. O Swagger fica em `http://127.0.0.1:7070/api/docs` |
 | `./mvnw test` | Roda os testes do backend. **Não mexe no frontend**, por isso é rápido |
 | `./mvnw verify` | Compila, testa e empacota. **Rode antes de abrir um PR** |
 | `./mvnw package` | Gera `target/canteiro.jar`, com o frontend dentro. Com `-Dfrontend.pular=true`, gera sem o frontend |
@@ -739,7 +743,8 @@ cd frontend && npm test        # Vitest
 | 🔒 **Encapsulamento** | Atributos **sempre** `private`. Acesso de fora só por métodos que preservem as invariantes |
 | 📐 **Tamanho** | Nenhum método com mais de **40 linhas úteis**, nenhuma classe com mais de **400** (RNF09) |
 | 🚫 **Modelo isolado** | Nada de Javalin, Jackson, `java.awt` ou `javax.swing` fora de `api` e `app` |
-| 📦 **DTOs** | São `record`s e ficam só em `canteiro.api`. O modelo nunca é transformado em JSON diretamente |
+| 📦 **DTOs** | São `record`s e ficam só em `canteiro.api.dto`. O modelo nunca é transformado em JSON diretamente |
+| 📖 **Swagger** | Toda rota nova, em `canteiro.api.rotas`, tem a anotação `@OpenApi` com resumo, descrição e as respostas possíveis (sucesso e erro). Rota sem anotação não aparece em `/api/docs` |
 | 📝 **Javadoc** | Toda classe pública: responsabilidade, `@author`, `@version`. Todo método público: `@param`, `@return`, `@throws` |
 
 ### Frontend (TypeScript)
