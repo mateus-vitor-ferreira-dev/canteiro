@@ -130,21 +130,31 @@ public final class MotorJogo {
         return true;
     }
 
+    /**
+     * Gira a peça. Se o giro simples colidir, tenta os deslocamentos
+     * corretivos da peça, em ordem, e aplica o primeiro que couber (RF08).
+     * Se nenhum couber, desfaz o giro.
+     */
     private void girar(boolean horario) {
+        girarPeca(horario);
+        if (!tabuleiro.colide(pecaAtual, linha, coluna)) {
+            mudou = true;
+            return;
+        }
+        for (int[] deslocamento : pecaAtual.deslocamentosCorretivos()) {
+            if (mover(deslocamento[0], deslocamento[1])) {
+                return;
+            }
+        }
+        girarPeca(!horario);
+    }
+
+    private void girarPeca(boolean horario) {
         if (horario) {
             pecaAtual.girarHorario();
         } else {
             pecaAtual.girarAntiHorario();
         }
-        if (tabuleiro.colide(pecaAtual, linha, coluna)) {
-            if (horario) {
-                pecaAtual.girarAntiHorario();
-            } else {
-                pecaAtual.girarHorario();
-            }
-            return;
-        }
-        mudou = true;
     }
 
     private void descerOuFixar() {

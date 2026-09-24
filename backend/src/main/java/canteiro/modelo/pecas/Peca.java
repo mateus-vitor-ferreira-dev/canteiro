@@ -30,6 +30,8 @@ public abstract class Peca {
 
     private static final int ROTACOES = 4;
 
+    private static final int[][] DESLOCAMENTOS_PADRAO = {{0, -1}, {0, 1}, {0, -2}, {0, 2}, {-1, 0}};
+
     private final char letra;
     private final Material material;
     private int rotacao;
@@ -53,6 +55,32 @@ public abstract class Peca {
      * @return uma matriz por rotação, todas do mesmo tamanho
      */
     protected abstract int[][][] formas();
+
+    /**
+     * Deslocamentos corretivos tentados, em ordem, quando o giro simples
+     * colide: uma coluna à esquerda, uma à direita, duas à esquerda, duas à
+     * direita e uma linha acima. Cada par é {linhas, colunas}. A peça que
+     * precisar de outra sequência sobrescreve este método.
+     *
+     * @return os deslocamentos, na ordem em que devem ser tentados
+     */
+    protected int[][] deslocamentosDeRotacao() {
+        return DESLOCAMENTOS_PADRAO;
+    }
+
+    /**
+     * Devolve uma cópia dos deslocamentos corretivos desta peça (RF08).
+     *
+     * @return pares {linhas, colunas}, na ordem em que devem ser tentados
+     */
+    public int[][] deslocamentosCorretivos() {
+        int[][] deslocamentos = deslocamentosDeRotacao();
+        int[][] copia = new int[deslocamentos.length][];
+        for (int i = 0; i < deslocamentos.length; i++) {
+            copia[i] = deslocamentos[i].clone();
+        }
+        return copia;
+    }
 
     /**
      * Calcula as quatro rotações de uma forma, girando a matriz no sentido
