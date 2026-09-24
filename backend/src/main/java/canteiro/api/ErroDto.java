@@ -1,7 +1,7 @@
 package canteiro.api;
 
 /**
- * Corpo de toda resposta de erro da API (seção 3.5.1 da especificação).
+ * Corpo de toda resposta de erro da API.
  *
  * @param erro     código do erro, em maiúsculas, para o frontend decidir o que fazer
  * @param mensagem texto que pode ser mostrado ao jogador

@@ -9,7 +9,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 <p>
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
-  <a href="docs/ESPECIFICACAO.md"><img src="https://img.shields.io/badge/especificação-v2.1-1F3864?style=for-the-badge" alt="Especificação v2.1"/></a>
+  <a href="docs/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
 </p>
 
 <p>
@@ -28,7 +28,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <img src="docs/imagens/tela-principal.png" alt="Esboço da tela principal do CANTEIRO" width="820"/>
 
-<sub>Esboço da tela principal, tirado da especificação. O jogo ainda está sendo construído.</sub>
+<sub>Esboço da tela principal. O jogo ainda está sendo construído.</sub>
 
 </div>
 
@@ -53,7 +53,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **A fonte da verdade é a [especificação v2.1](docs/ESPECIFICACAO.md).** Ela traz todos os requisitos, os diagramas, o protocolo completo entre backend e frontend e o que mudou em relação à [versão 1.0](docs/CANTEIRO_Documentacao-1.pdf). Este README é o resumo prático.
+> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/Apresentacao_Canteiro.pdf)**.
 
 ---
 
@@ -178,7 +178,7 @@ Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma exist
 
 ## 📋 Requisitos
 
-A lista completa, com casos de uso, critérios de aceitação e rastreabilidade, está na [seção 2 da especificação](docs/ESPECIFICACAO.md#2-levantamento-de-requisitos). Aqui fica o resumo e, principalmente, **o andamento de cada requisito**.
+Os critérios de aceitação de cada requisito estão na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 12). Aqui fica a lista e, principalmente, **o andamento de cada requisito**.
 
 | Status | Significado |
 |---|---|
@@ -328,7 +328,7 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 | `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |
 | `GET /api/materiais` · `/api/dificuldades` · `/api/configuracoes` · `/api/repeticoes` | ambos | Catálogo, dificuldades, teclas e repetições |
 
-Todas as rotas, os comandos, os eventos e um exemplo completo de mensagem estão na **[seção 3.5 da especificação](docs/ESPECIFICACAO.md#35-protocolo-entre-backend-e-frontend)**.
+Os detalhes de cada mensagem ficam no próprio código, que é a referência: os `record`s de `canteiro.api` no backend e `frontend/src/api/protocolo.ts` no frontend.
 
 > [!IMPORTANT]
 > **O protocolo existe duas vezes, de propósito:** como `record`s Java em `canteiro.api` e como tipos TypeScript em `frontend/src/api/protocolo.ts`. **Mudou um lado, muda o outro no mesmo PR.**
@@ -385,9 +385,8 @@ canteiro/
 │   ├── package.json                 a receita do frontend
 │   └── vite.config.ts
 ├── docs/
-│   ├── ESPECIFICACAO.md             especificação v2.1
-│   ├── CANTEIRO_Documentacao-1.pdf  especificação v1.0 (histórico)
-│   ├── Proposta_Projeto_Canteiro.*  proposta do projeto (.docx e .pdf)
+│   ├── Proposta_Projeto_Canteiro.pdf  proposta do projeto
+│   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
 │   └── imagens/
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
@@ -439,7 +438,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `fisica/AnalisadorEstrutural` fica em `test/.../fisica/AnalisadorEstruturalTest` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A especificação v2.1, a v1.0 em PDF, a proposta (em `.docx` para editar e em PDF para apresentar) e as imagens deste README |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, e as imagens deste README |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
@@ -1087,8 +1086,8 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Semanas | Etapa | Lado | Entrega |
 |---|---|---|---|
-| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Especificação 1.0](docs/CANTEIRO_Documentacao-1.pdf) |
-| 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | [Especificação 2.1](docs/ESPECIFICACAO.md) e esqueleto ponta a ponta |
+| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) |
+| 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
 | ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
 | ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
 | ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
@@ -1101,19 +1100,21 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - 📦 **Código-fonte**: o repositório completo, com `backend/`, `frontend/`, testes e arquivos de dados de exemplo
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação à especificação, com o porquê. A [seção 0.2 da especificação](docs/ESPECIFICACAO.md#02-tabela-de-desvios) já registra os desvios da v2.0
-- 📄 **[Especificação 2.1](docs/ESPECIFICACAO.md)**: requisitos, diagramas, protocolo e estratégias
-- 🗂️ **Proposta do projeto** ([PDF](docs/Proposta_Projeto_Canteiro.pdf) · [DOCX](docs/Proposta_Projeto_Canteiro.docx)): resumo, requisitos, cronograma e riscos, para a apresentação
+- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. O principal desvio até aqui é a troca da interface em Swing por uma interface no navegador
+- 🗂️ **[Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
+- 🎬 **[Apresentação](docs/Apresentacao_Canteiro.pdf)**: 15 slides em linguagem simples, para gravar a tela narrando
 
 ---
 
 ## 👥 Equipe
 
-| Integrante | GitHub |
-|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) |
-| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) |
-| Wanessa Kylie Silva Medeiros | _a confirmar_ |
+| Integrante | GitHub | Responsabilidades |
+|---|---|---|
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · 🌐 tela de partida · build e integração contínua |
+| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Estruturas de dados · persistência · 🌐 telas de apoio (menu, ranking, repetições, relatório, configurações) |
+| Wanessa Kylie Silva Medeiros | _a confirmar_ | 📋 Requisitos · 🧪 plano de testes e validação com jogadores · ♿ usabilidade e acessibilidade · 📝 documentação e apresentações |
+
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão completa está na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 16).
 
 ---
 
