@@ -24,7 +24,9 @@ function montar() {
         },
     });
     const receber = (estado: EstadoDto) => flushSync(() => ouvinte?.aoReceber(estado));
-    return { conexao, aoSair, tela, receber };
+    const reconectar = () => flushSync(() => ouvinte?.aoReconectar?.(1, 500));
+    const desistir = () => flushSync(() => ouvinte?.aoDesistir?.());
+    return { conexao, aoSair, tela, receber, reconectar, desistir };
 }
 
 describe("Partida", () => {
@@ -74,5 +76,17 @@ describe("Partida", () => {
         const { conexao, tela } = montar();
         tela.unmount();
         expect(conexao.fechar).toHaveBeenCalled();
+    });
+
+    it("mostra que está reconectando e, perdida a partida, deixa começar outra", async () => {
+        const { aoSair, receber, reconectar, desistir } = montar();
+        receber(estadoDeTeste());
+        reconectar();
+        expect(screen.getByText("Reconectando…")).toBeInTheDocument();
+
+        desistir();
+        expect(screen.getByText("Partida perdida")).toBeInTheDocument();
+        await fireEvent.click(screen.getByRole("button", { name: "Começar outra" }));
+        expect(aoSair).toHaveBeenCalled();
     });
 });

@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { conectarPartida, enderecoDaPartida } from "./conexao";
+import {
+    FECHAMENTO_PARTIDA_INEXISTENTE,
+    conectarPartida,
+    enderecoDaPartida,
+    esperaDaTentativa,
+} from "./conexao";
 
 /** WebSocket falso, que dispara os eventos quando o teste manda. */
 class SocketFalso extends EventTarget {
@@ -29,13 +34,30 @@ class SocketFalso extends EventTarget {
     }
 }
 
-function conectar(ouvinte = { aoReceber: vi.fn(), aoAbrir: vi.fn(), aoFechar: vi.fn() }) {
-    let socket: SocketFalso | undefined;
-    const conexao = conectarPartida("abc123", ouvinte, (url) => {
-        socket = new SocketFalso(url);
-        return socket as unknown as WebSocket;
-    });
-    return { conexao, ouvinte, socket: socket as unknown as SocketFalso };
+function conectar() {
+    const ouvinte = {
+        aoReceber: vi.fn(),
+        aoAbrir: vi.fn(),
+        aoFechar: vi.fn(),
+        aoReconectar: vi.fn(),
+        aoDesistir: vi.fn(),
+    };
+    const sockets: SocketFalso[] = [];
+    const agendadas: (() => void)[] = [];
+    const conexao = conectarPartida(
+        "abc123",
+        ouvinte,
+        (url) => {
+            const socket = new SocketFalso(url);
+            sockets.push(socket);
+            return socket as unknown as WebSocket;
+        },
+        (tarefa) => agendadas.push(tarefa),
+    );
+    const atual = () => sockets[sockets.length - 1] as SocketFalso;
+    const cair = (codigo = 1006) =>
+        atual().dispatchEvent(new CloseEvent("close", { code: codigo }));
+    return { conexao, ouvinte, sockets, agendadas, atual, cair, socket: atual() };
 }
 
 describe("enderecoDaPartida", () => {
@@ -65,7 +87,7 @@ describe("conectarPartida", () => {
         const { ouvinte, socket } = conectar();
         socket.abrir();
         socket.receber('{"tipo":"EVENTO","evento":"PECA_FIXADA","dados":{}}');
-        socket.dispatchEvent(new Event("close"));
+        socket.dispatchEvent(new CloseEvent("close", { code: 1000 }));
 
         expect(ouvinte.aoAbrir).toHaveBeenCalled();
         expect(ouvinte.aoReceber).toHaveBeenCalledWith({
@@ -86,5 +108,58 @@ describe("conectarPartida", () => {
         const { conexao, socket } = conectar();
         conexao.fechar();
         expect(socket.fechado).toBe(true);
+    });
+});
+
+describe("reconexão", () => {
+    it("a espera dobra a cada tentativa, até 8 segundos", () => {
+        expect([1, 2, 3, 4, 5, 6].map(esperaDaTentativa)).toEqual([
+            500, 1000, 2000, 4000, 8000, 8000,
+        ]);
+    });
+
+    it("quando a conexão cai, tenta de novo depois da espera", () => {
+        const { ouvinte, sockets, agendadas, cair } = conectar();
+        sockets[0]?.abrir();
+
+        cair();
+
+        expect(ouvinte.aoReconectar).toHaveBeenCalledWith(1, 500);
+        expect(sockets).toHaveLength(1);
+        agendadas[0]?.();
+        expect(sockets).toHaveLength(2);
+        expect(sockets[1]?.url).toBe(sockets[0]?.url);
+    });
+
+    it("sem conseguir voltar, espera cada vez mais", () => {
+        const { ouvinte, agendadas, cair } = conectar();
+        cair();
+        agendadas[0]?.();
+        cair();
+        expect(ouvinte.aoReconectar).toHaveBeenLastCalledWith(2, 1000);
+    });
+
+    it("ao voltar, a contagem recomeça", () => {
+        const { ouvinte, agendadas, atual, cair } = conectar();
+        cair();
+        agendadas[0]?.();
+        atual().abrir();
+        cair();
+        expect(ouvinte.aoReconectar).toHaveBeenLastCalledWith(1, 500);
+    });
+
+    it("fechar de propósito não reconecta", () => {
+        const { conexao, ouvinte, agendadas, cair } = conectar();
+        conexao.fechar();
+        cair(1000);
+        expect(ouvinte.aoReconectar).not.toHaveBeenCalled();
+        expect(agendadas).toHaveLength(0);
+    });
+
+    it("partida inexistente: desiste em vez de insistir", () => {
+        const { ouvinte, agendadas, cair } = conectar();
+        cair(FECHAMENTO_PARTIDA_INEXISTENTE);
+        expect(ouvinte.aoDesistir).toHaveBeenCalled();
+        expect(agendadas).toHaveLength(0);
     });
 });
