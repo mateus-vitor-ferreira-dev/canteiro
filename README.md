@@ -281,7 +281,7 @@ canteiro/
 ```
 
 > [!IMPORTANT]
-> **A migração para a v2.0 está em andamento.** Hoje o `backend/` ainda tem o esqueleto da v1.0, com um pacote `visao/` em Swing, e o `frontend/` está vazio. O Javalin, o pacote `api/` e o projeto Svelte entram nos próximos PRs. A árvore acima é o destino.
+> **A migração para a v2.0 está em andamento.** O `backend/` já roda com Javalin: o pacote `api/` tem o `ServidorWeb` e a primeira rota, `GET /api/dificuldades`. O `frontend/` ainda está vazio; o projeto Svelte entra no próximo PR. A árvore acima é o destino.
 
 ### Por que o backend está dividido assim
 
@@ -433,11 +433,12 @@ Com o Javalin, o servidor inteiro é algo assim, e **todo objeto é criado com `
 ```java
 var partidas = new GerenciadorPartidas(catalogo);
 
-Javalin.create(config -> config.staticFiles.add("/publico"))
-    .get("/api/ranking", ctx -> ctx.json(ranking.dezMelhores()))
-    .post("/api/partidas", ctx -> ctx.json(partidas.criar(ctx.bodyAsClass(NovaPartidaDto.class))))
-    .ws("/ws/partidas/{id}", ws -> new CanalPartida(partidas).registrar(ws))
-    .start("127.0.0.1", 7070);
+Javalin.create(config -> {
+    config.staticFiles.add("/publico", Location.CLASSPATH);
+    config.routes.get("/api/ranking", ctx -> ctx.json(ranking.dezMelhores()));
+    config.routes.post("/api/partidas", ctx -> ctx.json(partidas.criar(ctx.bodyAsClass(NovaPartidaDto.class))));
+    config.routes.ws("/ws/partidas/{id}", ws -> new CanalPartida(partidas).registrar(ws));
+}).start("127.0.0.1", 7070);
 ```
 
 ---
@@ -445,7 +446,7 @@ Javalin.create(config -> config.staticFiles.add("/publico"))
 ## 🚀 Rodando localmente
 
 > [!IMPORTANT]
-> Enquanto a [migração para a v2.0](#-estrutura-de-pastas) não termina, só o **backend** roda, e só os testes. Os comandos de frontend e do JAR completo valem a partir dos próximos PRs.
+> Enquanto a [migração para a v2.0](#-estrutura-de-pastas) não termina, só o **backend** roda: `./mvnw compile exec:java` sobe o servidor e `http://127.0.0.1:7070/api/dificuldades` já responde, mas ainda não há telas. Os comandos de frontend e o JAR com o jogo completo valem a partir do próximo PR.
 
 ### 1. Pré-requisitos
 
@@ -532,7 +533,7 @@ O `package` compila o frontend com um Node próprio, baixado dentro do projeto s
 | `'.' não é reconhecido como um comando` (Windows) | `./mvnw` é sintaxe do Linux | No CMD ou PowerShell use `mvnw.cmd` |
 | `JAVA_HOME not found` · `JAVA_HOME is not defined correctly` | O wrapper não achou o JDK | Instale o JDK 17 e aponte a variável `JAVA_HOME` para a pasta dele |
 | `O CANTEIRO exige Java 17 ou superior` | O Java ativo é antigo | `java -version`. Troque o JDK padrão ou o `JAVA_HOME` |
-| `Address already in use` · porta 7070 ocupada | O backend já está rodando em outro terminal | Feche o outro, ou encerre o processo que usa a porta |
+| `A porta 7070 já está em uso` · `Address already in use` | O backend já está rodando em outro terminal, ou outro programa usa a porta | Feche o outro. Para descobrir quem usa a porta: `ss -ltnp \| grep 7070` (Linux) ou `netstat -ano \| findstr 7070` (Windows) |
 | A tela abre, mas fica em "Reconectando..." | O backend não está rodando | Suba o terminal 1 |
 | `npm: command not found` | Node.js não instalado | Instale o Node LTS. Só é preciso para mexer no frontend |
 | `Cannot find module` depois de um `git pull` | Alguém adicionou uma dependência | `npm install` de novo |
@@ -800,7 +801,7 @@ tipo(onde): o que foi feito, no presente
 | `refactor` | Reorganização | `refactor(modelo): extrai verificação de linha completa` |
 | `chore` | Configuração | `chore: adiciona plugin do Javadoc ao pom` |
 
-✅ `feat(visao): adiciona painel de estabilidade`
+✅ `feat(api): adiciona rota do ranking`
 ❌ `mudanças` · ❌ `arrumei umas coisas` · ❌ `aaaa` · ❌ `versão final agora vai`
 
 #### 5️⃣ Envie o ramo para o GitHub
