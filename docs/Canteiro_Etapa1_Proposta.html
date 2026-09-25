@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>CANTEIRO — Proposta de Projeto Final</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Liberation Serif", "Times New Roman", Georgia, serif;
+    font-size: 10.2pt;
+    line-height: 1.34;
+    color: #16181d;
+    text-align: justify;
+    hyphens: auto;
+  }
+  .inst { text-align: center; font-size: 8.6pt; letter-spacing: .09em; text-transform: uppercase; color: #4a4f57; }
+  h1 { font-size: 15pt; text-align: center; margin: 7pt 0 1pt; letter-spacing: .02em; }
+  .sub { text-align: center; font-size: 9.6pt; color: #3d444d; margin-bottom: 9pt; }
+  .rule { border-top: 1.4pt solid #1F3864; margin: 0 0 10pt; }
+  h2 {
+    font-size: 10.4pt; margin: 11pt 0 4pt; color: #1F3864;
+    text-transform: uppercase; letter-spacing: .05em;
+    border-bottom: .5pt solid #c8cdd6; padding-bottom: 2pt;
+  }
+  h2:first-of-type { margin-top: 0; }
+  h2 { break-after: avoid-page; page-break-after: avoid; }
+  h2 + p, h2 + p + table, h2 + table, h2 + ul { break-before: avoid-page; page-break-before: avoid; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  p { margin: 0 0 5pt; }
+  .lead { font-size: 10.6pt; }
+  table { width: 100%; border-collapse: collapse; margin: 3pt 0 5pt; font-size: 9.4pt; text-align: left; }
+  th { background: #eef1f6; color: #1F3864; font-weight: 700; font-size: 8.8pt;
+       text-transform: uppercase; letter-spacing: .04em; }
+  th, td { border: .5pt solid #c8cdd6; padding: 3pt 5pt; vertical-align: top; }
+  td.k { font-weight: 700; white-space: nowrap; }
+  ul { margin: 0 0 5pt; padding-left: 15pt; }
+  li { margin-bottom: 2.2pt; }
+  .foot { margin-top: 10pt; border-top: .5pt solid #c8cdd6; padding-top: 4pt;
+          font-size: 8.4pt; color: #4a4f57; text-align: center; }
+  .nb { font-size: 9pt; color: #3d444d; }
+</style>
+</head>
+<body>
+
+<div class="inst">Universidade Federal de Lavras · Programação Aplicada à Engenharia · 2026</div>
+<h1>PROPOSTA DE PROJETO FINAL</h1>
+<div class="sub">Etapa 1 — Apresentação da proposta</div>
+<div class="rule"></div>
+
+<h2>1. Nome do projeto</h2>
+<p class="lead"><strong>CANTEIRO</strong> — jogo de encaixe de blocos com restrição de estabilidade estrutural.</p>
+
+<h2>2. Integrantes do grupo</h2>
+<table>
+  <tr><th style="width:38%">Nome completo</th><th style="width:34%">Frente principal no projeto</th><th>GitHub</th></tr>
+  <tr><td>Mateus Vitor Ferreira</td><td>Arquitetura, motor do jogo e física</td><td>@mateus-vitor-ferreira-dev</td></tr>
+  <tr><td>Marcelo Camillo De Paula Leite</td><td>Estruturas de dados, persistência e telas de apoio</td><td>@WendigoAwake</td></tr>
+  <tr><td>Wanessa Kylie Silva Medeiros</td><td>Requisitos, testes, usabilidade e documentação</td><td>@WanessaK21</td></tr>
+</table>
+<p class="nb">Grupo de três integrantes. Todos participarão da apresentação desta proposta e de cada etapa seguinte.</p>
+
+<h2>3. Resumo do projeto</h2>
+<p>Jogos de encaixe de blocos existem há quatro décadas e todos fazem a mesma coisa: peças caem, o jogador
+fecha linhas e as linhas somem. O <strong>CANTEIRO</strong> mantém a grade discreta do gênero e acrescenta uma
+restrição tirada da estática: <strong>a pilha tem massa e essa massa precisa ficar equilibrada sobre a base de
+apoio</strong>. As peças deixam de ser formas coloridas e passam a ser elementos construtivos: cada uma é
+fabricada em <strong>madeira, alvenaria, concreto ou aço</strong>, com densidade própria, e uma linha completa
+é um pavimento concluído.</p>
+<p>Enquanto o jogador joga, o programa faz a análise da obra a cada peça fixada: soma as massas, calcula o
+<strong>centro de massa horizontal</strong> e compara com o eixo da base. A distância entre os dois vira um
+<strong>índice de estabilidade</strong>, visível o tempo todo, com aviso antes do limite. Se o jogador concentrar
+carga pesada de um lado, o desvio passa do limite tolerado pelo nível e a obra <strong>desaba</strong>: as camadas
+acima da linha crítica se desprendem, caem por gravidade coluna a coluna e a pontuação é penalizada. Uma torre
+de aço encostada na parede cai antes de uma pirâmide de madeira duas vezes maior — e é esse comportamento
+contraintuitivo que o jogo ensina. Decidir <em>onde colocar carga</em> passa a valer tanto quanto decidir
+<em>qual vazio preencher</em>.</p>
+<p>O sistema é local e monousuário. As regras ficam todas no <strong>backend em Java</strong>, que serve o estado
+da partida por WebSocket a um <strong>frontend em Svelte 5 com TypeScript</strong> desenhado em Canvas no
+navegador. Estão previstas as telas de menu, seleção de dificuldade, partida, fim de partida e ranking
+persistente, além de repetição da partida jogada por jogada e de um relatório final com a evolução da
+estabilidade. Tudo é entregue em <strong>um único JAR</strong>: dois cliques sobem o servidor em 127.0.0.1 e
+abrem o jogo, sem internet e sem instalação além do Java.</p>
+
+<h2>4. Tema, originalidade e diferenciais</h2>
+<ul>
+  <li><strong>Tema distinto dos exercícios de sala</strong> e desenvolvido integralmente pelo grupo, com
+  histórico individual de contribuições no repositório público do projeto.</li>
+  <li><strong>Regra de centro de massa:</strong> não é um jogo de encaixe convencional com nova aparência, e sim
+  uma regra física adicional que muda toda a estratégia e liga o jogo ao conteúdo de engenharia.</li>
+  <li><strong>Materiais com comportamento próprio:</strong> cada material tem densidade, bônus e efeito distinto
+  ao ser fixado — o aço, por exemplo, consolida os blocos abaixo dele e resiste ao desprendimento.</li>
+  <li><strong>Colapso animado e painel de análise:</strong> a queda é reacomodada bloco a bloco e, ao fim da
+  partida, o jogo mostra a curva de estabilidade e a distribuição de materiais usados.</li>
+  <li><strong>Acessibilidade:</strong> cada material tem padrão de textura além da cor, para jogadores com
+  daltonismo.</li>
+</ul>
+
+<h2>5. Conceitos da disciplina aplicados</h2>
+<p class="nb">Nenhuma estrutura está no projeto para cumprir enunciado: cada uma existe porque o jogo precisa
+dela, e todas ficam no Java.</p>
+<table>
+  <tr><th style="width:27%">Conceito</th><th>Onde é aplicado no projeto</th></tr>
+  <tr><td class="k">Herança</td><td><em>Peca</em> abstrata especializada nas sete formas (I, O, T, S, Z, J, L) e <em>Material</em> abstrato especializado nos quatro tipos de construção</td></tr>
+  <tr><td class="k">Polimorfismo</td><td>Rotação, bônus por linha e efeito ao fixar reescritos em cada subclasse: o motor pede o comportamento sem saber o tipo, sem cadeia de <em>if</em> ou <em>switch</em></td></tr>
+  <tr><td class="k">Interfaces e encapsulamento</td><td>Separação entre modelo, controle e interface; observadores do estado da partida e elementos atualizáveis a cada ciclo</td></tr>
+  <tr><td class="k">Pilha</td><td>Peça reservada pelo jogador e histórico de jogadas, base da repetição e do desfazer do modo treino</td></tr>
+  <tr><td class="k">Fila</td><td>Fila das três próximas peças e fila concorrente de comandos entre a thread do WebSocket e o laço de 60 ciclos por segundo</td></tr>
+  <tr><td class="k">Lista</td><td>Blocos de cada peça, linhas completas e blocos desprendidos no colapso</td></tr>
+  <tr><td class="k">Tabela hash</td><td>Catálogo de materiais por código, sessões de partida por identificador e ranking por jogador, todos em tempo constante</td></tr>
+  <tr><td class="k">Matriz e vetor</td><td>Grade 10×20 do tabuleiro e vetor de massa acumulada por coluna, que torna o centro de massa imediato</td></tr>
+  <tr><td class="k">Recursividade</td><td>Reacomodação dos blocos no colapso, propagando a queda coluna a coluna</td></tr>
+  <tr><td class="k">Exceções</td><td>Leitura defensiva dos arquivos com valores padrão e validação das mensagens recebidas do navegador</td></tr>
+</table>
+
+<h2>6. Tecnologias e recursos</h2>
+<p><strong>Backend:</strong> Java 17 com Javalin 7 (HTTP e WebSocket), build em Maven. <strong>Frontend:</strong>
+Svelte 5 e TypeScript em modo estrito, tabuleiro em Canvas, build com Vite e embutido no JAR.
+<strong>Persistência:</strong> arquivos locais para materiais, configurações, ranking e repetições.
+<strong>Testes:</strong> JUnit 5 para colisão, rotação, pontuação e centro de massa; Vitest para a interface.
+<strong>Processo:</strong> Git e GitHub com board por sprint, toda tarefa virando issue, ramo e pull request
+revisado, e integração contínua executando os testes e abrindo o JAR em Linux, Windows e macOS a cada
+alteração. <strong>Documentação:</strong> Javadoc de todas as classes públicas.</p>
+
+<h2>7. Papel de cada integrante nesta etapa</h2>
+<table>
+  <tr><th style="width:31%">Integrante</th><th>Contribuição na Etapa 1 (proposta)</th></tr>
+  <tr><td class="k">Mateus Vitor Ferreira</td><td>Concepção da mecânica de estabilidade e do modelo físico simplificado; definição da arquitetura cliente-servidor local e da entrega em JAR único; redação das seções técnicas da proposta (conceitos, tecnologias e arquitetura); preparação do repositório, do board de sprints e dos diagramas.</td></tr>
+  <tr><td class="k">Marcelo Camillo De Paula Leite</td><td>Levantamento das estruturas de dados exigidas por cada mecânica e escolha justificada de cada uma; definição das telas de apoio e do formato de persistência de ranking, configurações e repetições; revisão da proposta.</td></tr>
+  <tr><td class="k">Wanessa Kylie Silva Medeiros</td><td>Consolidação dos requisitos funcionais e não funcionais, das regras de negócio e dos critérios de aceitação; escopo e público-alvo; cronograma, riscos e divisão de responsabilidades; montagem dos slides e organização da apresentação.</td></tr>
+</table>
+<p class="nb">O tema, o escopo e o roteiro da apresentação foram definidos em conjunto pelos três integrantes. A
+divisão completa por frente de trabalho, para todas as etapas, está na seção 16 da proposta detalhada do projeto.</p>
+
+<div class="foot">Repositório do projeto: github.com/mateus-vitor-ferreira-dev/canteiro · Lavras, 24 de setembro de 2026</div>
+
+</body>
+</html>
