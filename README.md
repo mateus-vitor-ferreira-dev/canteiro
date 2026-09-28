@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 35 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 35 prontos e 5 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -252,7 +252,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | 🟡 | Tela do ranking, com o nome recém-salvo em destaque (#32); falta a rota `GET /api/ranking` (#31) |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
 | RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
-| RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | ⬜ |  |
+| RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | 🟡 | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); falta a rota `GET /api/partidas/{id}/relatorio` (#70) |
 | RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ | ⬜ |  |
 | RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | ⬜ |  |
 | RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ✅ | Sons gerados no navegador (Web Audio), um por evento, com liga e desliga no botão ou na tecla M; o volume ajustável vem na tela de configurações (#38) |

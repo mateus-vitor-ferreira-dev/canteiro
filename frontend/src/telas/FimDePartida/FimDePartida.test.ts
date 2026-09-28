@@ -19,6 +19,7 @@ function montar() {
         placar: { ...estadoDeTeste().placar, pontuacao: 12340, tempoSegundos: 185 },
         aoSalvo: vi.fn(),
         aoJogarDeNovo: vi.fn(),
+        aoVerRelatorio: vi.fn(),
         aoVoltar: vi.fn(),
     };
     render(FimDePartida, props);
@@ -92,8 +93,10 @@ describe("FimDePartida", () => {
         );
     });
 
-    it("jogar de novo e voltar ao menu", async () => {
-        const { aoJogarDeNovo, aoVoltar } = montar();
+    it("jogar de novo, ver o relatório e voltar ao menu", async () => {
+        const { aoJogarDeNovo, aoVerRelatorio, aoVoltar } = montar();
+        await fireEvent.click(screen.getByRole("button", { name: "Ver relatório" }));
+        expect(aoVerRelatorio).toHaveBeenCalled();
         await fireEvent.click(screen.getByRole("button", { name: "Jogar de novo" }));
         await fireEvent.click(screen.getByRole("button", { name: "Voltar ao menu" }));
         expect(aoJogarDeNovo).toHaveBeenCalled();

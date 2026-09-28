@@ -2,13 +2,15 @@ import type { PlacarDto } from "@/api/protocolo";
 
 /**
  * As telas do jogo. A partida leva o id que o backend devolveu ao criá-la; o
- * fim leva também o placar final; o ranking pode destacar um nome.
+ * fim e o relatório levam também o placar final, para o relatório poder voltar
+ * ao resultado; o ranking pode destacar um nome.
  */
 export type Tela =
     | { nome: "menu" }
     | { nome: "nova-partida" }
     | { nome: "partida"; id: string }
     | { nome: "fim"; id: string; placar: PlacarDto }
+    | { nome: "relatorio"; id: string; placar: PlacarDto }
     | { nome: "ranking"; destaque?: string }
     | { nome: "repeticoes" }
     | { nome: "configuracoes" }

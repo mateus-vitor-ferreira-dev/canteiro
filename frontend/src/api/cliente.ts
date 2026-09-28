@@ -6,6 +6,7 @@ import type {
     NovaPartidaDto,
     PartidaCriadaDto,
     RegistroRankingDto,
+    RelatorioDto,
 } from "./protocolo";
 
 /** Código usado quando o backend nem chegou a responder. */
@@ -66,15 +67,24 @@ export async function registrarNoRanking(partidaId: string, nome: string): Promi
 
 const NAO_ENCONTRADO = 404;
 
+/** O relatório da partida: estabilidade a cada peça, colapsos e materiais (RF25). */
+export function buscarRelatorio(partidaId: string): Promise<RelatorioDto> {
+    return buscarJson<RelatorioDto>(`/api/partidas/${encodeURIComponent(partidaId)}/relatorio`);
+}
+
 /**
- * Texto para o jogador quando o ranking falha. Enquanto o backend não tem as
- * rotas do ranking, elas respondem 404: aí o aviso diz que ele ainda não existe.
+ * Texto para o jogador quando uma parte do jogo que depende do backend falha.
+ * Enquanto o backend não tem a rota, ela responde 404: aí o aviso diz que a
+ * parte ainda não existe, em vez de mostrar um código de erro.
+ *
+ * @param erro o que foi lançado
+ * @param parte como a parte é chamada na frase, como `"O ranking"`
  */
-export function mensagemDoRanking(erro: unknown): string {
+export function mensagemIndisponivel(erro: unknown, parte: string): string {
     if (erro instanceof ErroApi && erro.status === NAO_ENCONTRADO) {
-        return "O ranking ainda não está disponível nesta versão do jogo.";
+        return `${parte} ainda não está disponível nesta versão do jogo.`;
     }
-    return erro instanceof Error ? erro.message : "Não foi possível falar com o ranking.";
+    return erro instanceof Error ? erro.message : "Não foi possível falar com o jogo.";
 }
 
 async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
