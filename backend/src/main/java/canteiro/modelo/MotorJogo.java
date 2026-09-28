@@ -3,6 +3,8 @@ package canteiro.modelo;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
+import canteiro.modelo.estruturas.HistoricoJogadas;
+import canteiro.modelo.estruturas.Jogada;
 import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
 import canteiro.modelo.fisica.Colapso;
@@ -39,6 +41,7 @@ public final class MotorJogo {
     private final Placar placar;
     private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
     private final Reserva reserva = new Reserva();
+    private final HistoricoJogadas historico = new HistoricoJogadas();
     private int ciclosPorQueda;
     private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
 
@@ -79,12 +82,19 @@ public final class MotorJogo {
     }
 
     /**
-     * Aplica um comando do jogador. Comandos que não cabem no estado atual,
-     * ou que fariam a peça colidir, são ignorados.
+     * Aplica um comando do jogador e o registra no histórico (RF23). Comandos
+     * que não cabem no estado atual, ou que fariam a peça colidir, são
+     * ignorados, mas também ficam registrados: repetidos no mesmo ciclo, são
+     * ignorados de novo, e o replay dá a mesma partida. Depois do fim de jogo,
+     * nada é registrado.
      *
      * @param comando comando recebido
      */
     public void aplicar(Comando comando) {
+        if (estado.encerrada()) {
+            return;
+        }
+        historico.registrar(new Jogada(ciclo, comando));
         switch (comando) {
             case PAUSAR -> mudarEstadoSe(EstadoPartida.PECA_CAINDO, EstadoPartida.PAUSA);
             case RETOMAR -> mudarEstadoSe(EstadoPartida.PAUSA, EstadoPartida.PECA_CAINDO);
@@ -331,15 +341,6 @@ public final class MotorJogo {
     }
 
     /**
-     * Total de linhas eliminadas na partida.
-     *
-     * @return quantidade de linhas
-     */
-    public int linhasEliminadas() {
-        return placar.linhas();
-    }
-
-    /**
      * Estabilidade atual da estrutura, com o limite do nível atual.
      *
      * @return índice, desvio, centro de massa, eixo da base e alerta
@@ -355,6 +356,15 @@ public final class MotorJogo {
      */
     public AnalisadorEstrutural analisador() {
         return analisador;
+    }
+
+    /**
+     * Devolve as jogadas da partida, na ordem em que aconteceram (RF23).
+     *
+     * @return cópia imutável das jogadas, que o replay percorre
+     */
+    public List<Jogada> jogadas() {
+        return historico.emOrdem();
     }
 
     /**
