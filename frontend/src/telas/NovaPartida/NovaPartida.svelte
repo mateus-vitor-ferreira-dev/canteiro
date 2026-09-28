@@ -37,7 +37,7 @@
 </script>
 
 <section class="nova-partida">
-    <h2>Escolha a dificuldade</h2>
+    <h2 tabindex="-1">Escolha a dificuldade</h2>
 
     {#await dificuldades}
         <p class="aviso">Carregando…</p>

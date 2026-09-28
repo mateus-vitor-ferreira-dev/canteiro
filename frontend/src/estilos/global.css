@@ -19,6 +19,9 @@
     --cor-concreto: #9ea7b1;
     --cor-aco: #4e5a6b;
 
+    /* Fonte larga e pesada, de placa de obra, só para títulos. Vem dentro do JAR: funciona sem internet. */
+    --fonte-destaque: "Archivo Variable", "Arial Black", system-ui, sans-serif;
+
     font-family: Inter, "Noto Sans", system-ui, sans-serif;
     font-size: 100%;
     line-height: 1.5;
@@ -40,6 +43,11 @@ body {
 :focus-visible {
     outline: 3px solid var(--cor-foco);
     outline-offset: 2px;
+}
+
+/* Títulos recebem o foco ao trocar de tela, para o leitor de tela anunciar; não são clicáveis, então não ganham contorno. */
+h2[tabindex="-1"]:focus {
+    outline: none;
 }
 
 /* Some da tela, mas o leitor de tela lê. */
