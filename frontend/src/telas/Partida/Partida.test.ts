@@ -2,7 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/svelte";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushSync } from "svelte";
 import type { OuvinteConexao } from "@/api/conexao";
-import type { EstadoDto } from "@/api/protocolo";
+import type { EstadoDto, EventoDto } from "@/api/protocolo";
+import { Som } from "@/estado/som.svelte";
 import { estadoDeTeste } from "@/testes-apoio";
 import Partida from "./Partida.svelte";
 
@@ -11,7 +12,7 @@ beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
 });
 
-function montar() {
+function montar(som?: Som) {
     let ouvinte: OuvinteConexao | undefined;
     const conexao = { enviar: vi.fn(), fechar: vi.fn() };
     const aoSair = vi.fn();
@@ -20,15 +21,17 @@ function montar() {
         id: "abc",
         aoSair,
         aoTerminar,
+        ...(som ? { som } : {}),
         conectar: (_id: string, o: OuvinteConexao) => {
             ouvinte = o;
             return conexao;
         },
     });
     const receber = (estado: EstadoDto) => flushSync(() => ouvinte?.aoReceber(estado));
+    const evento = (e: EventoDto) => flushSync(() => ouvinte?.aoReceber(e));
     const reconectar = () => flushSync(() => ouvinte?.aoReconectar?.(1, 500));
     const desistir = () => flushSync(() => ouvinte?.aoDesistir?.());
-    return { conexao, aoSair, aoTerminar, tela, receber, reconectar, desistir };
+    return { conexao, aoSair, aoTerminar, tela, receber, evento, reconectar, desistir };
 }
 
 describe("Partida", () => {
@@ -83,6 +86,21 @@ describe("Partida", () => {
 
         await fireEvent.click(botao);
         expect(aoTerminar).toHaveBeenCalledWith(estado.placar);
+    });
+
+    it("toca o som de cada evento, e M liga e desliga sem ir ao backend", async () => {
+        const tocador = vi.fn();
+        const som = new Som(tocador, { getItem: () => null, setItem: vi.fn() });
+        const { conexao, receber, evento } = montar(som);
+        receber(estadoDeTeste());
+        evento({ tipo: "EVENTO", evento: "PECA_FIXADA", dados: {} });
+        expect(tocador).toHaveBeenCalledTimes(1);
+
+        await fireEvent.keyDown(window, { code: "KeyM" });
+        expect(som.ligado).toBe(false);
+        expect(conexao.enviar).not.toHaveBeenCalled();
+        evento({ tipo: "EVENTO", evento: "COLAPSO", dados: {} });
+        expect(tocador).toHaveBeenCalledTimes(1);
     });
 
     it("fecha a conexão ao sair da tela", () => {

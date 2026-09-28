@@ -8,11 +8,11 @@ export type Tecla = {
     rotulo: string;
     /** O que ela faz, para a legenda. */
     acao: string;
-    /** Comando enviado; `PAUSA` alterna entre pausar e retomar. */
-    comando: Comando | "PAUSA";
+    /** Comando enviado; `PAUSA` alterna entre pausar e retomar; `SOM` fica no navegador. */
+    comando: Comando | "PAUSA" | "SOM";
 };
 
-/** As teclas do jogo (RF07 a RF10, RF19). A legenda da tela é gerada daqui (RNF05). */
+/** As teclas do jogo (RF07 a RF10, RF19, RF28). A legenda da tela é gerada daqui (RNF05). */
 export const TECLAS: readonly Tecla[] = [
     { codigos: ["ArrowLeft"], rotulo: "←", acao: "Mover para a esquerda", comando: "ESQUERDA" },
     { codigos: ["ArrowRight"], rotulo: "→", acao: "Mover para a direita", comando: "DIREITA" },
@@ -42,6 +42,7 @@ export const TECLAS: readonly Tecla[] = [
         acao: "Pausar ou continuar",
         comando: "PAUSA",
     },
+    { codigos: ["KeyM"], rotulo: "M", acao: "Ligar ou desligar o som", comando: "SOM" },
 ];
 
 /**
@@ -51,13 +52,14 @@ export const TECLAS: readonly Tecla[] = [
  * @param codigo `KeyboardEvent.code`
  * @param repetida `KeyboardEvent.repeat`
  * @param pausada se a partida está pausada, para a tecla de pausa virar "retomar"
- * @returns o comando, ou `null` se a tecla não faz nada
+ * @returns o comando; `"SOM"` para ligar ou desligar o som, que não vai ao
+ *     backend; ou `null` se a tecla não faz nada
  */
 export function comandoDaTecla(
     codigo: string,
     repetida: boolean,
     pausada: boolean,
-): Comando | null {
+): Comando | "SOM" | null {
     if (repetida) {
         return null;
     }
