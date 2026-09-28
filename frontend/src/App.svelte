@@ -8,6 +8,7 @@
     import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
     import Partida from "@/telas/Partida/Partida.svelte";
     import Ranking from "@/telas/Ranking/Ranking.svelte";
+    import Relatorio from "@/telas/Relatorio/Relatorio.svelte";
 
     /** Troca a navegação nos testes. */
     let { navegacao = new Navegacao() }: { navegacao?: Navegacao } = $props();
@@ -55,12 +56,21 @@
             />
         {/key}
     {:else if navegacao.tela.nome === "fim"}
+        {@const tela = navegacao.tela}
         <FimDePartida
-            partidaId={navegacao.tela.id}
-            placar={navegacao.tela.placar}
+            partidaId={tela.id}
+            placar={tela.placar}
             aoSalvo={(nome) => navegacao.ir({ nome: "ranking", destaque: nome })}
             aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVerRelatorio={() => navegacao.ir({ ...tela, nome: "relatorio" })}
             aoVoltar={() => navegacao.voltarAoMenu()}
+        />
+    {:else if navegacao.tela.nome === "relatorio"}
+        {@const tela = navegacao.tela}
+        <Relatorio
+            partidaId={tela.id}
+            aoVoltar={() => navegacao.ir({ ...tela, nome: "fim" })}
+            aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
         />
     {:else if navegacao.tela.nome === "ranking"}
         <Ranking

@@ -1,6 +1,6 @@
 <!-- O nome do jogador para o ranking (RF21). A pontuação o backend lê da própria partida. -->
 <script lang="ts">
-    import { mensagemDoRanking, registrarNoRanking } from "@/api/cliente";
+    import { mensagemIndisponivel, registrarNoRanking } from "@/api/cliente";
 
     let {
         partidaId,
@@ -33,7 +33,7 @@
             await registrarNoRanking(partidaId, limpo);
             aoSalvo(limpo);
         } catch (falha) {
-            falhar(mensagemDoRanking(falha));
+            falhar(mensagemIndisponivel(falha, "O ranking"));
         } finally {
             salvando = false;
         }

@@ -1,6 +1,6 @@
 <!-- As dez maiores pontuações (RF22). -->
 <script lang="ts">
-    import { listarRanking, mensagemDoRanking } from "@/api/cliente";
+    import { listarRanking, mensagemIndisponivel } from "@/api/cliente";
     import LinhaRanking from "./LinhaRanking.svelte";
 
     let {
@@ -41,7 +41,7 @@
         {/if}
     {:catch erro}
         <div class="vazio">
-            <p class="aviso erro" role="alert">{mensagemDoRanking(erro)}</p>
+            <p class="aviso erro" role="alert">{mensagemIndisponivel(erro, "O ranking")}</p>
             <button
                 type="button"
                 class="principal"

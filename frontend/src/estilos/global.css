@@ -14,6 +14,10 @@
     --cor-tabuleiro: #1b2432;
     --cor-foco: #1f3864;
 
+    /* Gráficos: a série e o estado crítico, validados juntos (faixa de claridade, croma, daltonismo e contraste). */
+    --cor-serie: #2f5fb3;
+    --cor-critico: #d03b3b;
+
     --cor-madeira: #e6c48f;
     --cor-alvenaria: #c8704b;
     --cor-concreto: #9ea7b1;
