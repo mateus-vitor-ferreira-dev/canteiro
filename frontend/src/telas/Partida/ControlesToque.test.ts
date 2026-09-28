@@ -9,11 +9,13 @@ describe("ControlesToque", () => {
         await fireEvent.click(screen.getByRole("button", { name: "Mover para a esquerda" }));
         await fireEvent.click(screen.getByRole("button", { name: "Girar" }));
         await fireEvent.click(screen.getByRole("button", { name: "Queda instantânea" }));
+        await fireEvent.click(screen.getByRole("button", { name: "Guardar na reserva" }));
         await fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
         expect(aoComando.mock.calls).toEqual([
             ["ESQUERDA"],
             ["GIRAR_HORARIO"],
             ["QUEDA_INSTANTANEA"],
+            ["RESERVAR"],
             ["PAUSAR"],
         ]);
     });

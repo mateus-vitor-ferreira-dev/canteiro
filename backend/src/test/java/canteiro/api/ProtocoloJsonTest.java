@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -59,7 +60,7 @@ class ProtocoloJsonTest {
         JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motorComUmaPeca())));
 
         assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
-                "placar", "estabilidade"), campos(estado));
+                "reservada", "podeReservar", "placar", "estabilidade"), campos(estado));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
         assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos"), campos(estado.get("placar")));
         assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta"),
@@ -69,6 +70,20 @@ class ProtocoloJsonTest {
         assertEquals(3, estado.get("proximas").size());
         assertEquals(4, estado.at("/proximas/0/blocos").size(), "as próximas vêm com a forma, para a tela desenhar");
         assertEquals(4, estado.get("pecaFantasma").size());
+    }
+
+    @Test
+    void reservaVaiNoEstado() throws Exception {
+        MotorJogo motor = motorComUmaPeca();
+        JsonNode antes = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertTrue(antes.get("reservada").isNull(), "nada guardado ainda");
+        assertTrue(antes.get("podeReservar").asBoolean());
+
+        motor.aplicar(canteiro.modelo.Comando.RESERVAR);
+        JsonNode depois = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertEquals(List.of("forma", "material", "blocos"), campos(depois.get("reservada")));
+        assertEquals(4, depois.at("/reservada/blocos").size());
+        assertFalse(depois.get("podeReservar").asBoolean());
     }
 
     @Test

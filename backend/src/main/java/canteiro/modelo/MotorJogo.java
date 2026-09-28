@@ -3,6 +3,7 @@ package canteiro.modelo;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
+import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
 import canteiro.modelo.fisica.Colapso;
 import canteiro.modelo.fisica.Estabilidade;
@@ -37,6 +38,7 @@ public final class MotorJogo {
     private final FontePecas fonte;
     private final Placar placar;
     private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
+    private final Reserva reserva = new Reserva();
     private int ciclosPorQueda;
     private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
 
@@ -106,14 +108,30 @@ public final class MotorJogo {
             }
             case GIRAR_HORARIO -> mudou |= emQueda.girar(true);
             case GIRAR_ANTI_HORARIO -> mudou |= emQueda.girar(false);
+            case RESERVAR -> reservar();
             default -> {
-                // RESERVAR e DESFAZER dependem da reserva e do histórico (#13, #14, #26)
+                // DESFAZER depende do modo treino (#37)
             }
         }
     }
 
+    /**
+     * Guarda a peça atual na reserva e põe no topo a que estava guardada, ou
+     * a próxima da fila na primeira vez (RN05). Só uma troca por peça.
+     */
+    private void reservar() {
+        if (reserva.podeTrocar()) {
+            entrar(reserva.trocar(emQueda.peca()).orElseGet(fonte::proxima));
+        }
+    }
+
     private void gerarPeca() {
-        emQueda = PecaEmQueda.nascer(fonte.proxima(), tabuleiro);
+        reserva.liberar();
+        entrar(fonte.proxima());
+    }
+
+    private void entrar(Peca peca) {
+        emQueda = PecaEmQueda.nascer(peca, tabuleiro);
         ciclosDesdeQueda = 0;
         mudou = true;
         if (emQueda.colide()) {
@@ -274,6 +292,24 @@ public final class MotorJogo {
      */
     public Peca pecaAtual() {
         return emQueda == null ? null : emQueda.peca();
+    }
+
+    /**
+     * Devolve a peça guardada na reserva (RF10).
+     *
+     * @return a peça, ou {@code null} se nada foi guardado ainda
+     */
+    public Peca pecaReservada() {
+        return reserva.guardada().orElse(null);
+    }
+
+    /**
+     * Informa se o jogador ainda pode trocar a peça atual pela reservada.
+     *
+     * @return {@code false} depois de uma troca, até a próxima peça sair da fila
+     */
+    public boolean podeReservar() {
+        return reserva.podeTrocar();
     }
 
     /**

@@ -25,14 +25,16 @@ import java.util.List;
  * @param pecaAtual    peça caindo, ou {@code null}
  * @param pecaFantasma onde a peça atual vai pousar, como pares [linha, coluna]
  * @param proximas     as três próximas peças, com as células da forma relativas ao quadrado dela
+ * @param reservada    peça guardada na reserva, com as células da forma, ou {@code null} se não há
+ * @param podeReservar se a troca com a reserva está liberada nesta peça
  * @param placar       pontuação, linhas, nível, colapsos e tempo
  * @param estabilidade índice, desvio, limite, centro de massa, eixo e alerta
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
 public record EstadoDto(String tipo, long ciclo, String estado, List<List<String>> tabuleiro, PecaDto pecaAtual,
-                        List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PlacarDto placar,
-                        EstabilidadeDto estabilidade) {
+                        List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PecaDto reservada,
+                        boolean podeReservar, PlacarDto placar, EstabilidadeDto estabilidade) {
 
     /** Valor de {@code tipo}. */
     public static final String TIPO = "ESTADO";
@@ -48,10 +50,12 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      */
     public static EstadoDto de(MotorJogo motor) {
         Peca atual = motor.pecaAtual();
+        Peca reservada = motor.pecaReservada();
         return new EstadoDto(TIPO, motor.ciclo(), motor.estado().name(), grade(motor),
                 atual == null ? null : PecaDto.de(atual, motor.celulasPecaAtual()),
                 pares(motor.celulasFantasma()),
                 motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
+                reservada == null ? null : PecaDto.de(reservada, reservada.celulas()), motor.podeReservar(),
                 PlacarDto.de(motor.placar(), motor.ciclo()), EstabilidadeDto.de(motor.estabilidade()));
     }
 
