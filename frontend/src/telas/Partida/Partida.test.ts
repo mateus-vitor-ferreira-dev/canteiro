@@ -15,9 +15,11 @@ function montar() {
     let ouvinte: OuvinteConexao | undefined;
     const conexao = { enviar: vi.fn(), fechar: vi.fn() };
     const aoSair = vi.fn();
+    const aoTerminar = vi.fn();
     const tela = render(Partida, {
         id: "abc",
         aoSair,
+        aoTerminar,
         conectar: (_id: string, o: OuvinteConexao) => {
             ouvinte = o;
             return conexao;
@@ -26,7 +28,7 @@ function montar() {
     const receber = (estado: EstadoDto) => flushSync(() => ouvinte?.aoReceber(estado));
     const reconectar = () => flushSync(() => ouvinte?.aoReconectar?.(1, 500));
     const desistir = () => flushSync(() => ouvinte?.aoDesistir?.());
-    return { conexao, aoSair, tela, receber, reconectar, desistir };
+    return { conexao, aoSair, aoTerminar, tela, receber, reconectar, desistir };
 }
 
 describe("Partida", () => {
@@ -70,6 +72,17 @@ describe("Partida", () => {
 
         await fireEvent.click(screen.getByRole("button", { name: "Jogar de novo" }));
         expect(aoSair).toHaveBeenCalled();
+    });
+
+    it("no fim de jogo, Ver resultado recebe o foco e entrega o placar final", async () => {
+        const { aoTerminar, receber } = montar();
+        const estado = estadoDeTeste({ estado: "FIM_DE_JOGO" });
+        receber(estado);
+        const botao = screen.getByRole("button", { name: "Ver resultado" });
+        expect(botao).toHaveFocus();
+
+        await fireEvent.click(botao);
+        expect(aoTerminar).toHaveBeenCalledWith(estado.placar);
     });
 
     it("fecha a conexão ao sair da tela", () => {

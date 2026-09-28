@@ -3,16 +3,17 @@
     import { tick } from "svelte";
     import { Navegacao, type NomeTela } from "@/estado/navegacao.svelte";
     import Aviso from "@/telas/Aviso/Aviso.svelte";
+    import FimDePartida from "@/telas/FimDePartida/FimDePartida.svelte";
     import Menu from "@/telas/Menu/Menu.svelte";
     import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
     import Partida from "@/telas/Partida/Partida.svelte";
+    import Ranking from "@/telas/Ranking/Ranking.svelte";
 
     /** Troca a navegação nos testes. */
     let { navegacao = new Navegacao() }: { navegacao?: Navegacao } = $props();
 
     /** Telas que ainda não existem: o menu já leva até elas, com um aviso. */
     const EM_BREVE: Partial<Record<NomeTela, string>> = {
-        ranking: "Ranking",
         repeticoes: "Repetições",
         configuracoes: "Configurações",
     };
@@ -45,9 +46,28 @@
         </button>
         <NovaPartida aoCriar={(id) => navegacao.ir({ nome: "partida", id })} />
     {:else if navegacao.tela.nome === "partida"}
-        {#key navegacao.tela.id}
-            <Partida id={navegacao.tela.id} aoSair={() => navegacao.ir({ nome: "nova-partida" })} />
+        {@const id = navegacao.tela.id}
+        {#key id}
+            <Partida
+                {id}
+                aoSair={() => navegacao.ir({ nome: "nova-partida" })}
+                aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar })}
+            />
         {/key}
+    {:else if navegacao.tela.nome === "fim"}
+        <FimDePartida
+            partidaId={navegacao.tela.id}
+            placar={navegacao.tela.placar}
+            aoSalvo={(nome) => navegacao.ir({ nome: "ranking", destaque: nome })}
+            aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
+    {:else if navegacao.tela.nome === "ranking"}
+        <Ranking
+            destaque={navegacao.tela.destaque}
+            aoJogar={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
     {:else if navegacao.tela.nome === "saida"}
         <Aviso
             titulo="Até a próxima obra"

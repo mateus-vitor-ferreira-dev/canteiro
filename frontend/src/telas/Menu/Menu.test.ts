@@ -35,7 +35,7 @@ describe("Menu", () => {
 
     it("avisa quais telas ainda não existem", () => {
         render(Menu, { aoEscolher: vi.fn() });
-        expect(screen.getAllByText("Em breve")).toHaveLength(3);
+        expect(screen.getAllByText("Em breve")).toHaveLength(2);
     });
 
     it("descreve a torre para o leitor de tela", () => {

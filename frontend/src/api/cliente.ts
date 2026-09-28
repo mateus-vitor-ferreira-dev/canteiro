@@ -1,9 +1,11 @@
 import type {
     CodigoDificuldade,
     DificuldadeDto,
+    EntradaRankingDto,
     ErroDto,
     NovaPartidaDto,
     PartidaCriadaDto,
+    RegistroRankingDto,
 } from "./protocolo";
 
 /** Código usado quando o backend nem chegou a responder. */
@@ -44,7 +46,43 @@ export function criarPartida(dificuldade: CodigoDificuldade): Promise<PartidaCri
     });
 }
 
+/** As dez maiores pontuações, da maior para a menor (RF22). */
+export function listarRanking(): Promise<EntradaRankingDto[]> {
+    return buscarJson<EntradaRankingDto[]>("/api/ranking");
+}
+
+/**
+ * Registra no ranking a partida encerrada, com o nome do jogador (RF21). A
+ * pontuação o backend lê da própria partida.
+ */
+export async function registrarNoRanking(partidaId: string, nome: string): Promise<void> {
+    const corpo: RegistroRankingDto = { partidaId, nome };
+    await buscar("/api/ranking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+    });
+}
+
+const NAO_ENCONTRADO = 404;
+
+/**
+ * Texto para o jogador quando o ranking falha. Enquanto o backend não tem as
+ * rotas do ranking, elas respondem 404: aí o aviso diz que ele ainda não existe.
+ */
+export function mensagemDoRanking(erro: unknown): string {
+    if (erro instanceof ErroApi && erro.status === NAO_ENCONTRADO) {
+        return "O ranking ainda não está disponível nesta versão do jogo.";
+    }
+    return erro instanceof Error ? erro.message : "Não foi possível falar com o ranking.";
+}
+
 async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
+    return (await (await buscar(caminho, opcoes)).json()) as T;
+}
+
+/** Faz a requisição e transforma falha de rede ou resposta de erro em {@link ErroApi}. */
+async function buscar(caminho: string, opcoes: RequestInit = {}): Promise<Response> {
     let resposta: Response;
     try {
         resposta = await fetch(caminho, {
@@ -62,7 +100,7 @@ async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise
         const erro = await lerErro(resposta);
         throw new ErroApi(erro.erro, erro.mensagem, resposta.status);
     }
-    return (await resposta.json()) as T;
+    return resposta;
 }
 
 async function lerErro(resposta: Response): Promise<ErroDto> {
