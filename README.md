@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 32 prontos e 3 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 33 prontos e 3 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -228,7 +228,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 
 | Código | Descrição | Prior. | Lado | Status | Onde está |
 |---|---|:-:|:-:|:-:|---|
-| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
+| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; ranking, repetições e configurações avisam que estão em construção (#26) |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25) |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ✅ | O motor gera peças continuamente (#20) pelo método da sacola, com semente (#12) |
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12) |
