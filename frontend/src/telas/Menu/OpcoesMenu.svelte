@@ -23,7 +23,6 @@
             tela: { nome: "configuracoes" },
             nome: "Configurações",
             descricao: "Teclas e volume.",
-            emBreve: true,
         },
     ];
 </script>

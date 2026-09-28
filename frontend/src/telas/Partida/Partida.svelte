@@ -2,20 +2,17 @@
 <script lang="ts">
     import { untrack } from "svelte";
     import type { Comando, PlacarDto } from "@/api/protocolo";
-    import LegendaMateriais from "@/componentes/LegendaMateriais.svelte";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
     import Tabuleiro from "@/componentes/Tabuleiro.svelte";
     import { tamanhoDaCelula } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { Som } from "@/estado/som.svelte";
     import { comandoDaTecla } from "@/estado/teclado";
-    import BotaoSom from "./BotaoSom.svelte";
     import CamadaPartida from "./CamadaPartida.svelte";
+    import ColunaApoio from "./ColunaApoio.svelte";
     import ControlesToque from "./ControlesToque.svelte";
-    import FilaProximas from "./FilaProximas.svelte";
-    import LegendaTeclas from "./LegendaTeclas.svelte";
-    import PecaReservada from "./PecaReservada.svelte";
     import Placar from "./Placar.svelte";
 
     let {
@@ -81,7 +78,8 @@
     }
 
     function aoTeclar(evento: KeyboardEvent) {
-        const comando = comandoDaTecla(evento.code, evento.repeat, partida.pausada);
+        const tabela = configuracoes.tabela;
+        const comando = comandoDaTecla(evento.code, evento.repeat, partida.pausada, tabela);
         if (comando === "SOM") {
             som.alternar();
         } else if (comando && !partida.encerrada) {
@@ -126,15 +124,7 @@
         <ControlesToque aoComando={aoTocar} pausada={partida.pausada} />
     </div>
 
-    <aside>
-        <BotaoSom {som} />
-        {#if partida.estado}
-            <PecaReservada peca={partida.estado.reservada} liberada={partida.estado.podeReservar} />
-            <FilaProximas proximas={partida.estado.proximas} />
-        {/if}
-        <LegendaMateriais />
-        <LegendaTeclas />
-    </aside>
+    <ColunaApoio estado={partida.estado} {som} />
 </div>
 
 <style>
@@ -161,10 +151,6 @@
     }
     .palco {
         position: relative;
-    }
-    aside {
-        grid-area: aside;
-        width: 100%;
     }
     /* Tablet: o tabuleiro à esquerda e todo o resto numa coluna ao lado. */
     @media (min-width: 768px) {

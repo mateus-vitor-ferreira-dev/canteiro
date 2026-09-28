@@ -1,12 +1,12 @@
-<!-- A legenda das teclas, sempre visível durante a partida (RNF05). Sai da mesma tabela que o teclado usa. -->
+<!-- A legenda das teclas, sempre visível durante a partida (RNF05). Sai da mesma tabela que o teclado usa, com as teclas que o jogador trocou. -->
 <script lang="ts">
-    import { TECLAS } from "@/estado/teclado";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
 </script>
 
 <section class="legenda" aria-label="Teclas">
     <h2>Teclas</h2>
     <dl>
-        {#each TECLAS as tecla (tecla.rotulo)}
+        {#each configuracoes.tabela as tecla (tecla.comando)}
             <dt><kbd>{tecla.rotulo}</kbd></dt>
             <dd>{tecla.acao}</dd>
         {/each}

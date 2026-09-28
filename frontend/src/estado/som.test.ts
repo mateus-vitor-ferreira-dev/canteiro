@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { EventoDto } from "@/api/protocolo";
-import { Som, VOLUME_PADRAO } from "./som.svelte";
+import { VOLUME_PADRAO } from "./configuracoes.svelte";
+import { Som } from "./som.svelte";
 
 const FIXADA: EventoDto = { tipo: "EVENTO", evento: "PECA_FIXADA", dados: {} };
 const NIVEL: EventoDto = { tipo: "EVENTO", evento: "NIVEL_SUBIU", dados: {} };
@@ -20,7 +21,17 @@ describe("Som", () => {
     it("toca o som do evento no volume atual", () => {
         const tocador = vi.fn();
         new Som(tocador, armazenamento()).tocar(FIXADA);
-        expect(tocador).toHaveBeenCalledWith(expect.any(Array), VOLUME_PADRAO);
+        expect(tocador).toHaveBeenCalledWith(expect.any(Array), VOLUME_PADRAO / 100);
+    });
+
+    it("usa o volume escolhido na hora de tocar", () => {
+        const tocador = vi.fn();
+        let volume = 0.2;
+        const som = new Som(tocador, armazenamento(), () => volume);
+        som.tocar(FIXADA);
+        volume = 0.9;
+        som.tocar(FIXADA);
+        expect(tocador.mock.calls.map((c) => c[1])).toEqual([0.2, 0.9]);
     });
 
     it("evento sem som não chama o tocador", () => {

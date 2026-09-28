@@ -1,5 +1,6 @@
 import type {
     CodigoDificuldade,
+    ConfiguracoesDto,
     DificuldadeDto,
     EntradaRankingDto,
     ErroDto,
@@ -66,6 +67,20 @@ export async function registrarNoRanking(partidaId: string, nome: string): Promi
 }
 
 const NAO_ENCONTRADO = 404;
+
+/** As teclas e o volume salvos (RF27). */
+export function lerConfiguracoes(): Promise<ConfiguracoesDto> {
+    return buscarJson<ConfiguracoesDto>("/api/configuracoes");
+}
+
+/** Salva as teclas e o volume. O backend recusa tecla repetida e volume fora de 0 a 100. */
+export async function salvarConfiguracoes(configuracoes: ConfiguracoesDto): Promise<void> {
+    await buscar("/api/configuracoes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(configuracoes),
+    });
+}
 
 /** O relatório da partida: estabilidade a cada peça, colapsos e materiais (RF25). */
 export function buscarRelatorio(partidaId: string): Promise<RelatorioDto> {

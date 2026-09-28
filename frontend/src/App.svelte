@@ -2,7 +2,9 @@
 <script lang="ts">
     import { tick } from "svelte";
     import { Navegacao, type NomeTela } from "@/estado/navegacao.svelte";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
     import Aviso from "@/telas/Aviso/Aviso.svelte";
+    import Configuracoes from "@/telas/Configuracoes/Configuracoes.svelte";
     import FimDePartida from "@/telas/FimDePartida/FimDePartida.svelte";
     import Menu from "@/telas/Menu/Menu.svelte";
     import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
@@ -16,10 +18,12 @@
     /** Telas que ainda não existem: o menu já leva até elas, com um aviso. */
     const EM_BREVE: Partial<Record<NomeTela, string>> = {
         repeticoes: "Repetições",
-        configuracoes: "Configurações",
     };
 
     let principal: HTMLElement | undefined = $state();
+
+    // Teclas e volume do jogador: se não carregarem, o jogo segue com o padrão.
+    void configuracoes.carregar();
 
     // Ao trocar de tela, o foco vai para o título dela: quem usa teclado ou
     // leitor de tela sabe onde está. O menu e a partida cuidam do próprio foco.
@@ -78,6 +82,8 @@
             aoJogar={() => navegacao.ir({ nome: "nova-partida" })}
             aoVoltar={() => navegacao.voltarAoMenu()}
         />
+    {:else if navegacao.tela.nome === "configuracoes"}
+        <Configuracoes aoVoltar={() => navegacao.voltarAoMenu()} />
     {:else if navegacao.tela.nome === "saida"}
         <Aviso
             titulo="Até a próxima obra"
