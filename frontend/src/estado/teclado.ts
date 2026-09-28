@@ -52,6 +52,7 @@ export const TECLAS: readonly Tecla[] = [
  * @param codigo `KeyboardEvent.code`
  * @param repetida `KeyboardEvent.repeat`
  * @param pausada se a partida está pausada, para a tecla de pausa virar "retomar"
+ * @param teclas a tabela em uso, com as teclas que o jogador trocou
  * @returns o comando; `"SOM"` para ligar ou desligar o som, que não vai ao
  *     backend; ou `null` se a tecla não faz nada
  */
@@ -59,11 +60,12 @@ export function comandoDaTecla(
     codigo: string,
     repetida: boolean,
     pausada: boolean,
+    teclas: readonly Tecla[] = TECLAS,
 ): Comando | "SOM" | null {
     if (repetida) {
         return null;
     }
-    const tecla = TECLAS.find((t) => t.codigos.includes(codigo));
+    const tecla = teclas.find((t) => t.codigos.includes(codigo));
     if (!tecla) {
         return null;
     }
@@ -71,4 +73,64 @@ export function comandoDaTecla(
         return pausada ? "RETOMAR" : "PAUSAR";
     }
     return tecla.comando;
+}
+
+/** O que uma tecla faz: um comando do jogo, a pausa (que alterna) ou o som. */
+export type AcaoTecla = Tecla["comando"];
+
+/** As teclas que o jogador trocou, por ação. Ação que não aparece fica com a padrão. */
+export type TeclasPersonalizadas = Partial<Record<AcaoTecla, string[]>>;
+
+/**
+ * A tabela em uso: a padrão, com as teclas trocadas pelo jogador (RF27). O
+ * rótulo da legenda sai das teclas novas.
+ */
+export function montarTeclas(personalizadas: TeclasPersonalizadas): Tecla[] {
+    return TECLAS.map((tecla) => {
+        const codigos = personalizadas[tecla.comando];
+        if (!codigos || codigos.length === 0) {
+            return tecla;
+        }
+        return { ...tecla, codigos, rotulo: codigos.map(rotuloDaTecla).join(" ou ") };
+    });
+}
+
+const NOMES: Record<string, string> = {
+    ArrowLeft: "←",
+    ArrowRight: "→",
+    ArrowUp: "↑",
+    ArrowDown: "↓",
+    Space: "Espaço",
+    Escape: "Esc",
+    Enter: "Enter",
+    Backspace: "Apagar",
+    Minus: "-",
+    Equal: "=",
+    Comma: ",",
+    Period: ".",
+};
+
+/**
+ * Como uma tecla aparece para o jogador: `KeyA` vira "A", `Digit1` vira "1",
+ * `ArrowUp` vira "↑". Pontuação que muda de lugar entre layouts (ABNT2, EUA)
+ * fica com o nome do código, para a legenda nunca mostrar a tecla errada.
+ */
+export function rotuloDaTecla(codigo: string): string {
+    if (NOMES[codigo]) {
+        return NOMES[codigo];
+    }
+    const letraOuNumero = /^(?:Key|Digit)(.)$/.exec(codigo);
+    if (letraOuNumero?.[1]) {
+        return letraOuNumero[1];
+    }
+    const teclado = /^Numpad(.+)$/.exec(codigo);
+    return teclado?.[1] ? `Num ${teclado[1]}` : codigo;
+}
+
+/**
+ * Teclas que não podem virar comando: Tab é como se anda pela página, e as
+ * modificadoras (Shift, Ctrl, Alt) sozinhas não são um toque de verdade.
+ */
+export function teclaReservada(codigo: string): boolean {
+    return /^(Tab|Shift|Control|Alt|Meta|OS|CapsLock|Fn)/.test(codigo);
 }

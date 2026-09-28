@@ -72,6 +72,20 @@ export type RelatorioDto = {
     materiais: Record<string, number>;
 };
 
+/**
+ * As configurações do jogador, em `GET` e `PUT /api/configuracoes` (RF27).
+ * Espelho de `ConfiguracoesDto`, que o backend cria na #71.
+ */
+export type ConfiguracoesDto = {
+    /**
+     * As teclas de cada ação (`ESQUERDA`, `RESERVAR`, `PAUSA`, `SOM`...), como
+     * valores de `KeyboardEvent.code`. Ação que não aparece fica com a padrão.
+     */
+    teclas: Record<string, string[]>;
+    /** Volume dos efeitos, de 0 a 100. */
+    volume: number;
+};
+
 /** Comandos que o jogador envia pelo WebSocket. Espelho do enum `Comando`. */
 export type Comando =
     | "ESQUERDA"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TECLAS, comandoDaTecla } from "./teclado";
+import { TECLAS, comandoDaTecla, montarTeclas, rotuloDaTecla, teclaReservada } from "./teclado";
 
 describe("comandoDaTecla", () => {
     it("traduz as setas, o espaço e as letras", () => {
@@ -37,5 +37,42 @@ describe("comandoDaTecla", () => {
             expect(tecla.acao).not.toBe("");
             expect(tecla.codigos.length).toBeGreaterThan(0);
         }
+    });
+});
+
+describe("teclas personalizadas", () => {
+    it("troca as teclas de uma ação e refaz o rótulo da legenda", () => {
+        const teclas = montarTeclas({ ESQUERDA: ["KeyA"], PAUSA: ["KeyP", "Space"] });
+        const esquerda = teclas.find((t) => t.comando === "ESQUERDA");
+        expect(esquerda?.codigos).toEqual(["KeyA"]);
+        expect(esquerda?.rotulo).toBe("A");
+        expect(teclas.find((t) => t.comando === "PAUSA")?.rotulo).toBe("P ou Espaço");
+    });
+
+    it("ação sem troca fica com a tecla padrão", () => {
+        const padrao = TECLAS.find((t) => t.comando === "DIREITA");
+        expect(montarTeclas({}).find((t) => t.comando === "DIREITA")).toEqual(padrao);
+        expect(montarTeclas({ DIREITA: [] }).find((t) => t.comando === "DIREITA")).toEqual(padrao);
+    });
+
+    it("o comando segue a tabela em uso", () => {
+        const teclas = montarTeclas({ ESQUERDA: ["KeyA"] });
+        expect(comandoDaTecla("KeyA", false, false, teclas)).toBe("ESQUERDA");
+        expect(comandoDaTecla("ArrowLeft", false, false, teclas)).toBeNull();
+    });
+
+    it("dá nome às teclas comuns e mantém o código das raras", () => {
+        expect(rotuloDaTecla("KeyW")).toBe("W");
+        expect(rotuloDaTecla("Digit7")).toBe("7");
+        expect(rotuloDaTecla("ArrowUp")).toBe("↑");
+        expect(rotuloDaTecla("Numpad4")).toBe("Num 4");
+        expect(rotuloDaTecla("Semicolon")).toBe("Semicolon");
+    });
+
+    it("Tab e as modificadoras sozinhas não podem virar comando", () => {
+        for (const codigo of ["Tab", "ShiftLeft", "ControlRight", "AltLeft", "MetaLeft"]) {
+            expect(teclaReservada(codigo)).toBe(true);
+        }
+        expect(teclaReservada("KeyA")).toBe(false);
     });
 });
