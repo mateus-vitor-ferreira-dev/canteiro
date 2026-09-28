@@ -59,6 +59,19 @@ export type RegistroRankingDto = {
     nome: string;
 };
 
+/**
+ * O relatório da partida, como vem de `GET /api/partidas/{id}/relatorio`
+ * (RF25). Espelho de `RelatorioDto`, que o backend cria na #70.
+ */
+export type RelatorioDto = {
+    /** Índice de estabilidade logo depois de cada peça fixada, de 1 (desvio nulo) a 0, na ordem. */
+    indices: number[];
+    /** Número de cada peça (a partir de 1) cuja fixação derrubou a estrutura. */
+    colapsos: number[];
+    /** Quantas peças de cada material foram fixadas, pelo código do material. */
+    materiais: Record<string, number>;
+};
+
 /** Comandos que o jogador envia pelo WebSocket. Espelho do enum `Comando`. */
 export type Comando =
     | "ESQUERDA"

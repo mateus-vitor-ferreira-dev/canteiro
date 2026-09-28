@@ -9,6 +9,7 @@
         placar,
         aoSalvo,
         aoJogarDeNovo,
+        aoVerRelatorio,
         aoVoltar,
     }: {
         /** Partida encerrada. */
@@ -19,6 +20,8 @@
         aoSalvo: (nome: string) => void;
         /** Chamado para escolher a dificuldade de outra partida. */
         aoJogarDeNovo: () => void;
+        /** Chamado para abrir o relatório da partida. */
+        aoVerRelatorio: () => void;
         /** Chamado para voltar ao menu. */
         aoVoltar: () => void;
     } = $props();
@@ -57,6 +60,7 @@
         <FormularioRanking {partidaId} {aoSalvo} />
         <div class="outras">
             <button type="button" class="jogar" onclick={aoJogarDeNovo}>Jogar de novo</button>
+            <button type="button" class="relatorio" onclick={aoVerRelatorio}>Ver relatório</button>
             <button type="button" class="voltar" onclick={aoVoltar}>Voltar ao menu</button>
         </div>
     </div>
@@ -147,6 +151,11 @@
     .jogar {
         color: #fff;
         background: var(--cor-marinho);
+    }
+    .relatorio {
+        color: var(--cor-marinho);
+        background: var(--cor-cartao);
+        border: 1px solid var(--cor-borda);
     }
     .voltar {
         color: var(--cor-marinho);
