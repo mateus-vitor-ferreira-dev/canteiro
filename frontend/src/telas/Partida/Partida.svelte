@@ -1,5 +1,6 @@
 <!-- A partida: tabuleiro, placar, próximas peças e legendas. Teclado e toque viram comando pelo WebSocket. -->
 <script lang="ts">
+    import { untrack } from "svelte";
     import type { Comando, PlacarDto } from "@/api/protocolo";
     import LegendaMateriais from "@/componentes/LegendaMateriais.svelte";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
@@ -7,7 +8,9 @@
     import { tamanhoDaCelula } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
+    import { Som } from "@/estado/som.svelte";
     import { comandoDaTecla } from "@/estado/teclado";
+    import BotaoSom from "./BotaoSom.svelte";
     import CamadaPartida from "./CamadaPartida.svelte";
     import ControlesToque from "./ControlesToque.svelte";
     import FilaProximas from "./FilaProximas.svelte";
@@ -20,6 +23,7 @@
         aoSair,
         aoTerminar,
         conectar,
+        som = new Som(),
     }: {
         /** Id da partida criada em `POST /api/partidas`. */
         id: string;
@@ -29,6 +33,8 @@
         aoTerminar: (placar: PlacarDto) => void;
         /** Troca a conexão nos testes. */
         conectar?: Conectar;
+        /** Troca os sons nos testes. */
+        som?: Som;
     } = $props();
 
     // A partida é criada uma vez, com o id recebido; trocar de partida é montar a tela de novo.
@@ -36,6 +42,14 @@
     const partida = new PartidaAoVivo(id, conectar);
 
     $effect(() => () => partida.encerrar());
+
+    // Cada evento novo toca o seu som. Ligar o som não repete o último evento.
+    $effect(() => {
+        const evento = partida.ultimoEvento;
+        if (evento) {
+            untrack(() => som.tocar(evento));
+        }
+    });
 
     let larguraJanela = $state(1280);
     let alturaJanela = $state(800);
@@ -68,7 +82,9 @@
 
     function aoTeclar(evento: KeyboardEvent) {
         const comando = comandoDaTecla(evento.code, evento.repeat, partida.pausada);
-        if (comando && !partida.encerrada) {
+        if (comando === "SOM") {
+            som.alternar();
+        } else if (comando && !partida.encerrada) {
             evento.preventDefault();
             partida.enviar(comando);
         }
@@ -111,6 +127,7 @@
     </div>
 
     <aside>
+        <BotaoSom {som} />
         {#if partida.estado}
             <PecaReservada peca={partida.estado.reservada} liberada={partida.estado.podeReservar} />
             <FilaProximas proximas={partida.estado.proximas} />
