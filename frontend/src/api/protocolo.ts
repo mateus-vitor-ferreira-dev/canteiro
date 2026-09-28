@@ -106,6 +106,10 @@ export type EstadoDto = {
     pecaAtual: PecaDto | null;
     pecaFantasma: Posicao[];
     proximas: PecaDto[];
+    /** Peça guardada na reserva, com as células no quadrado da forma, ou `null` se não há. */
+    reservada: PecaDto | null;
+    /** Se a troca com a reserva está liberada nesta peça (RN05). */
+    podeReservar: boolean;
     placar: PlacarDto;
     estabilidade: EstabilidadeDto;
 };

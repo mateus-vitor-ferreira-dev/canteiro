@@ -19,6 +19,7 @@
         girar: "M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5",
         descer: "M12 5v14m-6-6 6 6 6-6",
         cair: "m6 5 6 6 6-6M6 12l6 6 6-6",
+        reservar: "M4 9h16v10H4zM8 5h8M10 13h4",
         pausar: "M9 5v14M15 5v14",
         continuar: "M8 5v14l11-7z",
     };
@@ -29,6 +30,7 @@
         { comando: "DIREITA", rotulo: "Mover para a direita", icone: ICONES.direita },
         { comando: "DESCER", rotulo: "Descer uma linha", icone: ICONES.descer },
         { comando: "QUEDA_INSTANTANEA", rotulo: "Queda instantânea", icone: ICONES.cair },
+        { comando: "RESERVAR", rotulo: "Guardar na reserva", icone: ICONES.reservar },
     ];
 </script>
 
@@ -57,7 +59,7 @@
 <style>
     .controles {
         display: grid;
-        grid-template-columns: repeat(6, minmax(44px, 56px));
+        grid-template-columns: repeat(auto-fit, minmax(44px, 56px));
         gap: 0.5rem;
         justify-content: center;
     }

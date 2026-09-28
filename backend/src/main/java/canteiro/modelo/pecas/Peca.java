@@ -125,6 +125,14 @@ public abstract class Peca {
     }
 
     /**
+     * Volta a peça para a rotação com que ela nasce. A peça guardada na
+     * reserva sai dela de pé, como se viesse da fila.
+     */
+    public void endireitar() {
+        rotacao = 0;
+    }
+
+    /**
      * Posições ocupadas pela peça na rotação atual, relativas ao canto
      * superior esquerdo da matriz da forma.
      *
