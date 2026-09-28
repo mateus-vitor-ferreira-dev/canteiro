@@ -1,5 +1,32 @@
 import { describe, expect, it } from "vitest";
-import { corCss, formatarColunas, formatarSegundos } from "./formatacao";
+import {
+    corCss,
+    formatarColunas,
+    formatarData,
+    formatarDuracao,
+    formatarSegundos,
+} from "./formatacao";
+
+describe("formatarDuracao", () => {
+    it("só segundos abaixo de um minuto", () => {
+        expect(formatarDuracao(45)).toBe("45 s");
+        expect(formatarDuracao(0)).toBe("0 s");
+    });
+
+    it("minutos e segundos com dois dígitos", () => {
+        expect(formatarDuracao(185)).toBe("3 min 05 s");
+    });
+});
+
+describe("formatarData", () => {
+    it("converte a data ISO para o formato brasileiro, sem mudar o dia pelo fuso", () => {
+        expect(formatarData("2026-09-28")).toBe("28/09/2026");
+    });
+
+    it("devolve o texto como veio se ele não for uma data", () => {
+        expect(formatarData("ontem")).toBe("ontem");
+    });
+});
 
 describe("formatarColunas", () => {
     it("usa vírgula decimal e plural a partir de duas colunas", () => {

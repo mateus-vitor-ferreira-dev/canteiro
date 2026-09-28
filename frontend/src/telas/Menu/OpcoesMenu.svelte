@@ -12,7 +12,6 @@
             tela: { nome: "ranking" },
             nome: "Ranking",
             descricao: "As dez maiores pontuações.",
-            emBreve: true,
         },
         {
             tela: { nome: "repeticoes" },

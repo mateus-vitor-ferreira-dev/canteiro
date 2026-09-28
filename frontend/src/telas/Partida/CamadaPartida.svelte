@@ -1,16 +1,27 @@
 <!-- O aviso por cima do tabuleiro: partida perdida, reconectando, pausada ou encerrada. -->
 <script lang="ts">
+    import type { PlacarDto } from "@/api/protocolo";
     import type { PartidaAoVivo } from "@/estado/partida.svelte";
 
     let {
         partida,
         aoSair,
+        aoTerminar,
     }: {
         /** A partida, de onde vem o que mostrar. */
         partida: PartidaAoVivo;
         /** Chamado quando o jogador sai para começar outra partida. */
         aoSair: () => void;
+        /** Chamado com o placar final, quando o jogador quer ver o resultado. */
+        aoTerminar: (placar: PlacarDto) => void;
     } = $props();
+
+    const pontos = new Intl.NumberFormat("pt-BR");
+
+    let verResultado: HTMLButtonElement | undefined = $state();
+
+    // A partida acabou no meio de uma jogada pelo teclado: Enter já leva ao resultado.
+    $effect(() => verResultado?.focus());
 </script>
 
 {#if partida.perdida}
@@ -30,10 +41,14 @@
         <p>Aperte <kbd>P</kbd> para continuar.</p>
     </div>
 {:else if partida.encerrada && partida.estado}
+    {@const placar = partida.estado.placar}
     <div class="camada" role="status">
         <h2>Fim de jogo</h2>
-        <p>{partida.estado.placar.pontuacao} pontos</p>
-        <button type="button" onclick={aoSair}>Jogar de novo</button>
+        <p>{pontos.format(placar.pontuacao)} pontos</p>
+        <button bind:this={verResultado} type="button" onclick={() => aoTerminar(placar)}>
+            Ver resultado
+        </button>
+        <button type="button" class="secundario" onclick={aoSair}>Jogar de novo</button>
     </div>
 {/if}
 
@@ -66,5 +81,11 @@
         border: 0;
         border-radius: 8px;
         cursor: pointer;
+    }
+    .secundario {
+        color: #fff;
+        background: none;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
     }
 </style>

@@ -36,6 +36,29 @@ export type PartidaCriadaDto = {
     id: string;
 };
 
+/**
+ * Uma linha do ranking, como vem de `GET /api/ranking` (RF22). Espelho de
+ * `EntradaRankingDto`, que o backend cria na #31.
+ */
+export type EntradaRankingDto = {
+    nome: string;
+    pontuacao: number;
+    nivel: number;
+    linhas: number;
+    colapsos: number;
+    /** Dia em que a partida foi registrada, no formato ISO (`"2026-09-28"`). */
+    data: string;
+};
+
+/**
+ * Corpo de `POST /api/ranking` (RF21). A pontuação não vai aqui: o backend lê
+ * da partida, para ninguém mandar pontos inventados. Espelho de `RegistroRankingDto`.
+ */
+export type RegistroRankingDto = {
+    partidaId: string;
+    nome: string;
+};
+
 /** Comandos que o jogador envia pelo WebSocket. Espelho do enum `Comando`. */
 export type Comando =
     | "ESQUERDA"
