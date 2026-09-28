@@ -1,6 +1,7 @@
 import type { EventoDto } from "@/api/protocolo";
 import { receitaDoEvento, type Nota } from "@/sons/receitas";
 import { tocarNotas } from "@/sons/sintetizador";
+import { configuracoes } from "./configuracoes.svelte";
 
 /** Toca notas num volume de 0 a 1. Os testes trocam por um falso. */
 export type Tocador = (notas: readonly Nota[], volume: number) => void;
@@ -8,8 +9,10 @@ export type Tocador = (notas: readonly Nota[], volume: number) => void;
 /** O mínimo do `localStorage` que o som usa. */
 export type Armazenamento = Pick<Storage, "getItem" | "setItem">;
 
-/** Volume até a tela de configurações (#38) deixar o jogador escolher. */
-export const VOLUME_PADRAO = 0.6;
+/** Volume de 0 a 1 na hora de tocar. */
+export type LerVolume = () => number;
+
+const PORCENTO = 100;
 
 const CHAVE = "canteiro.som";
 const DESLIGADO = "desligado";
@@ -21,18 +24,24 @@ const DESLIGADO = "desligado";
 export class Som {
     /** Se os sons tocam. Começa como o jogador deixou da última vez. */
     ligado = $state(true);
-    /** Volume, de 0 a 1. */
-    volume = $state(VOLUME_PADRAO);
 
     readonly #tocador: Tocador;
     readonly #armazenamento: Armazenamento | null;
+    readonly #volume: LerVolume;
 
+    /**
+     * @param tocador quem toca de fato; o padrão usa o Web Audio
+     * @param armazenamento onde lembrar se o som está desligado
+     * @param volume de onde vem o volume; o padrão é o das configurações (RF27)
+     */
     constructor(
         tocador: Tocador = tocadorDoNavegador(),
         armazenamento = armazenamentoDoNavegador(),
+        volume: LerVolume = () => configuracoes.volume / PORCENTO,
     ) {
         this.#tocador = tocador;
         this.#armazenamento = armazenamento;
+        this.#volume = volume;
         this.ligado = this.#ler() !== DESLIGADO;
     }
 
@@ -50,7 +59,7 @@ export class Som {
     tocar(evento: EventoDto): void {
         const notas = receitaDoEvento(evento);
         if (this.ligado && notas.length > 0) {
-            this.#tocador(notas, this.volume);
+            this.#tocador(notas, this.#volume());
         }
     }
 
