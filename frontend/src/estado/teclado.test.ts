@@ -22,6 +22,11 @@ describe("comandoDaTecla", () => {
         expect(comandoDaTecla("Escape", false, true)).toBe("RETOMAR");
     });
 
+    it("M liga e desliga o som, sem virar comando do backend", () => {
+        expect(comandoDaTecla("KeyM", false, false)).toBe("SOM");
+        expect(comandoDaTecla("KeyM", false, true)).toBe("SOM");
+    });
+
     it("tecla sem função não gera comando", () => {
         expect(comandoDaTecla("KeyQ", false, false)).toBeNull();
     });

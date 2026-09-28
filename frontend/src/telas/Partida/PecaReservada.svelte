@@ -56,11 +56,13 @@
     .travada {
         opacity: 0.45;
     }
+    /* Texto claro sobre o fundo escuro da caixa: o âmbar escuro dos rótulos não passaria de 4,5:1 aqui. */
     .vazia {
         padding: 0 0.25rem;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
+        line-height: 1.3;
         text-align: center;
-        color: var(--cor-rotulo);
+        color: #c9d1dd;
     }
     p {
         margin: 0.4rem 0 0;
