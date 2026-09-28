@@ -125,7 +125,7 @@ class MotorJogoTest {
         for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna += 2) {
             posicionarEDerrubar(motor, coluna - 4);
         }
-        assertEquals(2, motor.linhasEliminadas());
+        assertEquals(2, motor.placar().linhas());
         assertTrue(registro.eventos.contains(
                 new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, List.of(FUNDO - 1, FUNDO))));
         for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
@@ -187,7 +187,7 @@ class MotorJogoTest {
         posicionarEDerrubar(motor, 1);
         posicionarEDerrubar(motor, 4);
 
-        assertEquals(1, motor.linhasEliminadas());
+        assertEquals(1, motor.placar().linhas());
         assertTrue(motor.tabuleiro().ocupada(FUNDO, 8), "a metade de cima da O desceu");
         assertTrue(motor.tabuleiro().ocupada(FUNDO, 9));
         assertFalse(motor.tabuleiro().ocupada(FUNDO - 1, 8));
