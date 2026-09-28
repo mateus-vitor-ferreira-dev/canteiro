@@ -189,7 +189,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 33 prontos e 3 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 34 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -247,9 +247,9 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva, penalidade e evento COLAPSO (#28), com a animação de 1 s na tela (#29) |
 | RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ✅ | Sobe a cada 10 linhas, acelera a queda e aperta o limite de desvio (#22, #28) |
 | RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ✅ | P ou Esc pausa e retoma, com a camada de pausa (#20, #23, #25) |
-| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | 🟡 | O motor encerra a partida nas duas condições da RN13 (#20, #28); falta a tela de fim (#32) |
-| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ⬜ |  |
-| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ⬜ |  |
+| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ✅ | O motor encerra a partida nas duas condições da RN13 (#20, #28); tela de fim com pontuação, nível, linhas, colapsos e tempo (#32) |
+| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | 🟡 | Campo do nome no fim de partida, com validação e erros claros (#32); falta o arquivo e a rota `POST /api/ranking` (#31) |
+| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | 🟡 | Tela do ranking, com o nome recém-salvo em destaque (#32); falta a rota `GET /api/ranking` (#31) |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
 | RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
 | RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | ⬜ |  |

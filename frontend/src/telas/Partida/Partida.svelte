@@ -1,6 +1,6 @@
 <!-- A partida: tabuleiro, placar, próximas peças e legendas. Teclado e toque viram comando pelo WebSocket. -->
 <script lang="ts">
-    import type { Comando } from "@/api/protocolo";
+    import type { Comando, PlacarDto } from "@/api/protocolo";
     import LegendaMateriais from "@/componentes/LegendaMateriais.svelte";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
     import Tabuleiro from "@/componentes/Tabuleiro.svelte";
@@ -18,12 +18,15 @@
     let {
         id,
         aoSair,
+        aoTerminar,
         conectar,
     }: {
         /** Id da partida criada em `POST /api/partidas`. */
         id: string;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
+        /** Chamado com o placar final, quando o jogador abre o resultado. */
+        aoTerminar: (placar: PlacarDto) => void;
         /** Troca a conexão nos testes. */
         conectar?: Conectar;
     } = $props();
@@ -101,7 +104,7 @@
     <div class="jogo">
         <div class="palco">
             <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
-            <CamadaPartida {partida} {aoSair} />
+            <CamadaPartida {partida} {aoSair} {aoTerminar} />
         </div>
 
         <ControlesToque aoComando={aoTocar} pausada={partida.pausada} />
