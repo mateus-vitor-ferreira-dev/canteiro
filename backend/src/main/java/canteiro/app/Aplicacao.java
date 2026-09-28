@@ -2,7 +2,7 @@ package canteiro.app;
 
 import canteiro.api.ServidorWeb;
 import canteiro.controle.GerenciadorPartidas;
-import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
 import io.javalin.util.JavalinBindException;
 import org.slf4j.Logger;
@@ -60,13 +60,13 @@ public final class Aplicacao {
     }
 
     /**
-     * Monta o gerenciador de partidas. A fonte de peças ainda é a provisória;
-     * quando o gerador por sacola (#12) ficar pronto, é só trocar aqui.
+     * Monta o gerenciador de partidas. Cada partida ganha um gerador de peças
+     * próprio, pelo método da sacola, com uma semente nova.
      */
     private static GerenciadorPartidas criarGerenciador() {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
         return new GerenciadorPartidas(dificuldade ->
-                new FonteSimples(System.nanoTime(), catalogo, dificuldade.materiaisLiberados()));
+                new GeradorPecas(System.nanoTime(), catalogo, dificuldade.nivelInicial()));
     }
 
     private static void abrirNavegador(URI endereco) {

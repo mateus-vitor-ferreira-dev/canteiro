@@ -7,7 +7,7 @@ import canteiro.modelo.Dificuldade;
 import canteiro.modelo.EventoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.Queda;
-import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,7 +83,7 @@ class ProtocoloJsonTest {
 
     private static MotorJogo motorComUmaPeca() {
         MotorJogo motor = new MotorJogo(Dificuldade.DIFICIL,
-                new FonteSimples(3, CatalogoMateriais.padrao(), Dificuldade.DIFICIL.materiaisLiberados()));
+                new GeradorPecas(3, CatalogoMateriais.padrao(), Dificuldade.DIFICIL.nivelInicial()));
         motor.avancarCiclo();
         return motor;
     }
