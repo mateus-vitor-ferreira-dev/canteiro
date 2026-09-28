@@ -1,7 +1,7 @@
 package canteiro.api;
 
 import canteiro.controle.GerenciadorPartidas;
-import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
 
 /** Monta o que o servidor precisa nos testes. */
@@ -14,6 +14,6 @@ final class ServidoresDeTeste {
 
     static GerenciadorPartidas gerenciador() {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
-        return new GerenciadorPartidas(d -> new FonteSimples(SEMENTE, catalogo, d.materiaisLiberados()));
+        return new GerenciadorPartidas(d -> new GeradorPecas(SEMENTE, catalogo, d.nivelInicial()));
     }
 }

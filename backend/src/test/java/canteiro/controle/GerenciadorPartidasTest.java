@@ -1,7 +1,7 @@
 package canteiro.controle;
 
 import canteiro.modelo.Dificuldade;
-import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ class GerenciadorPartidasTest {
 
     private final CatalogoMateriais catalogo = CatalogoMateriais.padrao();
     private final GerenciadorPartidas partidas = new GerenciadorPartidas(
-            d -> new FonteSimples(1, catalogo, d.materiaisLiberados()));
+            d -> new GeradorPecas(1, catalogo, d.nivelInicial()));
 
     @Test
     void criaPartidasComIdsDiferentes() {
