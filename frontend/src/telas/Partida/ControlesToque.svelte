@@ -5,11 +5,14 @@
     let {
         aoComando,
         pausada,
+        treino = false,
     }: {
         /** Chamado com o comando do botão tocado. */
         aoComando: (comando: Comando) => void;
         /** Se a partida está pausada, para o botão de pausa virar "continuar". */
         pausada: boolean;
+        /** Se a partida é de treino: só aí o botão de desfazer aparece (RF26). */
+        treino?: boolean;
     } = $props();
 
     /** Desenho de cada ícone, num quadro de 24 × 24. */
@@ -20,11 +23,20 @@
         descer: "M12 5v14m-6-6 6 6 6-6",
         cair: "m6 5 6 6 6-6M6 12l6 6 6-6",
         reservar: "M4 9h16v10H4zM8 5h8M10 13h4",
+        desfazer: "M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3",
         pausar: "M9 5v14M15 5v14",
         continuar: "M8 5v14l11-7z",
     };
 
-    const BOTOES: { comando: Comando; rotulo: string; icone: string }[] = [
+    type Botao = { comando: Comando; rotulo: string; icone: string };
+
+    const DESFAZER: Botao = {
+        comando: "DESFAZER",
+        rotulo: "Desfazer a última jogada",
+        icone: ICONES.desfazer,
+    };
+
+    const BOTOES: Botao[] = [
         { comando: "ESQUERDA", rotulo: "Mover para a esquerda", icone: ICONES.esquerda },
         { comando: "GIRAR_HORARIO", rotulo: "Girar", icone: ICONES.girar },
         { comando: "DIREITA", rotulo: "Mover para a direita", icone: ICONES.direita },
@@ -32,10 +44,12 @@
         { comando: "QUEDA_INSTANTANEA", rotulo: "Queda instantânea", icone: ICONES.cair },
         { comando: "RESERVAR", rotulo: "Guardar na reserva", icone: ICONES.reservar },
     ];
+
+    const botoes = $derived(treino ? [...BOTOES, DESFAZER] : BOTOES);
 </script>
 
 <div class="controles" role="group" aria-label="Controles de toque">
-    {#each BOTOES as botao (botao.comando)}
+    {#each botoes as botao (botao.comando)}
         <button
             type="button"
             aria-label={botao.rotulo}

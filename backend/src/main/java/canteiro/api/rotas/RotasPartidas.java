@@ -64,25 +64,44 @@ public final class RotasPartidas {
                 @OpenApiResponse(status = "201", description = "Partida criada",
                         content = @OpenApiContent(from = PartidaCriadaDto.class)),
                 @OpenApiResponse(status = "400", description = "Dificuldade ausente ou desconhecida",
+                        content = @OpenApiContent(from = ErroDto.class)),
+                @OpenApiResponse(status = "501", description = "Modo treino pedido, mas ainda não disponível",
                         content = @OpenApiContent(from = ErroDto.class))
             })
     void criar(Context ctx) {
-        Dificuldade dificuldade = lerDificuldade(ctx);
+        NovaPartidaDto corpo = lerCorpo(ctx);
+        Dificuldade dificuldade = lerDificuldade(corpo);
         if (dificuldade == null) {
             ctx.status(HttpStatus.BAD_REQUEST).json(new ErroDto("DIFICULDADE_INVALIDA",
                     "Escolha uma dificuldade: FACIL, NORMAL ou DIFICIL."));
             return;
         }
+        if (corpo.modoTreino()) {
+            // o motor ainda não desfaz jogadas (#37): melhor recusar do que criar um treino que não é treino
+            ctx.status(HttpStatus.NOT_IMPLEMENTED).json(new ErroDto("MODO_TREINO_INDISPONIVEL",
+                    "O modo treino ainda não está disponível nesta versão do jogo."));
+            return;
+        }
         ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade).id()));
     }
 
-    private static Dificuldade lerDificuldade(Context ctx) {
+    private static NovaPartidaDto lerCorpo(Context ctx) {
         try {
-            NovaPartidaDto corpo = ctx.bodyAsClass(NovaPartidaDto.class);
-            return corpo == null || corpo.dificuldade() == null ? null : Dificuldade.valueOf(corpo.dificuldade());
+            return ctx.bodyAsClass(NovaPartidaDto.class);
         } catch (Exception invalida) {
             // o Javalin (em Kotlin) lança as exceções do Jackson sem declará-las: pegar só
             // RuntimeException deixaria o JSON malformado escapar (RNF14)
+            return null;
+        }
+    }
+
+    private static Dificuldade lerDificuldade(NovaPartidaDto corpo) {
+        if (corpo == null || corpo.dificuldade() == null) {
+            return null;
+        }
+        try {
+            return Dificuldade.valueOf(corpo.dificuldade());
+        } catch (IllegalArgumentException desconhecida) {
             return null;
         }
     }

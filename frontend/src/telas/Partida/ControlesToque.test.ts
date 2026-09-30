@@ -20,6 +20,17 @@ describe("ControlesToque", () => {
         ]);
     });
 
+    it("o botão de desfazer só existe no modo treino", async () => {
+        const aoComando = vi.fn();
+        const { unmount } = render(ControlesToque, { aoComando, pausada: false });
+        expect(screen.queryByRole("button", { name: "Desfazer a última jogada" })).toBeNull();
+        unmount();
+
+        render(ControlesToque, { aoComando, pausada: false, treino: true });
+        await fireEvent.click(screen.getByRole("button", { name: "Desfazer a última jogada" }));
+        expect(aoComando).toHaveBeenCalledWith("DESFAZER");
+    });
+
     it("pausada, só o botão de continuar funciona", async () => {
         const aoComando = vi.fn();
         render(ControlesToque, { aoComando, pausada: true });

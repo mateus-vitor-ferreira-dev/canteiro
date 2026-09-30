@@ -253,7 +253,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
 | RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
 | RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | 🟡 | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); falta a rota `GET /api/partidas/{id}/relatorio` (#70) |
-| RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ | ⬜ |  |
+| RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ 🌐 | 🟡 | Na tela: a opção de modo treino ao criar a partida, desfazer por U, Ctrl+Z ou botão de toque, e o aviso de que o treino não entra no ranking (#69); falta o motor desfazer a jogada (#37). Até lá, o backend recusa a partida de treino com um aviso claro |
 | RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | 🟡 | Tela de configurações com a troca de cada tecla e o volume; a partida e a legenda usam as teclas novas, guardadas no navegador (#38); falta guardar no servidor (#71) |
 | RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ✅ | Sons gerados no navegador (Web Audio), um por evento, com liga e desliga no botão ou na tecla M; o volume ajustável vem na tela de configurações (#38) |
 | RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | ✅ | Sobe o servidor e abre o navegador (#4), com o frontend dentro do JAR (#8) |
@@ -304,7 +304,7 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 
 | Canal | Direção | O que passa |
 |---|---|---|
-| `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida e devolve o `id` |
+| `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida (e `modoTreino`, para o treino) e devolve o `id` |
 | `WS /ws/partidas/{id}` | front → back | `{ "tipo": "COMANDO", "comando": "GIRAR_HORARIO" }` |
 | `WS /ws/partidas/{id}` | back → front | `ESTADO` (tabuleiro, peça, fila, reserva, placar, estabilidade) e `EVENTO` (linhas eliminadas, colapso, nível, fim) |
 | `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |

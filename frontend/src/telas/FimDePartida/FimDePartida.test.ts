@@ -13,9 +13,10 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-function montar() {
+function montar(treino = false) {
     const props = {
         partidaId: "abc",
+        treino,
         placar: { ...estadoDeTeste().placar, pontuacao: 12340, tempoSegundos: 185 },
         aoSalvo: vi.fn(),
         aoJogarDeNovo: vi.fn(),
@@ -91,6 +92,17 @@ describe("FimDePartida", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent(
             "O ranking ainda não está disponível",
         );
+    });
+
+    it("partida de treino não pede nome e avisa que não entra no ranking", async () => {
+        const { aoJogarDeNovo } = montar(true);
+        expect(screen.getByText("12.340")).toBeInTheDocument();
+        expect(screen.getByText(/não entra no ranking/)).toBeInTheDocument();
+        expect(screen.queryByLabelText("Seu nome no ranking")).toBeNull();
+        expect(screen.queryByRole("button", { name: "Salvar no ranking" })).toBeNull();
+
+        await fireEvent.click(screen.getByRole("button", { name: "Jogar de novo" }));
+        expect(aoJogarDeNovo).toHaveBeenCalled();
     });
 
     it("jogar de novo, ver o relatório e voltar ao menu", async () => {

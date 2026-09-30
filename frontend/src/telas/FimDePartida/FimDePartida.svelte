@@ -7,6 +7,7 @@
     let {
         partidaId,
         placar,
+        treino = false,
         aoSalvo,
         aoJogarDeNovo,
         aoVerRelatorio,
@@ -16,6 +17,8 @@
         partidaId: string;
         /** Placar final. */
         placar: PlacarDto;
+        /** Partida de treino: não entra no ranking, então não pede o nome (RN15). */
+        treino?: boolean;
         /** Chamado com o nome registrado no ranking. */
         aoSalvo: (nome: string) => void;
         /** Chamado para escolher a dificuldade de outra partida. */
@@ -57,7 +60,14 @@
     </div>
 
     <div class="acoes">
-        <FormularioRanking {partidaId} {aoSalvo} />
+        {#if treino}
+            <p class="treino">
+                <strong>Partida de treino.</strong> Ela não entra no ranking: jogue uma partida normal
+                para registrar a sua pontuação.
+            </p>
+        {:else}
+            <FormularioRanking {partidaId} {aoSalvo} />
+        {/if}
         <div class="outras">
             <button type="button" class="jogar" onclick={aoJogarDeNovo}>Jogar de novo</button>
             <button type="button" class="relatorio" onclick={aoVerRelatorio}>Ver relatório</button>
@@ -132,6 +142,14 @@
         display: grid;
         gap: 1.5rem;
         align-content: start;
+    }
+    .treino {
+        margin: 0;
+        padding: 1rem;
+        background: var(--cor-cartao);
+        border: 1px solid var(--cor-borda);
+        border-left: 6px solid var(--cor-ambar);
+        border-radius: 12px;
     }
     .outras {
         display: flex;

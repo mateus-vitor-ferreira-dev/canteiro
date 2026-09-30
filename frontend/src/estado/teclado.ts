@@ -10,9 +10,11 @@ export type Tecla = {
     acao: string;
     /** Comando enviado; `PAUSA` alterna entre pausar e retomar; `SOM` fica no navegador. */
     comando: Comando | "PAUSA" | "SOM";
+    /** A tecla só vale no modo treino (RF26). */
+    soTreino?: boolean;
 };
 
-/** As teclas do jogo (RF07 a RF10, RF19, RF28). A legenda da tela é gerada daqui (RNF05). */
+/** As teclas do jogo (RF07 a RF10, RF19, RF26, RF28). A legenda da tela é gerada daqui (RNF05). */
 export const TECLAS: readonly Tecla[] = [
     { codigos: ["ArrowLeft"], rotulo: "←", acao: "Mover para a esquerda", comando: "ESQUERDA" },
     { codigos: ["ArrowRight"], rotulo: "→", acao: "Mover para a direita", comando: "DIREITA" },
@@ -36,6 +38,13 @@ export const TECLAS: readonly Tecla[] = [
         comando: "GIRAR_ANTI_HORARIO",
     },
     { codigos: ["KeyC"], rotulo: "C", acao: "Guardar na reserva", comando: "RESERVAR" },
+    {
+        codigos: ["KeyU"],
+        rotulo: "U",
+        acao: "Desfazer a última jogada",
+        comando: "DESFAZER",
+        soTreino: true,
+    },
     {
         codigos: ["KeyP", "Escape"],
         rotulo: "P ou Esc",
@@ -73,6 +82,38 @@ export function comandoDaTecla(
         return pausada ? "RETOMAR" : "PAUSAR";
     }
     return tecla.comando;
+}
+
+/** O atalho de desfazer que não muda com as configurações: Ctrl+Z, ou ⌘Z no Mac. */
+const ATALHO_DESFAZER = "Ctrl+Z";
+
+/**
+ * A tabela que vale numa partida: fora do modo treino, as teclas só de treino
+ * saem; no treino, a de desfazer ganha o atalho fixo na legenda.
+ *
+ * @param teclas a tabela em uso, com as teclas que o jogador trocou
+ * @param treino se a partida é de treino
+ */
+export function teclasDoModo(teclas: readonly Tecla[], treino: boolean): Tecla[] {
+    if (!treino) {
+        return teclas.filter((tecla) => !tecla.soTreino);
+    }
+    return teclas.map((tecla) =>
+        tecla.comando === "DESFAZER"
+            ? { ...tecla, rotulo: `${tecla.rotulo} ou ${ATALHO_DESFAZER}` }
+            : tecla,
+    );
+}
+
+/**
+ * Se a tecla é o atalho de desfazer (Ctrl+Z ou ⌘Z). Ele é conferido antes da
+ * tabela, porque o Z sozinho gira a peça.
+ *
+ * @param codigo `KeyboardEvent.code`
+ * @param comControle se Ctrl ou ⌘ está apertado
+ */
+export function ehAtalhoDesfazer(codigo: string, comControle: boolean): boolean {
+    return comControle && codigo === "KeyZ";
 }
 
 /** O que uma tecla faz: um comando do jogo, a pausa (que alterna) ou o som. */

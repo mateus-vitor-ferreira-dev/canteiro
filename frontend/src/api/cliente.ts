@@ -38,9 +38,15 @@ export function listarDificuldades(): Promise<DificuldadeDto[]> {
 /**
  * Cria uma partida na dificuldade escolhida (RF02). Ela começa quando o
  * navegador conecta em `/ws/partidas/{id}`.
+ *
+ * @param dificuldade a dificuldade escolhida
+ * @param modoTreino se é uma partida de treino, com o desfazer liberado (RF26)
  */
-export function criarPartida(dificuldade: CodigoDificuldade): Promise<PartidaCriadaDto> {
-    const corpo: NovaPartidaDto = { dificuldade };
+export function criarPartida(
+    dificuldade: CodigoDificuldade,
+    modoTreino = false,
+): Promise<PartidaCriadaDto> {
+    const corpo: NovaPartidaDto = { dificuldade, modoTreino };
     return buscarJson<PartidaCriadaDto>("/api/partidas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
