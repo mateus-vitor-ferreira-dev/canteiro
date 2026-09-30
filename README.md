@@ -385,9 +385,10 @@ E cada passo tem o seu teste: [`DificuldadeTest`](backend/src/test/java/canteiro
 
 | Quem | Onde vai trabalhar na maior parte do tempo |
 |---|---|
-| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, física), `backend/.../api/` e `controle/` (servidor e WebSocket), `frontend/src/telas/Partida/` e `componentes/` |
-| **Marcelo** | `backend/.../modelo/estruturas/` (sacola, fila, pilha, histórico), `backend/.../persistencia/` (arquivos e ranking) e as telas de apoio em `frontend/src/telas/` (Menu, Ranking, Repetições, Relatório, Configurações) |
-| **Wanessa** | `docs/` (roteiros de teste, manual da equipe, relatório), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
+| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket) e todo o `frontend/src/` (a tela de partida e as telas de apoio) |
+| **Marcelo** | `backend/.../persistencia/` (materiais, configurações, ranking e repetições em arquivo) e o que usa esses arquivos em `backend/.../api/rotas/` e `controle/` (ranking, configurações, relatório, replay e modo treino) |
+| **Wanessa** | `docs/` (manual da equipe, relatório e apresentação), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`** |
+| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores) e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
 
 ### O que ninguém edita à mão
 
@@ -1178,11 +1179,12 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Integrante | GitHub | Responsabilidades |
 |---|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · 🌐 tela de partida · build e integração contínua |
-| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Estruturas de dados · persistência · 🌐 telas de apoio (menu, ranking, repetições, relatório, configurações) |
-| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes e validação com jogadores · ♿ usabilidade e acessibilidade · 📝 documentação e apresentações |
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · 🌐 tela de partida e telas de apoio · build e integração contínua |
+| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino · medições de desempenho |
+| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · ♿ usabilidade e acessibilidade · 📝 manual da equipe, relatório e apresentações |
+| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Roteiros de teste manual · execução dos testes a cada entrega · validação com jogadores |
 
-Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão completa está na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 16).
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão inicial, de antes da entrada do Alisson, está na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 16); a tabela acima é a que vale hoje.
 
 ---
 
