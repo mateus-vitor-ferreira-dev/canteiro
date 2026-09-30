@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ErroApi, criarPartida, listarDificuldades } from "@/api/cliente";
+import type { DificuldadeDto } from "@/api/protocolo";
 import NovaPartida from "./NovaPartida.svelte";
 
 vi.mock("@/api/cliente", async (original) => ({
@@ -8,6 +9,14 @@ vi.mock("@/api/cliente", async (original) => ({
     listarDificuldades: vi.fn(),
     criarPartida: vi.fn(),
 }));
+
+const NORMAL: DificuldadeDto = {
+    codigo: "NORMAL",
+    nome: "Normal",
+    intervaloQuedaMs: 650,
+    limiteDesvio: 2.5,
+    materiaisLiberados: ["MADEIRA"],
+};
 
 afterEach(() => {
     vi.clearAllMocks();
@@ -55,22 +64,47 @@ describe("NovaPartida", () => {
     });
 
     it("clicar numa dificuldade cria a partida e entrega o id", async () => {
-        vi.mocked(listarDificuldades).mockResolvedValue([
-            {
-                codigo: "NORMAL",
-                nome: "Normal",
-                intervaloQuedaMs: 650,
-                limiteDesvio: 2.5,
-                materiaisLiberados: ["MADEIRA"],
-            },
-        ]);
+        vi.mocked(listarDificuldades).mockResolvedValue([NORMAL]);
         vi.mocked(criarPartida).mockResolvedValue({ id: "xyz" });
         const aoCriar = vi.fn();
         render(NovaPartida, { aoCriar });
 
         await fireEvent.click(await screen.findByRole("button", { name: /Normal/ }));
 
-        expect(criarPartida).toHaveBeenCalledWith("NORMAL");
-        await vi.waitFor(() => expect(aoCriar).toHaveBeenCalledWith("xyz"));
+        expect(criarPartida).toHaveBeenCalledWith("NORMAL", false);
+        await vi.waitFor(() => expect(aoCriar).toHaveBeenCalledWith("xyz", false));
+    });
+
+    it("com o modo treino marcado, cria a partida de treino", async () => {
+        vi.mocked(listarDificuldades).mockResolvedValue([NORMAL]);
+        vi.mocked(criarPartida).mockResolvedValue({ id: "xyz" });
+        const aoCriar = vi.fn();
+        render(NovaPartida, { aoCriar });
+
+        await fireEvent.click(await screen.findByRole("checkbox", { name: /Modo treino/ }));
+        expect(screen.getByText(/não entram no ranking/)).toBeInTheDocument();
+        await fireEvent.click(screen.getByRole("button", { name: /Normal/ }));
+
+        expect(criarPartida).toHaveBeenCalledWith("NORMAL", true);
+        await vi.waitFor(() => expect(aoCriar).toHaveBeenCalledWith("xyz", true));
+    });
+
+    it("mostra o aviso do backend quando o modo treino ainda não existe", async () => {
+        vi.mocked(listarDificuldades).mockResolvedValue([NORMAL]);
+        vi.mocked(criarPartida).mockRejectedValue(
+            new ErroApi(
+                "MODO_TREINO_INDISPONIVEL",
+                "O modo treino ainda não está disponível nesta versão do jogo.",
+                501,
+            ),
+        );
+        const aoCriar = vi.fn();
+        render(NovaPartida, { aoCriar });
+
+        await fireEvent.click(await screen.findByRole("checkbox", { name: /Modo treino/ }));
+        await fireEvent.click(screen.getByRole("button", { name: /Normal/ }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent("ainda não está disponível");
+        expect(aoCriar).not.toHaveBeenCalled();
     });
 });

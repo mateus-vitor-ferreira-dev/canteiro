@@ -1,4 +1,4 @@
-<!-- Escolha da dificuldade antes de começar a partida (RF02). -->
+<!-- Escolha da dificuldade e do modo treino antes de começar a partida (RF02, RF26). -->
 <script lang="ts">
     import { criarPartida, listarDificuldades } from "@/api/cliente";
     import type { CodigoDificuldade } from "@/api/protocolo";
@@ -11,18 +11,19 @@
         ACO: "aço",
     };
 
-    /** Chamado com o id da partida criada. */
-    let { aoCriar }: { aoCriar: (id: string) => void } = $props();
+    /** Chamado com o id da partida criada e se ela é de treino. */
+    let { aoCriar }: { aoCriar: (id: string, treino: boolean) => void } = $props();
 
     const dificuldades = listarDificuldades();
     let criando = $state(false);
+    let treino = $state(false);
     let erroAoCriar = $state<string | null>(null);
 
     async function escolher(codigo: CodigoDificuldade) {
         criando = true;
         erroAoCriar = null;
         try {
-            aoCriar((await criarPartida(codigo)).id);
+            aoCriar((await criarPartida(codigo, treino)).id, treino);
         } catch (erro) {
             erroAoCriar =
                 erro instanceof Error ? erro.message : "Não foi possível criar a partida.";
@@ -42,6 +43,15 @@
     {#await dificuldades}
         <p class="aviso">Carregando…</p>
     {:then lista}
+        <label class="treino">
+            <input type="checkbox" bind:checked={treino} disabled={criando} />
+            <span>
+                <strong>Modo treino</strong>
+                <span class="explicacao">
+                    Dá para desfazer a última jogada. Partidas de treino não entram no ranking.
+                </span>
+            </span>
+        </label>
         <ul class="opcoes">
             {#each lista as dificuldade (dificuldade.codigo)}
                 <li>
@@ -79,10 +89,39 @@
         margin: 0 0 1.5rem;
         color: var(--cor-marinho);
     }
+    /* A linha inteira é clicável, com o alvo de toque de 44 px. */
+    .treino {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        min-height: 44px;
+        margin: 0 0 1.25rem;
+        padding: 0.75rem 1rem;
+        background: var(--cor-cartao);
+        border: 1px solid var(--cor-borda);
+        border-left: 6px solid var(--cor-ambar);
+        border-radius: 12px;
+        cursor: pointer;
+    }
+    .treino input {
+        flex: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        margin: 0.15rem 0 0;
+        accent-color: var(--cor-marinho);
+    }
+    .treino strong {
+        display: block;
+        color: var(--cor-marinho);
+    }
+    .explicacao {
+        color: var(--cor-texto-suave);
+    }
     .opcoes {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.25rem;
+        margin: 0;
         padding: 0;
         list-style: none;
     }

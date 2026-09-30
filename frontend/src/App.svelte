@@ -49,14 +49,15 @@
         <button type="button" class="voltar" onclick={() => navegacao.voltarAoMenu()}>
             Voltar ao menu
         </button>
-        <NovaPartida aoCriar={(id) => navegacao.ir({ nome: "partida", id })} />
+        <NovaPartida aoCriar={(id, treino) => navegacao.ir({ nome: "partida", id, treino })} />
     {:else if navegacao.tela.nome === "partida"}
-        {@const id = navegacao.tela.id}
+        {@const { id, treino } = navegacao.tela}
         {#key id}
             <Partida
                 {id}
+                {treino}
                 aoSair={() => navegacao.ir({ nome: "nova-partida" })}
-                aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar })}
+                aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar, treino })}
             />
         {/key}
     {:else if navegacao.tela.nome === "fim"}
@@ -64,6 +65,7 @@
         <FimDePartida
             partidaId={tela.id}
             placar={tela.placar}
+            treino={tela.treino}
             aoSalvo={(nome) => navegacao.ir({ nome: "ranking", destaque: nome })}
             aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
             aoVerRelatorio={() => navegacao.ir({ ...tela, nome: "relatorio" })}

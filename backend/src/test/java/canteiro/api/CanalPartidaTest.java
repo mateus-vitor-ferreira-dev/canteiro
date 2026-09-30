@@ -72,6 +72,15 @@ class CanalPartidaTest {
     }
 
     @Test
+    void modoTreinoERecusadoEnquantoOMotorNaoDesfaz() throws Exception {
+        HttpResponse<String> resposta = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
+        assertEquals(501, resposta.statusCode());
+        assertEquals("MODO_TREINO_INDISPONIVEL", json.readTree(resposta.body()).get("erro").asText());
+
+        assertEquals(201, post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}").statusCode());
+    }
+
+    @Test
     void recebeOEstadoEAplicaComandos() throws Exception {
         Conexao conexao = conectar(criarPartida());
         JsonNode caindo = conexao.esperar(m -> "PECA_CAINDO".equals(m.path("estado").asText()));

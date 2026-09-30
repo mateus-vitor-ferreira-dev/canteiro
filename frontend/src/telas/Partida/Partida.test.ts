@@ -12,13 +12,14 @@ beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
 });
 
-function montar(som?: Som) {
+function montar(som?: Som, treino = false) {
     let ouvinte: OuvinteConexao | undefined;
     const conexao = { enviar: vi.fn(), fechar: vi.fn() };
     const aoSair = vi.fn();
     const aoTerminar = vi.fn();
     const tela = render(Partida, {
         id: "abc",
+        treino,
         aoSair,
         aoTerminar,
         ...(som ? { som } : {}),
@@ -51,6 +52,35 @@ describe("Partida", () => {
         await fireEvent.keyDown(window, { code: "ArrowLeft", repeat: true });
         await fireEvent.keyDown(window, { code: "Space" });
         expect(conexao.enviar.mock.calls).toEqual([["ESQUERDA"], ["QUEDA_INSTANTANEA"]]);
+    });
+
+    it("fora do modo treino, não há desfazer: U não faz nada e Ctrl+Z só gira", async () => {
+        const { conexao, receber } = montar();
+        receber(estadoDeTeste());
+        expect(screen.queryByText(/Modo treino/)).toBeNull();
+        expect(screen.queryByText("Desfazer a última jogada")).toBeNull();
+
+        await fireEvent.keyDown(window, { code: "KeyU" });
+        await fireEvent.keyDown(window, { code: "KeyZ", ctrlKey: true });
+        expect(conexao.enviar.mock.calls).toEqual([["GIRAR_ANTI_HORARIO"]]);
+    });
+
+    it("no modo treino, U e Ctrl+Z desfazem, e a tela avisa que não vale para o ranking", async () => {
+        const { conexao, receber } = montar(undefined, true);
+        receber(estadoDeTeste());
+        expect(screen.getByText(/esta partida não entra no ranking/)).toBeInTheDocument();
+        expect(screen.getByText("U ou Ctrl+Z")).toBeInTheDocument();
+
+        await fireEvent.keyDown(window, { code: "KeyU" });
+        await fireEvent.keyDown(window, { code: "KeyZ", ctrlKey: true });
+        await fireEvent.keyDown(window, { code: "KeyZ" });
+        await fireEvent.click(screen.getByRole("button", { name: "Desfazer a última jogada" }));
+        expect(conexao.enviar.mock.calls).toEqual([
+            ["DESFAZER"],
+            ["DESFAZER"],
+            ["GIRAR_ANTI_HORARIO"],
+            ["DESFAZER"],
+        ]);
     });
 
     it("pausa quando a aba perde o foco e mostra a camada de pausa", async () => {

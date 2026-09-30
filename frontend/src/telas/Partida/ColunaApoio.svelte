@@ -11,11 +11,14 @@
     let {
         estado,
         som,
+        treino = false,
     }: {
         /** O último estado da partida; `null` antes da primeira mensagem. */
         estado: EstadoDto | null;
         /** Os sons da partida. */
         som: Som;
+        /** Se a partida é de treino, para a legenda mostrar o desfazer. */
+        treino?: boolean;
     } = $props();
 </script>
 
@@ -26,7 +29,7 @@
         <FilaProximas proximas={estado.proximas} />
     {/if}
     <LegendaMateriais />
-    <LegendaTeclas />
+    <LegendaTeclas {treino} />
 </aside>
 
 <style>
