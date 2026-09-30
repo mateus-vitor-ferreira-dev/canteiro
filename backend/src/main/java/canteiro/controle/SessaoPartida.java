@@ -1,6 +1,7 @@
 package canteiro.controle;
 
 import canteiro.modelo.Comando;
+import canteiro.modelo.EstadoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.ObservadorPartida;
 import canteiro.modelo.constantes.Tempo;
@@ -140,8 +141,15 @@ public final class SessaoPartida {
         medidor.fecharJanelaSeVenceu().ifPresent(this::registrarNoLog);
     }
 
-    /** Uma linha a cada janela do medidor, para conferir as metas de desempenho (RNF01). */
+    /**
+     * Uma linha a cada janela do medidor, para conferir as metas de desempenho
+     * (RNF01). Partida pausada ou encerrada não escreve: o laço dela continua
+     * rodando, mas sem nada para medir, e só encheria o log.
+     */
     private void registrarNoLog(MedidorDesempenho.Medicao medicao) {
+        if (motor.estado() == EstadoPartida.PAUSA || motor.estado() == EstadoPartida.FIM_DE_JOGO) {
+            return;
+        }
         LOG.info(String.format(Locale.ROOT,
                 "Partida %s: %.1f ciclos/s, ciclo médio %.3f ms, máximo %.3f ms, memória %d MB",
                 id, medicao.ciclosPorSegundo(), medicao.mediaMs(), medicao.maximoMs(), medicao.memoriaMb()));
