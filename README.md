@@ -1179,8 +1179,8 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Integrante | GitHub | Responsabilidades |
 |---|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · 🌐 tela de partida e telas de apoio · build e integração contínua |
-| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino · medições de desempenho |
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua |
+| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino |
 | Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · ♿ usabilidade e acessibilidade · 📝 manual da equipe, relatório e apresentações |
 | Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Roteiros de teste manual · execução dos testes a cada entrega · validação com jogadores |
 
