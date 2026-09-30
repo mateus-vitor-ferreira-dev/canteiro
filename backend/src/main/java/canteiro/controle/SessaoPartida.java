@@ -1,12 +1,14 @@
 package canteiro.controle;
 
 import canteiro.modelo.Comando;
+import canteiro.modelo.EstadoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.ObservadorPartida;
 import canteiro.modelo.constantes.Tempo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -35,6 +37,7 @@ public final class SessaoPartida {
     private final String id;
     private final MotorJogo motor;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
+    private final MedidorDesempenho medidor = new MedidorDesempenho(System::nanoTime);
     private ScheduledExecutorService laco;
 
     /**
@@ -128,11 +131,28 @@ public final class SessaoPartida {
 
     /** Um erro num ciclo não pode matar o laço: o agendador para de vez se a tarefa lançar exceção. */
     private void cicloProtegido() {
+        long inicio = System.nanoTime();
         try {
             ciclo();
         } catch (RuntimeException erro) {
             LOG.error("Erro no ciclo da partida {}", id, erro);
         }
+        medidor.registrar(System.nanoTime() - inicio);
+        medidor.fecharJanelaSeVenceu().ifPresent(this::registrarNoLog);
+    }
+
+    /**
+     * Uma linha a cada janela do medidor, para conferir as metas de desempenho
+     * (RNF01). Partida pausada ou encerrada não escreve: o laço dela continua
+     * rodando, mas sem nada para medir, e só encheria o log.
+     */
+    private void registrarNoLog(MedidorDesempenho.Medicao medicao) {
+        if (motor.estado() == EstadoPartida.PAUSA || motor.estado() == EstadoPartida.FIM_DE_JOGO) {
+            return;
+        }
+        LOG.info(String.format(Locale.ROOT,
+                "Partida %s: %.1f ciclos/s, ciclo médio %.3f ms, máximo %.3f ms, memória %d MB",
+                id, medicao.ciclosPorSegundo(), medicao.mediaMs(), medicao.maximoMs(), medicao.memoriaMb()));
     }
 
     /**
