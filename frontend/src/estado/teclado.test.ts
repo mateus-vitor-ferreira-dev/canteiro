@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { TECLAS, comandoDaTecla, montarTeclas, rotuloDaTecla, teclaReservada } from "./teclado";
+import {
+    TECLAS,
+    comandoDaTecla,
+    ehAtalhoDesfazer,
+    montarTeclas,
+    rotuloDaTecla,
+    teclaReservada,
+    teclasDoModo,
+} from "./teclado";
 
 describe("comandoDaTecla", () => {
     it("traduz as setas, o espaço e as letras", () => {
@@ -37,6 +45,35 @@ describe("comandoDaTecla", () => {
             expect(tecla.acao).not.toBe("");
             expect(tecla.codigos.length).toBeGreaterThan(0);
         }
+    });
+});
+
+describe("modo treino", () => {
+    it("fora do treino, a tecla de desfazer sai da tabela e não gera comando", () => {
+        const teclas = teclasDoModo(TECLAS, false);
+        expect(teclas.some((t) => t.comando === "DESFAZER")).toBe(false);
+        expect(comandoDaTecla("KeyU", false, false, teclas)).toBeNull();
+        expect(teclas).toHaveLength(TECLAS.length - 1);
+    });
+
+    it("no treino, U desfaz e a legenda mostra também o Ctrl+Z", () => {
+        const teclas = teclasDoModo(TECLAS, true);
+        expect(comandoDaTecla("KeyU", false, false, teclas)).toBe("DESFAZER");
+        expect(teclas.find((t) => t.comando === "DESFAZER")?.rotulo).toBe("U ou Ctrl+Z");
+    });
+
+    it("a tecla de desfazer trocada pelo jogador continua só do treino", () => {
+        const teclas = montarTeclas({ DESFAZER: ["KeyB"] });
+        expect(teclasDoModo(teclas, false).some((t) => t.comando === "DESFAZER")).toBe(false);
+        expect(teclasDoModo(teclas, true).find((t) => t.comando === "DESFAZER")?.rotulo).toBe(
+            "B ou Ctrl+Z",
+        );
+    });
+
+    it("o atalho de desfazer é o Z com Ctrl ou ⌘, e só ele", () => {
+        expect(ehAtalhoDesfazer("KeyZ", true)).toBe(true);
+        expect(ehAtalhoDesfazer("KeyZ", false)).toBe(false);
+        expect(ehAtalhoDesfazer("KeyX", true)).toBe(false);
     });
 });
 

@@ -1,12 +1,16 @@
 <!-- A legenda das teclas, sempre visível durante a partida (RNF05). Sai da mesma tabela que o teclado usa, com as teclas que o jogador trocou. -->
 <script lang="ts">
     import { configuracoes } from "@/estado/configuracoes.svelte";
+    import { teclasDoModo } from "@/estado/teclado";
+
+    /** Se a partida é de treino: só aí a tecla de desfazer aparece. */
+    let { treino = false }: { treino?: boolean } = $props();
 </script>
 
 <section class="legenda" aria-label="Teclas">
     <h2>Teclas</h2>
     <dl>
-        {#each configuracoes.tabela as tecla (tecla.comando)}
+        {#each teclasDoModo(configuracoes.tabela, treino) as tecla (tecla.comando)}
             <dt><kbd>{tecla.rotulo}</kbd></dt>
             <dd>{tecla.acao}</dd>
         {/each}

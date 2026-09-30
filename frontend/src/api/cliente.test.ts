@@ -58,7 +58,10 @@ describe("criarPartida", () => {
         const [caminho, opcoes] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
         expect(caminho).toBe("/api/partidas");
         expect(opcoes.method).toBe("POST");
-        expect(JSON.parse(opcoes.body as string)).toEqual({ dificuldade: "NORMAL" });
+        expect(JSON.parse(opcoes.body as string)).toEqual({
+            dificuldade: "NORMAL",
+            modoTreino: false,
+        });
     });
 
     it("transforma a dificuldade inválida em ErroApi", async () => {

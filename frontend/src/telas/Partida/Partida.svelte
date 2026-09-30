@@ -9,7 +9,8 @@
     import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { Som } from "@/estado/som.svelte";
-    import { comandoDaTecla } from "@/estado/teclado";
+    import { comandoDaTecla, ehAtalhoDesfazer, teclasDoModo } from "@/estado/teclado";
+    import AvisoTreino from "./AvisoTreino.svelte";
     import CamadaPartida from "./CamadaPartida.svelte";
     import ColunaApoio from "./ColunaApoio.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -17,6 +18,7 @@
 
     let {
         id,
+        treino = false,
         aoSair,
         aoTerminar,
         conectar,
@@ -24,6 +26,8 @@
     }: {
         /** Id da partida criada em `POST /api/partidas`. */
         id: string;
+        /** Partida de treino: o desfazer fica liberado e ela não entra no ranking (RF26, RN15). */
+        treino?: boolean;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
         /** Chamado com o placar final, quando o jogador abre o resultado. */
@@ -78,8 +82,11 @@
     }
 
     function aoTeclar(evento: KeyboardEvent) {
-        const tabela = configuracoes.tabela;
-        const comando = comandoDaTecla(evento.code, evento.repeat, partida.pausada, tabela);
+        const tabela = teclasDoModo(configuracoes.tabela, treino);
+        const atalho = treino && ehAtalhoDesfazer(evento.code, evento.ctrlKey || evento.metaKey);
+        const comando = atalho
+            ? "DESFAZER"
+            : comandoDaTecla(evento.code, evento.repeat, partida.pausada, tabela);
         if (comando === "SOM") {
             som.alternar();
         } else if (comando && !partida.encerrada) {
@@ -116,15 +123,18 @@
     {/if}
 
     <div class="jogo">
+        {#if treino}
+            <AvisoTreino />
+        {/if}
         <div class="palco">
             <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
             <CamadaPartida {partida} {aoSair} {aoTerminar} />
         </div>
 
-        <ControlesToque aoComando={aoTocar} pausada={partida.pausada} />
+        <ControlesToque aoComando={aoTocar} pausada={partida.pausada} {treino} />
     </div>
 
-    <ColunaApoio estado={partida.estado} {som} />
+    <ColunaApoio estado={partida.estado} {som} {treino} />
 </div>
 
 <style>

@@ -29,6 +29,8 @@ export type ErroDto = {
 /** Corpo de `POST /api/partidas`. Espelho de `NovaPartidaDto`. */
 export type NovaPartidaDto = {
     dificuldade: CodigoDificuldade;
+    /** Partida de treino: dá para desfazer a última jogada e ela não entra no ranking (RF26, RN15). */
+    modoTreino: boolean;
 };
 
 /** Resposta de `POST /api/partidas`: o id para conectar em `/ws/partidas/{id}`. Espelho de `PartidaCriadaDto`. */
