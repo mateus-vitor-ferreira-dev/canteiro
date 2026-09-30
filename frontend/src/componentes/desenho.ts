@@ -37,6 +37,27 @@ export function tamanhoDaCelula(larguraDisponivel: number, alturaDisponivel: num
     return Math.min(CELULA_MAXIMA, Math.max(CELULA_MINIMA, cabe));
 }
 
+const JANELA_COMPUTADOR = 1100;
+const JANELA_TABLET = 768;
+
+/**
+ * O lado da célula para a janela do navegador. Desconta o que fica ao lado do
+ * tabuleiro (colunas laterais) ou em cima e embaixo dele (cabeçalho, placar e
+ * botões), conforme o arranjo da tela de partida em cada largura.
+ *
+ * @param largura largura da janela, em pixels
+ * @param altura altura da janela, em pixels
+ */
+export function celulaParaJanela(largura: number, altura: number): number {
+    if (largura >= JANELA_COMPUTADOR) {
+        return tamanhoDaCelula(largura - 700, altura - 190);
+    }
+    if (largura >= JANELA_TABLET) {
+        return tamanhoDaCelula(largura - 400, altura - 260);
+    }
+    return tamanhoDaCelula(largura - 40, altura - 300);
+}
+
 /** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
 export function desenharTabuleiro(
     ctx: CanvasRenderingContext2D,

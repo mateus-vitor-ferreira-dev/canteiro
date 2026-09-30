@@ -88,6 +88,20 @@ export type ConfiguracoesDto = {
     volume: number;
 };
 
+/**
+ * Uma partida gravada, como vem de `GET /api/repeticoes` (RF24). Espelho de
+ * `RepeticaoDto`, que o backend cria na #35.
+ */
+export type RepeticaoDto = {
+    /** Identificador da gravação, usado em `POST /api/repeticoes/{id}/reproduzir`. */
+    id: string;
+    /** Quando a partida terminou, no horário local, em ISO (`"2026-09-28T14:32:05"`). */
+    data: string;
+    dificuldade: CodigoDificuldade;
+    /** Pontuação final da partida gravada. */
+    pontuacao: number;
+};
+
 /** Comandos que o jogador envia pelo WebSocket. Espelho do enum `Comando`. */
 export type Comando =
     | "ESQUERDA"

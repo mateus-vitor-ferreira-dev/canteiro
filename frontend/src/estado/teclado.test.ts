@@ -6,6 +6,7 @@ import {
     montarTeclas,
     rotuloDaTecla,
     teclaReservada,
+    teclasDaRepeticao,
     teclasDoModo,
 } from "./teclado";
 
@@ -68,6 +69,10 @@ describe("modo treino", () => {
         expect(teclasDoModo(teclas, true).find((t) => t.comando === "DESFAZER")?.rotulo).toBe(
             "B ou Ctrl+Z",
         );
+    });
+
+    it("na repetição sobram só a pausa e o som", () => {
+        expect(teclasDaRepeticao(TECLAS).map((t) => t.comando)).toEqual(["PAUSA", "SOM"]);
     });
 
     it("o atalho de desfazer é o Z com Ctrl ou ⌘, e só ele", () => {

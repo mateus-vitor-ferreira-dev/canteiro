@@ -33,9 +33,9 @@ describe("Menu", () => {
         expect(screen.getByRole("button", { name: /Nova partida/ })).toHaveFocus();
     });
 
-    it("avisa quais telas ainda não existem", () => {
+    it("nenhuma opção aparece como ainda por fazer", () => {
         render(Menu, { aoEscolher: vi.fn() });
-        expect(screen.getAllByText("Em breve")).toHaveLength(1);
+        expect(screen.queryByText("Em breve")).toBeNull();
     });
 
     it("descreve a torre para o leitor de tela", () => {

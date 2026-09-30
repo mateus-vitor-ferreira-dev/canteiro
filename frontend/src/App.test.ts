@@ -1,6 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { listarDificuldades, listarRanking, registrarNoRanking } from "@/api/cliente";
+import {
+    listarDificuldades,
+    listarRanking,
+    listarRepeticoes,
+    registrarNoRanking,
+    reproduzirRepeticao,
+} from "@/api/cliente";
 import { Navegacao } from "@/estado/navegacao.svelte";
 import { estadoDeTeste } from "@/testes-apoio";
 import App from "./App.svelte";
@@ -9,7 +15,9 @@ vi.mock("@/api/cliente", async (original) => ({
     ...(await original<typeof import("@/api/cliente")>()),
     listarDificuldades: vi.fn(),
     listarRanking: vi.fn(),
+    listarRepeticoes: vi.fn(),
     registrarNoRanking: vi.fn(),
+    reproduzirRepeticao: vi.fn(),
 }));
 
 beforeEach(() => {
@@ -36,12 +44,23 @@ describe("App", () => {
         expect(navegacao.tela).toEqual({ nome: "menu" });
     });
 
-    it("tela que ainda não existe mostra o aviso e põe o foco no título", async () => {
-        render(App);
+    it("abre as repetições com o foco no título e, ao escolher uma, abre a reprodução", async () => {
+        vi.mocked(listarRepeticoes).mockResolvedValue([
+            { id: "g1", data: "2026-09-28T14:32:05", dificuldade: "NORMAL", pontuacao: 900 },
+        ]);
+        vi.mocked(reproduzirRepeticao).mockResolvedValue({ id: "rep1" });
+        const navegacao = new Navegacao();
+        render(App, { navegacao });
         await fireEvent.click(screen.getByRole("button", { name: /Repetições/ }));
         const titulo = screen.getByRole("heading", { name: "Repetições" });
         await vi.waitFor(() => expect(titulo).toHaveFocus());
-        expect(screen.getByText(/ainda está em construção/)).toBeInTheDocument();
+
+        await fireEvent.click(await screen.findByRole("button", { name: /28\/09\/2026/ }));
+
+        await vi.waitFor(() =>
+            expect(navegacao.tela).toEqual({ nome: "partida", id: "rep1", repeticao: true }),
+        );
+        expect(screen.getByText(/dá para assistir e pausar/)).toBeInTheDocument();
     });
 
     it("o voltar do navegador volta uma tela", async () => {

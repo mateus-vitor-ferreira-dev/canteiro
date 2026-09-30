@@ -1,4 +1,4 @@
-<!-- Tela de uma mensagem só, com a volta para o menu: telas que ainda não existem e a saída do jogo. -->
+<!-- Tela de uma mensagem só, com a volta para o menu, como a saída do jogo. -->
 <script lang="ts">
     let {
         titulo,

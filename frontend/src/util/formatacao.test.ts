@@ -3,6 +3,7 @@ import {
     corCss,
     formatarColunas,
     formatarData,
+    formatarDataHora,
     formatarDuracao,
     formatarSegundos,
 } from "./formatacao";
@@ -15,6 +16,18 @@ describe("formatarDuracao", () => {
 
     it("minutos e segundos com dois dígitos", () => {
         expect(formatarDuracao(185)).toBe("3 min 05 s");
+    });
+});
+
+describe("formatarDataHora", () => {
+    it("mostra o dia e a hora do relógio de quem jogou", () => {
+        expect(formatarDataHora("2026-09-28T14:32:05")).toBe("28/09/2026 às 14:32");
+        expect(formatarDataHora("2026-01-02T03:04:05.123")).toBe("02/01/2026 às 03:04");
+    });
+
+    it("sem hora, mostra só a data; texto estranho volta como veio", () => {
+        expect(formatarDataHora("2026-09-28")).toBe("28/09/2026");
+        expect(formatarDataHora("ontem")).toBe("ontem");
     });
 });
 

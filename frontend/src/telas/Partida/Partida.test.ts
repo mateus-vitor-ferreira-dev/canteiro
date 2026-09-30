@@ -12,7 +12,7 @@ beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
 });
 
-function montar(som?: Som, treino = false) {
+function montar(som?: Som, treino = false, repeticao = false) {
     let ouvinte: OuvinteConexao | undefined;
     const conexao = { enviar: vi.fn(), fechar: vi.fn() };
     const aoSair = vi.fn();
@@ -20,6 +20,7 @@ function montar(som?: Som, treino = false) {
     const tela = render(Partida, {
         id: "abc",
         treino,
+        repeticao,
         aoSair,
         aoTerminar,
         ...(som ? { som } : {}),
@@ -81,6 +82,36 @@ describe("Partida", () => {
             ["GIRAR_ANTI_HORARIO"],
             ["DESFAZER"],
         ]);
+    });
+
+    it("na repetição, avisa que é uma gravação e só a pausa vira comando", async () => {
+        const { conexao, receber } = montar(undefined, false, true);
+        receber(estadoDeTeste());
+        expect(screen.getByText(/Repetição: dá para assistir e pausar/)).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Girar" })).toBeNull();
+        expect(screen.queryByText("Queda instantânea")).toBeNull();
+        expect(screen.getByText("Pausar ou continuar")).toBeInTheDocument();
+
+        await fireEvent.keyDown(window, { code: "ArrowLeft" });
+        await fireEvent.keyDown(window, { code: "Space" });
+        expect(conexao.enviar).not.toHaveBeenCalled();
+
+        await fireEvent.keyDown(window, { code: "KeyP" });
+        await fireEvent.click(screen.getByRole("button", { name: "Pausar" }));
+        expect(conexao.enviar.mock.calls).toEqual([["PAUSAR"], ["PAUSAR"]]);
+    });
+
+    it("no fim da repetição, volta para a lista em vez de pedir o resultado", async () => {
+        const { aoSair, aoTerminar, receber } = montar(undefined, false, true);
+        receber(estadoDeTeste({ estado: "FIM_DE_JOGO" }));
+        expect(screen.getByText("Fim da repetição")).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Ver resultado" })).toBeNull();
+
+        const voltar = screen.getByRole("button", { name: "Voltar às repetições" });
+        expect(voltar).toHaveFocus();
+        await fireEvent.click(voltar);
+        expect(aoSair).toHaveBeenCalled();
+        expect(aoTerminar).not.toHaveBeenCalled();
     });
 
     it("pausa quando a aba perde o foco e mostra a camada de pausa", async () => {

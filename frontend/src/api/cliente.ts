@@ -8,6 +8,7 @@ import type {
     PartidaCriadaDto,
     RegistroRankingDto,
     RelatorioDto,
+    RepeticaoDto,
 } from "./protocolo";
 
 /** Código usado quando o backend nem chegou a responder. */
@@ -91,6 +92,22 @@ export async function salvarConfiguracoes(configuracoes: ConfiguracoesDto): Prom
 /** O relatório da partida: estabilidade a cada peça, colapsos e materiais (RF25). */
 export function buscarRelatorio(partidaId: string): Promise<RelatorioDto> {
     return buscarJson<RelatorioDto>(`/api/partidas/${encodeURIComponent(partidaId)}/relatorio`);
+}
+
+/** As partidas gravadas, da mais recente para a mais antiga (RF24). */
+export function listarRepeticoes(): Promise<RepeticaoDto[]> {
+    return buscarJson<RepeticaoDto[]>("/api/repeticoes");
+}
+
+/**
+ * Cria a reprodução de uma partida gravada (RF24). O id devolvido abre em
+ * `/ws/partidas/{id}`, como uma partida comum, só que ninguém joga: o backend
+ * refaz as jogadas.
+ */
+export function reproduzirRepeticao(id: string): Promise<PartidaCriadaDto> {
+    return buscarJson<PartidaCriadaDto>(`/api/repeticoes/${encodeURIComponent(id)}/reproduzir`, {
+        method: "POST",
+    });
 }
 
 /**

@@ -12,6 +12,7 @@
         estado,
         som,
         treino = false,
+        repeticao = false,
     }: {
         /** O último estado da partida; `null` antes da primeira mensagem. */
         estado: EstadoDto | null;
@@ -19,6 +20,8 @@
         som: Som;
         /** Se a partida é de treino, para a legenda mostrar o desfazer. */
         treino?: boolean;
+        /** Se é uma repetição: a legenda mostra só a pausa e o som. */
+        repeticao?: boolean;
     } = $props();
 </script>
 
@@ -29,7 +32,7 @@
         <FilaProximas proximas={estado.proximas} />
     {/if}
     <LegendaMateriais />
-    <LegendaTeclas {treino} />
+    <LegendaTeclas {treino} {repeticao} />
 </aside>
 
 <style>

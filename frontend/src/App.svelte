@@ -1,7 +1,7 @@
 <!-- Moldura do jogo: o cabeçalho e a tela aberta, escolhida pela navegação (RF01). -->
 <script lang="ts">
     import { tick } from "svelte";
-    import { Navegacao, type NomeTela } from "@/estado/navegacao.svelte";
+    import { Navegacao } from "@/estado/navegacao.svelte";
     import { configuracoes } from "@/estado/configuracoes.svelte";
     import Aviso from "@/telas/Aviso/Aviso.svelte";
     import Configuracoes from "@/telas/Configuracoes/Configuracoes.svelte";
@@ -11,14 +11,10 @@
     import Partida from "@/telas/Partida/Partida.svelte";
     import Ranking from "@/telas/Ranking/Ranking.svelte";
     import Relatorio from "@/telas/Relatorio/Relatorio.svelte";
+    import Repeticoes from "@/telas/Repeticoes/Repeticoes.svelte";
 
     /** Troca a navegação nos testes. */
     let { navegacao = new Navegacao() }: { navegacao?: Navegacao } = $props();
-
-    /** Telas que ainda não existem: o menu já leva até elas, com um aviso. */
-    const EM_BREVE: Partial<Record<NomeTela, string>> = {
-        repeticoes: "Repetições",
-    };
 
     let principal: HTMLElement | undefined = $state();
 
@@ -51,12 +47,13 @@
         </button>
         <NovaPartida aoCriar={(id, treino) => navegacao.ir({ nome: "partida", id, treino })} />
     {:else if navegacao.tela.nome === "partida"}
-        {@const { id, treino } = navegacao.tela}
+        {@const { id, treino, repeticao } = navegacao.tela}
         {#key id}
             <Partida
                 {id}
                 {treino}
-                aoSair={() => navegacao.ir({ nome: "nova-partida" })}
+                {repeticao}
+                aoSair={() => navegacao.ir({ nome: repeticao ? "repeticoes" : "nova-partida" })}
                 aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar, treino })}
             />
         {/key}
@@ -86,16 +83,16 @@
         />
     {:else if navegacao.tela.nome === "configuracoes"}
         <Configuracoes aoVoltar={() => navegacao.voltarAoMenu()} />
-    {:else if navegacao.tela.nome === "saida"}
-        <Aviso
-            titulo="Até a próxima obra"
-            texto="Pode fechar esta aba. O navegador não deixa o jogo fechá-la sozinho."
+    {:else if navegacao.tela.nome === "repeticoes"}
+        <Repeticoes
+            aoReproduzir={(id) => navegacao.ir({ nome: "partida", id, repeticao: true })}
+            aoJogar={() => navegacao.ir({ nome: "nova-partida" })}
             aoVoltar={() => navegacao.voltarAoMenu()}
         />
     {:else}
         <Aviso
-            titulo={EM_BREVE[navegacao.tela.nome] ?? "Em construção"}
-            texto="Esta parte do jogo ainda está em construção. Por enquanto, dá para jogar uma partida nova."
+            titulo="Até a próxima obra"
+            texto="Pode fechar esta aba. O navegador não deixa o jogo fechá-la sozinho."
             aoVoltar={() => navegacao.voltarAoMenu()}
         />
     {/if}

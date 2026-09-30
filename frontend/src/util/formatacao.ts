@@ -42,6 +42,22 @@ export function formatarData(iso: string): string {
     return Number.isNaN(data.getTime()) ? iso : DATA.format(data);
 }
 
+const DATA_E_HORA = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/;
+
+/**
+ * Formata data e hora ISO do backend (`"2026-09-28T14:32:05"`) como
+ * `"28/09/2026 às 14:32"`. O horário é o do relógio de quem jogou, então não
+ * passa por fuso. Sem hora, mostra só a data.
+ */
+export function formatarDataHora(iso: string): string {
+    const partes = DATA_E_HORA.exec(iso);
+    if (!partes) {
+        return formatarData(iso);
+    }
+    const [, ano, mes, dia, hora, minuto] = partes;
+    return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+}
+
 /**
  * Converte a cor de um material, que o backend guarda como número RGB, em cor CSS.
  *
