@@ -5,7 +5,7 @@
     /** Chamado com a tela escolhida. */
     let { aoEscolher }: { aoEscolher: (tela: Tela) => void } = $props();
 
-    type Opcao = { tela: Tela; nome: string; descricao: string; emBreve?: boolean };
+    type Opcao = { tela: Tela; nome: string; descricao: string };
 
     const OPCOES: readonly Opcao[] = [
         {
@@ -17,7 +17,6 @@
             tela: { nome: "repeticoes" },
             nome: "Repetições",
             descricao: "Assista de novo a uma partida gravada.",
-            emBreve: true,
         },
         {
             tela: { nome: "configuracoes" },
@@ -31,10 +30,7 @@
     {#each OPCOES as opcao (opcao.nome)}
         <li>
             <button type="button" onclick={() => aoEscolher(opcao.tela)}>
-                <span class="nome">
-                    {opcao.nome}
-                    {#if opcao.emBreve}<span class="selo">Em breve</span>{/if}
-                </span>
+                <span class="nome">{opcao.nome}</span>
                 <span class="descricao">{opcao.descricao}</span>
             </button>
         </li>
@@ -81,13 +77,5 @@
     .descricao {
         font-size: 0.9rem;
         color: var(--cor-texto-suave);
-    }
-    .selo {
-        padding: 0.05rem 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--cor-rotulo);
-        border: 1px solid currentcolor;
-        border-radius: 999px;
     }
 </style>

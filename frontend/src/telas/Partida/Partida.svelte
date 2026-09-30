@@ -4,13 +4,13 @@
     import type { Comando, PlacarDto } from "@/api/protocolo";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
     import Tabuleiro from "@/componentes/Tabuleiro.svelte";
-    import { tamanhoDaCelula } from "@/componentes/desenho";
+    import { celulaParaJanela } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
     import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { Som } from "@/estado/som.svelte";
-    import { comandoDaTecla, ehAtalhoDesfazer, teclasDoModo } from "@/estado/teclado";
-    import AvisoTreino from "./AvisoTreino.svelte";
+    import { comandoDoEvento } from "@/estado/teclado";
+    import FaixaModo from "./FaixaModo.svelte";
     import CamadaPartida from "./CamadaPartida.svelte";
     import ColunaApoio from "./ColunaApoio.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -19,6 +19,7 @@
     let {
         id,
         treino = false,
+        repeticao = false,
         aoSair,
         aoTerminar,
         conectar,
@@ -28,6 +29,8 @@
         id: string;
         /** Partida de treino: o desfazer fica liberado e ela não entra no ranking (RF26, RN15). */
         treino?: boolean;
+        /** Reprodução de uma partida gravada: o jogador só assiste e pausa (RF24). */
+        repeticao?: boolean;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
         /** Chamado com o placar final, quando o jogador abre o resultado. */
@@ -55,19 +58,8 @@
     let larguraJanela = $state(1280);
     let alturaJanela = $state(800);
 
-    /**
-     * O tabuleiro cresce e encolhe com a janela. Desconta o que fica ao lado
-     * dele (colunas laterais) ou em cima e embaixo (cabeçalho, placar e botões).
-     */
-    const celula = $derived.by(() => {
-        if (larguraJanela >= 1100) {
-            return tamanhoDaCelula(larguraJanela - 700, alturaJanela - 190);
-        }
-        if (larguraJanela >= 768) {
-            return tamanhoDaCelula(larguraJanela - 400, alturaJanela - 260);
-        }
-        return tamanhoDaCelula(larguraJanela - 40, alturaJanela - 300);
-    });
+    /** O tabuleiro cresce e encolhe com a janela. */
+    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela));
 
     const anuncio = $derived(
         partida.ultimoEvento
@@ -75,21 +67,23 @@
             : "",
     );
 
+    /** Numa repetição, só a pausa chega ao backend: as jogadas são as gravadas. */
+    function aceita(comando: Comando): boolean {
+        const pausa = comando === "PAUSAR" || comando === "RETOMAR";
+        return !partida.encerrada && (!repeticao || pausa);
+    }
+
     function aoTocar(comando: Comando) {
-        if (!partida.encerrada) {
+        if (aceita(comando)) {
             partida.enviar(comando);
         }
     }
 
     function aoTeclar(evento: KeyboardEvent) {
-        const tabela = teclasDoModo(configuracoes.tabela, treino);
-        const atalho = treino && ehAtalhoDesfazer(evento.code, evento.ctrlKey || evento.metaKey);
-        const comando = atalho
-            ? "DESFAZER"
-            : comandoDaTecla(evento.code, evento.repeat, partida.pausada, tabela);
+        const comando = comandoDoEvento(evento, partida.pausada, configuracoes.tabela, treino);
         if (comando === "SOM") {
             som.alternar();
-        } else if (comando && !partida.encerrada) {
+        } else if (comando && aceita(comando)) {
             evento.preventDefault();
             partida.enviar(comando);
         }
@@ -123,18 +117,21 @@
     {/if}
 
     <div class="jogo">
-        {#if treino}
-            <AvisoTreino />
-        {/if}
+        <FaixaModo {treino} {repeticao} />
         <div class="palco">
             <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
-            <CamadaPartida {partida} {aoSair} {aoTerminar} />
+            <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
         </div>
 
-        <ControlesToque aoComando={aoTocar} pausada={partida.pausada} {treino} />
+        <ControlesToque
+            aoComando={aoTocar}
+            pausada={partida.pausada}
+            {treino}
+            soPausa={repeticao}
+        />
     </div>
 
-    <ColunaApoio estado={partida.estado} {som} {treino} />
+    <ColunaApoio estado={partida.estado} {som} {treino} {repeticao} />
 </div>
 
 <style>

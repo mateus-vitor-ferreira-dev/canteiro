@@ -5,12 +5,15 @@
 
     let {
         partida,
+        repeticao = false,
         aoSair,
         aoTerminar,
     }: {
         /** A partida, de onde vem o que mostrar. */
         partida: PartidaAoVivo;
-        /** Chamado quando o jogador sai para começar outra partida. */
+        /** Se é a reprodução de uma partida gravada: no fim, não há resultado a salvar. */
+        repeticao?: boolean;
+        /** Chamado quando o jogador sai para começar outra partida, ou volta à lista de repetições. */
         aoSair: () => void;
         /** Chamado com o placar final, quando o jogador quer ver o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
@@ -28,7 +31,9 @@
     <div class="camada" role="alert">
         <h2>Partida perdida</h2>
         <p>O jogo foi reiniciado e esta partida não existe mais.</p>
-        <button type="button" onclick={aoSair}>Começar outra</button>
+        <button type="button" onclick={aoSair}>
+            {repeticao ? "Voltar às repetições" : "Começar outra"}
+        </button>
     </div>
 {:else if partida.reconectando}
     <div class="camada" role="status">
@@ -39,6 +44,14 @@
     <div class="camada" role="status">
         <h2>Pausado</h2>
         <p>Aperte <kbd>P</kbd> para continuar.</p>
+    </div>
+{:else if partida.encerrada && partida.estado && repeticao}
+    <div class="camada" role="status">
+        <h2>Fim da repetição</h2>
+        <p>{pontos.format(partida.estado.placar.pontuacao)} pontos</p>
+        <button bind:this={verResultado} type="button" onclick={aoSair}>
+            Voltar às repetições
+        </button>
     </div>
 {:else if partida.encerrada && partida.estado}
     {@const placar = partida.estado.placar}

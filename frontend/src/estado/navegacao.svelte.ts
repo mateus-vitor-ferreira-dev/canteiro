@@ -4,12 +4,13 @@ import type { PlacarDto } from "@/api/protocolo";
  * As telas do jogo. A partida leva o id que o backend devolveu ao criá-la; o
  * fim e o relatório levam também o placar final, para o relatório poder voltar
  * ao resultado; o ranking pode destacar um nome. As três telas de uma partida
- * sabem se ela é de treino, que não vai para o ranking (RN15).
+ * sabem se ela é de treino, que não vai para o ranking (RN15). A partida
+ * também pode ser a reprodução de uma gravada (RF24).
  */
 export type Tela =
     | { nome: "menu" }
     | { nome: "nova-partida" }
-    | { nome: "partida"; id: string; treino?: boolean }
+    | { nome: "partida"; id: string; treino?: boolean; repeticao?: boolean }
     | { nome: "fim"; id: string; placar: PlacarDto; treino?: boolean }
     | { nome: "relatorio"; id: string; placar: PlacarDto; treino?: boolean }
     | { nome: "ranking"; destaque?: string }

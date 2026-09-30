@@ -106,6 +106,16 @@ export function teclasDoModo(teclas: readonly Tecla[], treino: boolean): Tecla[]
 }
 
 /**
+ * A tabela que vale numa repetição: o jogador só assiste, então sobram a pausa
+ * e o som.
+ *
+ * @param teclas a tabela em uso, com as teclas que o jogador trocou
+ */
+export function teclasDaRepeticao(teclas: readonly Tecla[]): Tecla[] {
+    return teclas.filter((tecla) => tecla.comando === "PAUSA" || tecla.comando === "SOM");
+}
+
+/**
  * Se a tecla é o atalho de desfazer (Ctrl+Z ou ⌘Z). Ele é conferido antes da
  * tabela, porque o Z sozinho gira a peça.
  *
@@ -114,6 +124,27 @@ export function teclasDoModo(teclas: readonly Tecla[], treino: boolean): Tecla[]
  */
 export function ehAtalhoDesfazer(codigo: string, comControle: boolean): boolean {
     return comControle && codigo === "KeyZ";
+}
+
+/**
+ * O comando de um toque no teclado durante a partida: primeiro o atalho de
+ * desfazer, depois a tabela do modo.
+ *
+ * @param evento a tecla apertada
+ * @param pausada se a partida está pausada
+ * @param teclas a tabela em uso, com as teclas que o jogador trocou
+ * @param treino se a partida é de treino
+ */
+export function comandoDoEvento(
+    evento: Pick<KeyboardEvent, "code" | "repeat" | "ctrlKey" | "metaKey">,
+    pausada: boolean,
+    teclas: readonly Tecla[],
+    treino: boolean,
+): Comando | "SOM" | null {
+    if (treino && ehAtalhoDesfazer(evento.code, evento.ctrlKey || evento.metaKey)) {
+        return "DESFAZER";
+    }
+    return comandoDaTecla(evento.code, evento.repeat, pausada, teclasDoModo(teclas, treino));
 }
 
 /** O que uma tecla faz: um comando do jogo, a pausa (que alterna) ou o som. */

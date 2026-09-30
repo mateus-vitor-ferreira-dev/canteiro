@@ -228,7 +228,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 
 | Código | Descrição | Prior. | Lado | Status | Onde está |
 |---|---|:-:|:-:|:-:|---|
-| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; ranking, repetições e configurações avisam que estão em construção (#26) |
+| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; cada opção abre a sua tela (#26, #32, #38, #68) |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25) |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ✅ | O motor gera peças continuamente (#20) pelo método da sacola, com semente (#12) |
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12) |
@@ -251,7 +251,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | 🟡 | Campo do nome no fim de partida, com validação e erros claros (#32); falta o arquivo e a rota `POST /api/ranking` (#31) |
 | RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | 🟡 | Tela do ranking, com o nome recém-salvo em destaque (#32); falta a rota `GET /api/ranking` (#31) |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
-| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
+| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | 🟡 | Tela das repetições, com data, dificuldade e pontuação de cada partida gravada; a reprodução abre no tabuleiro de sempre, avisa que é uma gravação e só aceita pausar (#68); faltam a gravação e as rotas `GET /api/repeticoes` e `POST /api/repeticoes/{id}/reproduzir` (#35) |
 | RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | 🟡 | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); falta a rota `GET /api/partidas/{id}/relatorio` (#70) |
 | RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ 🌐 | 🟡 | Na tela: a opção de modo treino ao criar a partida, desfazer por U, Ctrl+Z ou botão de toque, e o aviso de que o treino não entra no ranking (#69); falta o motor desfazer a jogada (#37). Até lá, o backend recusa a partida de treino com um aviso claro |
 | RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | 🟡 | Tela de configurações com a troca de cada tecla e o volume; a partida e a legenda usam as teclas novas, guardadas no navegador (#38); falta guardar no servidor (#71) |

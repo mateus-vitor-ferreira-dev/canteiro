@@ -6,6 +6,7 @@
         aoComando,
         pausada,
         treino = false,
+        soPausa = false,
     }: {
         /** Chamado com o comando do botão tocado. */
         aoComando: (comando: Comando) => void;
@@ -13,6 +14,8 @@
         pausada: boolean;
         /** Se a partida é de treino: só aí o botão de desfazer aparece (RF26). */
         treino?: boolean;
+        /** Numa repetição, o jogador só assiste: sobra o botão de pausa (RF24). */
+        soPausa?: boolean;
     } = $props();
 
     /** Desenho de cada ícone, num quadro de 24 × 24. */
@@ -45,7 +48,12 @@
         { comando: "RESERVAR", rotulo: "Guardar na reserva", icone: ICONES.reservar },
     ];
 
-    const botoes = $derived(treino ? [...BOTOES, DESFAZER] : BOTOES);
+    const botoes = $derived.by(() => {
+        if (soPausa) {
+            return [];
+        }
+        return treino ? [...BOTOES, DESFAZER] : BOTOES;
+    });
 </script>
 
 <div class="controles" role="group" aria-label="Controles de toque">
