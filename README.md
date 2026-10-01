@@ -9,7 +9,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 <p>
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
-  <a href="docs/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
+  <a href="docs/proposta/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
   <a href="https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mateus-vitor-ferreira-dev/canteiro/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"/></a>
 </p>
 
@@ -27,9 +27,9 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <br/><br/>
 
-<img src="docs/imagens/tela-principal.png" alt="Esboço da tela principal do CANTEIRO" width="820"/>
+<img src="docs/imagens/tela-principal.png" alt="Tela inicial do CANTEIRO: menu com nova partida, ranking, repetições e configurações" width="820"/>
 
-<sub>Esboço da tela principal. O jogo ainda está sendo construído.</sub>
+<sub>Tela inicial do jogo, capturada da versão atual. O jogo ainda está sendo construído.</sub>
 
 </div>
 
@@ -55,7 +55,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/Apresentacao_Canteiro.pdf)**.
+> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
 
 ---
 
@@ -180,7 +180,7 @@ Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma exist
 
 ## 📋 Requisitos
 
-Os critérios de aceitação de cada requisito estão na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 12). Aqui fica a lista e, principalmente, **o andamento de cada requisito**.
+Os critérios de aceitação de cada requisito estão na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 12). Aqui fica a lista e, principalmente, **o andamento de cada requisito**.
 
 | Status | Significado |
 |---|---|
@@ -363,7 +363,8 @@ Se você está na dúvida entre o backend e o frontend, faça a pergunta: **"iss
 | Escrever um roteiro de teste manual | `docs/testes/` | #17, #27 |
 | Escrever o manual da equipe | `docs/EQUIPE.md` | #18 |
 | Atualizar o andamento de um requisito | Este README, seção [📋 Requisitos](#-requisitos) | #19 |
-| Relatório, slides, documentos de entrega | `docs/` | #39 |
+| Relatório de plataforma e desvios | `docs/` | #39 |
+| Slides e vídeo da apresentação | `docs/apresentacao/` | #84 |
 | Registrar um bug ou uma ideia | Não é pasta: é uma **issue nova**, com o modelo certo, no [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5) | — |
 
 ### Um exemplo de ponta a ponta: a lista de dificuldades
@@ -445,8 +446,8 @@ canteiro/
 │   ├── package.json                 a receita do frontend
 │   └── vite.config.ts
 ├── docs/
-│   ├── Proposta_Projeto_Canteiro.pdf  proposta do projeto
-│   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
+│   ├── proposta/                    proposta do projeto (completa e o resumo da etapa 1)
+│   ├── apresentacao/                slides e vídeo da apresentação
 │   ├── EQUIPE.md                    manual da equipe (a criar, #18)
 │   ├── testes/                      roteiros de teste manual (a criar, #17)
 │   └── imagens/                     imagens do README e o gerador dos diagramas
@@ -1152,7 +1153,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Semanas | Etapa | Lado | Entrega |
 |---|---|---|---|
-| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) |
+| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) |
 | 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
 | ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
 | ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
@@ -1167,8 +1168,8 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
 - 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. O principal desvio até aqui é a troca da interface em Swing por uma interface no navegador
-- 🗂️ **[Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
-- 🎬 **[Apresentação](docs/Apresentacao_Canteiro.pdf)**: 15 slides em linguagem simples, para gravar a tela narrando
+- 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
+- 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 
 ---
 
@@ -1181,10 +1182,10 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 |---|---|---|
 | Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua |
 | Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino |
-| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · ♿ usabilidade e acessibilidade · 📝 manual da equipe, relatório e apresentações |
-| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Roteiros de teste manual · execução dos testes a cada entrega · validação com jogadores |
+| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes (roteiros, com o Alisson) · ♿ usabilidade e acessibilidade · 📝 manual da equipe e relatório |
+| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Execução dos testes a cada entrega · validação com jogadores · 📝 apoio na documentação · 🎬 apresentação do projeto |
 
-Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão inicial, de antes da entrada do Alisson, está na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 16); a tabela acima é a que vale hoje.
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista, já com o Alisson, está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16); as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus. A tabela acima é a que vale hoje.
 
 ---
 
