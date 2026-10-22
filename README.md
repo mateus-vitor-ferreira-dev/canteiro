@@ -363,7 +363,7 @@ Se você está na dúvida entre o backend e o frontend, faça a pergunta: **"iss
 | Colocar um som ou uma imagem | `frontend/public/sons/` ou `frontend/public/imagens/` | #38 |
 | Escrever um teste automático do backend | `backend/src/test/java/canteiro/`, **no mesmo pacote** da classe testada | toda tarefa de programação |
 | Escrever um teste automático do frontend | Ao lado do arquivo testado, com o final `.test.ts` | toda tarefa de programação |
-| Escrever um roteiro de teste manual | `docs/testes/` | #17, #27 |
+| Escrever ou executar um roteiro de teste manual | `docs/testes/` ([como testar](docs/testes/README.md)) | #17, #27, #30 |
 | Escrever o manual da equipe | `docs/EQUIPE.md` | #18 |
 | Atualizar o andamento de um requisito | Este README, seção [📋 Requisitos](#-requisitos) | #19 |
 | Relatório de plataforma e desvios | `docs/` | #39 |
@@ -452,7 +452,7 @@ canteiro/
 │   ├── proposta/                    proposta do projeto (completa e o resumo da etapa 1)
 │   ├── apresentacao/                slides e vídeo da apresentação
 │   ├── EQUIPE.md                    manual da equipe (a criar, #18)
-│   ├── testes/                      roteiros de teste manual (a criar, #17)
+│   ├── testes/                      testes manuais: roteiros, execuções, sessões e o relatório
 │   └── imagens/                     imagens do README e o gerador dos diagramas
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
@@ -510,7 +510,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README e, em breve, o manual da equipe (`EQUIPE.md`) e os roteiros de teste manual (`testes/`) |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e, em breve, o manual da equipe (`EQUIPE.md`) |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
