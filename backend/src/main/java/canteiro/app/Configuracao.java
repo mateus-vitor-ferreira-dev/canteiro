@@ -53,6 +53,10 @@ public record Configuracao(String host, int porta, boolean abrirNavegador, int l
     /**
      * Valida os campos.
      *
+     * @param host           endereço de escuta
+     * @param porta          porta de escuta, de 0 a 65535
+     * @param abrirNavegador se o jogo deve abrir o navegador ao subir
+     * @param limitePartidas máximo de partidas abertas ao mesmo tempo, positivo
      * @throws NullPointerException     se o host for nulo
      * @throws IllegalArgumentException se a porta ou o limite estiverem fora da faixa
      */
