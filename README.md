@@ -251,8 +251,8 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ✅ | Sobe a cada 10 linhas, acelera a queda e aperta o limite de desvio (#22, #28) |
 | RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ✅ | P ou Esc pausa e retoma, com a camada de pausa (#20, #23, #25) |
 | RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ✅ | O motor encerra a partida nas duas condições da RN13 (#20, #28); tela de fim com pontuação, nível, linhas, colapsos e tempo (#32) |
-| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | 🟡 | Campo do nome no fim de partida, com validação e erros claros (#32); falta o arquivo e a rota `POST /api/ranking` (#31) |
-| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | 🟡 | Tela do ranking, com o nome recém-salvo em destaque (#32); falta a rota `GET /api/ranking` (#31) |
+| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ✅ | Campo do nome no fim de partida (#32) e `POST /api/ranking`, que lê a pontuação da própria partida, só aceita partida encerrada e uma vez só, e grava em `ranking.csv` (#31) |
+| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ✅ | Tela do ranking, com o nome recém-salvo em destaque (#32), e `GET /api/ranking` com as dez melhores, uma por jogador (#31) |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
 | RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | 🟡 | Tela das repetições, com data, dificuldade e pontuação de cada partida gravada; a reprodução abre no tabuleiro de sempre, avisa que é uma gravação e só aceita pausar (#68); faltam a gravação e as rotas `GET /api/repeticoes` e `POST /api/repeticoes/{id}/reproduzir` (#35) |
 | RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | 🟡 | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); falta a rota `GET /api/partidas/{id}/relatorio` (#70) |
@@ -282,7 +282,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
 | RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido em cada PR, por quem o abre |
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ✅ | Colisão, rotação, linhas, centro de massa (#11, #20, #21, #28) e serialização do protocolo (#23) |
-| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | 🟡 | Materiais e configurações: arquivo ausente, vazio, ilegível ou com valor inválido vira o padrão do JAR, com aviso no log; o jogo sempre abre. Testado com arquivos feitos para quebrar (#24). Falta o ranking (#31) |
+| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ✅ | Materiais e configurações: arquivo ausente, vazio, ilegível ou com valor inválido vira o padrão do JAR, com aviso no log; o jogo sempre abre. Testado com arquivos feitos para quebrar (#24). O ranking ignora linha estragada e começa vazio se o arquivo for ilegível (#31) |
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ✅ | Cada valor é conferido na leitura (densidade positiva, cor RRGGBB, volume de 0 a 100); o inválido volta para o padrão só daquele item e vai para o log (#24) |
 | RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4). **Desvio:** a versão online escuta em `0.0.0.0` dentro do contêiner, por `CANTEIRO_HOST`; o padrão do JAR não mudou (#87) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | ✅ | REST e WebSocket validam tudo: JSON malformado vira erro 400 ou evento ERRO, e a partida continua (#4, #23) |
@@ -328,7 +328,7 @@ Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` 
 |---|---|---|
 | `materiais.properties` | chave = valor | Densidade e cor de cada material (`ACO.densidade=7.85`, `ACO.cor=4E5A6B`). Carregado no catálogo ao abrir o jogo |
 | `configuracoes.properties` | chave = valor | Só as teclas que o jogador trocou (`tecla.PAUSA=KeyP,Escape`) e o volume |
-| `ranking.csv` | CSV | Nome, pontuação, nível, linhas, colapsos e data. Só entram partidas **sem uso do desfazer** (RN15) |
+| `ranking.csv` | CSV (`;`) | Nome, pontuação, nível, linhas, colapsos e data, a melhor partida de cada jogador. Só entram partidas **sem uso do desfazer** (RN15) |
 | `repeticoes/<data>.txt` | uma jogada por linha | Semente do gerador e, para cada jogada, o ciclo e o comando: o suficiente para reconstruir a partida inteira |
 
 ---
@@ -1189,7 +1189,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | ✅ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
 | ✅ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
 | ✅ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada, e o jogo [no ar](https://canteiro.digitalcodexa.com) |
-| 🔄 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Requisitos desejáveis: as telas estão prontas; faltam as rotas e os arquivos (#24, #31, #35, #37, #70, #71) |
+| 🔄 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Persistência e ranking prontos (#24, #31); falta o backend dos desejáveis: configurações (#71), relatório (#70), modo treino (#37) e replay (#35) |
 | ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ 🌐 | **Entrega final** |
 
 ### Entregáveis

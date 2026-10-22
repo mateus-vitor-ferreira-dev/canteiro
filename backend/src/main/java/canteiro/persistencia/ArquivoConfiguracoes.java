@@ -4,13 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,9 +27,8 @@ import java.util.Properties;
  *
  * <p>A leitura nunca lança exceção: arquivo ausente ou ilegível vira o padrão
  * e volume inválido vira {@value ConfiguracoesSalvas#VOLUME_PADRAO}, com aviso
- * no log (RNF11, RNF12). A gravação escreve num arquivo temporário e depois o
- * troca pelo definitivo, para um jogo fechado no meio não deixar o arquivo
- * pela metade.</p>
+ * no log (RNF11, RNF12). A gravação passa pela {@link GravacaoSegura}, para um
+ * jogo fechado no meio não deixar o arquivo pela metade.</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -49,7 +44,6 @@ public final class ArquivoConfiguracoes {
     private static final String COMENTARIO = "Configurações do CANTEIRO (teclas trocadas e volume)";
     private static final Logger LOG = LoggerFactory.getLogger(ArquivoConfiguracoes.class);
 
-    private final Path pasta;
     private final Path arquivo;
 
     /**
@@ -58,8 +52,7 @@ public final class ArquivoConfiguracoes {
      * @param pasta pasta do jogo, como {@code ~/.canteiro}; nos testes, uma pasta temporária
      */
     public ArquivoConfiguracoes(Path pasta) {
-        this.pasta = Objects.requireNonNull(pasta, "pasta");
-        this.arquivo = pasta.resolve(ARQUIVO);
+        this.arquivo = Objects.requireNonNull(pasta, "pasta").resolve(ARQUIVO);
     }
 
     /**
@@ -84,28 +77,14 @@ public final class ArquivoConfiguracoes {
         configuracoes.teclas().forEach((acao, codigos) ->
                 propriedades.setProperty(PREFIXO_TECLA + acao, String.join(SEPARADOR, codigos)));
         propriedades.setProperty(CHAVE_VOLUME, Integer.toString(configuracoes.volume()));
+        StringWriter texto = new StringWriter();
         try {
-            Files.createDirectories(pasta);
-            Path temporario = Files.createTempFile(pasta, ARQUIVO, ".tmp");
-            try {
-                try (Writer escritor = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8)) {
-                    propriedades.store(escritor, COMENTARIO);
-                }
-                trocar(temporario);
-            } finally {
-                Files.deleteIfExists(temporario);
-            }
-        } catch (IOException falha) {
-            throw new UncheckedIOException("não foi possível gravar " + arquivo, falha);
+            propriedades.store(texto, COMENTARIO);
+        } catch (IOException impossivel) {
+            // um StringWriter não falha; a exceção só existe na assinatura do store
+            throw new UncheckedIOException(impossivel);
         }
-    }
-
-    private void trocar(Path temporario) throws IOException {
-        try {
-            Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException semTrocaAtomica) {
-            Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING);
-        }
+        GravacaoSegura.escrever(arquivo, texto.toString());
     }
 
     private static ConfiguracoesSalvas converter(Properties propriedades) {
