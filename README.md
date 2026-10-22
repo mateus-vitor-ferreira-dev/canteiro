@@ -11,6 +11,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
   <a href="docs/proposta/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
   <a href="https://canteiro.digitalcodexa.com"><img src="https://img.shields.io/badge/jogar-online-16A34A?style=for-the-badge" alt="Jogar online"/></a>
+  <a href="https://github.com/users/mateus-vitor-ferreira-dev/projects/5"><img src="https://img.shields.io/badge/board-tarefas-6E40C9?style=for-the-badge&logo=github&logoColor=white" alt="Board de tarefas"/></a>
   <a href="https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mateus-vitor-ferreira-dev/canteiro/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"/></a>
 </p>
 
