@@ -21,7 +21,18 @@ public final class Alvenaria extends Material {
      * Cria o material com os valores padrão do jogo.
      */
     public Alvenaria() {
-        super(CODIGO, "Alvenaria", DENSIDADE, COR);
+        this(DENSIDADE, COR);
+    }
+
+    /**
+     * Cria o material com densidade e cor lidas de arquivo (#24), no lugar das padrão.
+     *
+     * @param densidade densidade do material, positiva
+     * @param corRgb    cor no formato {@code 0xRRGGBB}
+     * @throws IllegalArgumentException se a densidade não for positiva ou a cor sair do intervalo RGB
+     */
+    public Alvenaria(double densidade, int corRgb) {
+        super(CODIGO, "Alvenaria", densidade, corRgb);
     }
 
     /**

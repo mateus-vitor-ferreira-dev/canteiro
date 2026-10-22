@@ -16,17 +16,21 @@ RUN cd backend && ./mvnw -B -ntp package -DskipTests
 
 # 2. Execução: só o Java e o JAR, com um usuário sem privilégios.
 FROM eclipse-temurin:17-jre
-RUN useradd --system --no-create-home canteiro
+RUN useradd --system --no-create-home canteiro \
+    && mkdir -p /app/dados && chown canteiro /app/dados
 COPY --from=build /canteiro/backend/target/canteiro.jar /app/canteiro.jar
 USER canteiro
 
 # Escuta em todas as interfaces do contêiner, sem tentar abrir navegador.
 # A hospedagem costuma definir PORT; o limite protege a máquina, porque cada
-# partida tem um laço de 60 ciclos por segundo numa thread própria.
+# partida tem um laço de 60 ciclos por segundo numa thread própria. O usuário
+# do contêiner não tem pasta pessoal, então os arquivos do jogador (ranking,
+# configurações) ficam em /app/dados.
 ENV CANTEIRO_HOST=0.0.0.0 \
     PORT=7070 \
     CANTEIRO_ABRIR_NAVEGADOR=false \
-    CANTEIRO_LIMITE_PARTIDAS=10
+    CANTEIRO_LIMITE_PARTIDAS=10 \
+    CANTEIRO_PASTA=/app/dados
 EXPOSE 7070
 
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+UseSerialGC", "-Djava.awt.headless=true", "-jar", "/app/canteiro.jar"]

@@ -4,6 +4,8 @@ import canteiro.api.ServidorWeb;
 import canteiro.controle.GerenciadorPartidas;
 import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
+import canteiro.persistencia.ArquivosDoJogo;
+import canteiro.persistencia.CarregadorMateriais;
 import io.javalin.util.JavalinBindException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +50,10 @@ public final class Aplicacao {
      */
     public static void main(String[] args) {
         Configuracao config = Configuracao.doAmbiente(System.getenv());
-        GerenciadorPartidas partidas = criarGerenciador(config.limitePartidas());
+        GerenciadorPartidas partidas = criarGerenciador(CarregadorMateriais.carregar(config.pasta()),
+                config.limitePartidas());
         partidas.iniciarLimpeza(TOLERANCIA_SEM_CONEXAO, INTERVALO_LIMPEZA);
-        ServidorWeb servidor = new ServidorWeb(partidas);
+        ServidorWeb servidor = new ServidorWeb(partidas, ArquivosDoJogo.em(config.pasta()));
         int porta;
         try {
             porta = servidor.iniciar(config.host(), config.porta());
@@ -72,10 +75,10 @@ public final class Aplicacao {
 
     /**
      * Monta o gerenciador de partidas. Cada partida ganha um gerador de peças
-     * próprio, pelo método da sacola, com uma semente nova.
+     * próprio, pelo método da sacola, com uma semente nova, e os materiais com
+     * a densidade e a cor do arquivo do jogador (#24).
      */
-    private static GerenciadorPartidas criarGerenciador(int limitePartidas) {
-        CatalogoMateriais catalogo = CatalogoMateriais.padrao();
+    private static GerenciadorPartidas criarGerenciador(CatalogoMateriais catalogo, int limitePartidas) {
         return new GerenciadorPartidas(dificuldade ->
                 new GeradorPecas(System.nanoTime(), catalogo, dificuldade.nivelInicial()),
                 limitePartidas, System::nanoTime);
