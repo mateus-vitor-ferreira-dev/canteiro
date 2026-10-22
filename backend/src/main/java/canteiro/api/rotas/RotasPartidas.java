@@ -4,6 +4,7 @@ import canteiro.api.dto.ErroDto;
 import canteiro.api.dto.NovaPartidaDto;
 import canteiro.api.dto.PartidaCriadaDto;
 import canteiro.controle.GerenciadorPartidas;
+import canteiro.controle.LimiteDePartidasException;
 import canteiro.modelo.Dificuldade;
 import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
@@ -66,6 +67,8 @@ public final class RotasPartidas {
                 @OpenApiResponse(status = "400", description = "Dificuldade ausente ou desconhecida",
                         content = @OpenApiContent(from = ErroDto.class)),
                 @OpenApiResponse(status = "501", description = "Modo treino pedido, mas ainda não disponível",
+                        content = @OpenApiContent(from = ErroDto.class)),
+                @OpenApiResponse(status = "503", description = "O servidor já tem o máximo de partidas abertas",
                         content = @OpenApiContent(from = ErroDto.class))
             })
     void criar(Context ctx) {
@@ -82,7 +85,12 @@ public final class RotasPartidas {
                     "O modo treino ainda não está disponível nesta versão do jogo."));
             return;
         }
-        ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade).id()));
+        try {
+            ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade).id()));
+        } catch (LimiteDePartidasException cheio) {
+            ctx.status(HttpStatus.SERVICE_UNAVAILABLE).json(new ErroDto("SERVIDOR_CHEIO",
+                    "O servidor está com muitas partidas abertas. Tente de novo em alguns minutos."));
+        }
     }
 
     private static NovaPartidaDto lerCorpo(Context ctx) {

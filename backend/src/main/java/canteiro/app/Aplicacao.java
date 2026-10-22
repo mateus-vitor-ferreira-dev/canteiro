@@ -11,13 +11,16 @@ import org.slf4j.LoggerFactory;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 
 /**
  * Ponto de entrada do CANTEIRO.
  *
  * <p>Sobe o servidor em {@value ServidorWeb#HOST} e abre o jogo no navegador
  * padrão (RF29). Se não for possível abrir o navegador, o endereço fica no
- * terminal para o jogador abrir à mão.</p>
+ * terminal para o jogador abrir à mão. Na hospedagem pública, endereço, porta,
+ * navegador e limite de partidas vêm das variáveis de ambiente
+ * ({@link Configuracao}).</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -29,6 +32,12 @@ public final class Aplicacao {
     /** Endereço do servidor de desenvolvimento do Vite. */
     private static final String ENDERECO_VITE = "http://localhost:5173";
 
+    /** Tempo sem conexão depois do qual a partida é descartada (RF31). */
+    private static final Duration TOLERANCIA_SEM_CONEXAO = Duration.ofMinutes(10);
+
+    /** De quanto em quanto tempo procurar partidas abandonadas. */
+    private static final Duration INTERVALO_LIMPEZA = Duration.ofMinutes(1);
+
     private Aplicacao() {
     }
 
@@ -38,24 +47,26 @@ public final class Aplicacao {
      * @param args argumentos de linha de comando; não utilizados
      */
     public static void main(String[] args) {
-        ServidorWeb servidor = new ServidorWeb(criarGerenciador());
+        Configuracao config = Configuracao.doAmbiente(System.getenv());
+        GerenciadorPartidas partidas = criarGerenciador(config.limitePartidas());
+        partidas.iniciarLimpeza(TOLERANCIA_SEM_CONEXAO, INTERVALO_LIMPEZA);
+        ServidorWeb servidor = new ServidorWeb(partidas);
         int porta;
         try {
-            porta = servidor.iniciar(ServidorWeb.PORTA_PADRAO);
+            porta = servidor.iniciar(config.host(), config.porta());
         } catch (JavalinBindException e) {
-            LOG.error("A porta {} já está em uso. O CANTEIRO já está aberto em outra janela?",
-                    ServidorWeb.PORTA_PADRAO);
+            LOG.error("A porta {} já está em uso. O CANTEIRO já está aberto em outra janela?", config.porta());
             System.exit(1);
             return;
         }
         Runtime.getRuntime().addShutdownHook(new Thread(servidor::parar));
 
-        URI endereco = URI.create("http://" + ServidorWeb.HOST + ":" + porta);
+        URI endereco = URI.create("http://" + config.host() + ":" + porta);
         LOG.info("CANTEIRO rodando em {}", endereco);
-        if (servidor.temFrontendEmbutido()) {
-            abrirNavegador(endereco);
-        } else {
+        if (!servidor.temFrontendEmbutido()) {
             LOG.info("Frontend não embutido (modo de desenvolvimento). Suba o Vite e abra {}", ENDERECO_VITE);
+        } else if (config.abrirNavegador()) {
+            abrirNavegador(endereco);
         }
     }
 
@@ -63,10 +74,11 @@ public final class Aplicacao {
      * Monta o gerenciador de partidas. Cada partida ganha um gerador de peças
      * próprio, pelo método da sacola, com uma semente nova.
      */
-    private static GerenciadorPartidas criarGerenciador() {
+    private static GerenciadorPartidas criarGerenciador(int limitePartidas) {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
         return new GerenciadorPartidas(dificuldade ->
-                new GeradorPecas(System.nanoTime(), catalogo, dificuldade.nivelInicial()));
+                new GeradorPecas(System.nanoTime(), catalogo, dificuldade.nivelInicial()),
+                limitePartidas, System::nanoTime);
     }
 
     private static void abrirNavegador(URI endereco) {
