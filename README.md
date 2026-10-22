@@ -410,7 +410,7 @@ canteiro/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/canteiro/
-│   │   │   │   ├── app/             main: sobe o servidor e abre o navegador
+│   │   │   │   ├── app/             main e configuração: sobe o servidor e abre o navegador
 │   │   │   │   ├── api/             ServidorWeb
 │   │   │   │   │   ├── rotas/       uma classe por recurso: RotasDificuldades...
 │   │   │   │   │   ├── ws/          CanalPartida (WebSocket)
@@ -453,6 +453,7 @@ canteiro/
 │   └── imagens/                     imagens do README e o gerador dos diagramas
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
+├── Dockerfile · .dockerignore · render.yaml   imagem e hospedagem pública
 └── README.md
 ```
 
@@ -511,6 +512,7 @@ canteiro/
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
 | `.editorconfig` | UTF-8, LF e indentação iguais em qualquer editor |
+| `Dockerfile` · `.dockerignore` · `render.yaml` | A imagem do jogo para hospedagem pública e a configuração do Render. Veja [No ar: Docker e Render](#7-no-ar-docker-e-render) |
 | `target/`, `node_modules/`, `dist/` | **Não versionadas.** São geradas pelo Maven e pelo npm. Pode apagar quando quiser |
 
 > [!NOTE]
@@ -713,6 +715,29 @@ Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=tr
 | `Cannot find module` depois de um `git pull` | Alguém adicionou uma dependência | `npm install` de novo |
 | `ArquiteturaTest` falhou | Alguém importou Javalin, JSON, gráfico ou uma camada de cima dentro do modelo | A mensagem mostra o arquivo e a linha. Mova o código para `api` ou `app` |
 | `javadoc:javadoc` falhou com `warning: no comment` | Classe ou método público sem Javadoc | Documente o que a mensagem aponta |
+
+### 7. No ar: Docker e Render
+
+Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Render** (plano grátis), configurado pelo `render.yaml`, que publica a `main` sozinho a cada merge.
+
+```bash
+docker build -t canteiro .
+docker run -p 7070:7070 canteiro      # abra http://localhost:7070
+```
+
+O comportamento muda por variáveis de ambiente, sem mexer no código. Sem nenhuma delas, vale o jogo local: só `127.0.0.1`, porta 7070 e o navegador abrindo sozinho.
+
+| Variável | Padrão local | No contêiner | Para que serve |
+|---|---|---|---|
+| `CANTEIRO_HOST` | `127.0.0.1` | `0.0.0.0` | Endereço de escuta. Fora do contêiner, mantenha o padrão (RNF13) |
+| `PORT` | `7070` | definida pela hospedagem | Porta de escuta |
+| `CANTEIRO_ABRIR_NAVEGADOR` | `true` | `false` | Abrir o navegador ao subir. Um servidor não tem tela |
+| `CANTEIRO_LIMITE_PARTIDAS` | sem limite | `10` | Quantas partidas podem existir ao mesmo tempo. Cada uma tem um laço de 60 Hz numa thread própria |
+
+Em qualquer modo, **a partida sem conexão por 10 minutos é descartada** (RF31). Assim, as abas fechadas não deixam laços rodando para sempre.
+
+> [!WARNING]
+> **No plano grátis, o Render desliga o serviço depois de 15 minutos sem acesso.** A primeira visita depois disso demora cerca de um minuto para carregar, e as partidas abertas se perdem, porque ficam em memória.
 
 ---
 

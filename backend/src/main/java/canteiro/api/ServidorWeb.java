@@ -19,8 +19,9 @@ import java.util.Objects;
 /**
  * Servidor HTTP do jogo: rotas da API e, no JAR final, os arquivos do frontend.
  *
- * <p>Escuta apenas em {@value #HOST}, nunca em todas as interfaces de rede,
- * para que outro computador da rede não alcance o jogo (RNF13). Toda exceção
+ * <p>Por padrão escuta apenas em {@value #HOST}, nunca em todas as interfaces
+ * de rede, para que outro computador da rede não alcance o jogo (RNF13). Só a
+ * hospedagem pública escolhe outro endereço, pela configuração. Toda exceção
  * que escapar de uma rota vira uma resposta {@link ErroDto}, sem derrubar o
  * servidor (RNF14).</p>
  *
@@ -29,7 +30,7 @@ import java.util.Objects;
  */
 public final class ServidorWeb {
 
-    /** Endereço de escuta: só a própria máquina (RNF13). */
+    /** Endereço de escuta padrão: só a própria máquina (RNF13). */
     public static final String HOST = "127.0.0.1";
 
     /** Porta usada pelo jogo e esperada pelo proxy do Vite. */
@@ -63,7 +64,20 @@ public final class ServidorWeb {
      * @throws io.javalin.util.JavalinBindException se a porta já estiver em uso
      */
     public int iniciar(int porta) {
-        javalin.start(HOST, porta);
+        return iniciar(HOST, porta);
+    }
+
+    /**
+     * Começa a escutar no endereço e na porta indicados. Fora da máquina do
+     * jogador, como num contêiner, o endereço costuma ser {@code 0.0.0.0}.
+     *
+     * @param host  endereço de escuta
+     * @param porta porta desejada; {@code 0} escolhe uma porta livre qualquer
+     * @return a porta em que o servidor de fato ficou escutando
+     * @throws io.javalin.util.JavalinBindException se a porta já estiver em uso
+     */
+    public int iniciar(String host, int porta) {
+        javalin.start(Objects.requireNonNull(host, "host"), porta);
         return javalin.port();
     }
 

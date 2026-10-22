@@ -1,0 +1,12 @@
+# Só o código-fonte entra no build da imagem; o resto é gerado lá dentro.
+.git
+.github
+.idea
+.vscode
+docs
+**/node_modules
+**/target
+frontend/dist
+frontend/node
+*.jar
+*.log
