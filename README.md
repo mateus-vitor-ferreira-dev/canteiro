@@ -277,7 +277,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ✅ | Textura em cada material (veios, tijolos, pontilhado, hachura) e borda clara nos blocos, legenda com nome e peso; conferido com simulação de protanopia, deuteranopia, tritanopia e escala de cinza (#59) |
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
-| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido na revisão de cada PR |
+| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido em cada PR, por quem o abre |
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ✅ | Colisão, rotação, linhas, centro de massa (#11, #20, #21, #28) e serialização do protocolo (#23) |
 | RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
@@ -849,7 +849,7 @@ O **Git** é um programa que tira **fotos do projeto** ao longo do tempo. Cada f
 
 O **GitHub** é o site onde fica a **cópia oficial** do projeto, que todo mundo compartilha. Cada integrante tem uma **cópia local** no próprio computador, trabalha nela e depois **envia** (`push`) as mudanças para o GitHub.
 
-Um **branch** (ramo) é uma **linha paralela de trabalho**. Você cria um ramo, mexe à vontade, e nada do que você faz ali afeta o trabalho dos outros até ser revisado e juntado (*merge*) ao ramo principal.
+Um **branch** (ramo) é uma **linha paralela de trabalho**. Você cria um ramo, mexe à vontade, e nada do que você faz ali afeta o trabalho dos outros até ser juntado (*merge*) ao ramo principal.
 
 ### Os ramos deste repositório
 
@@ -1008,7 +1008,7 @@ git push
 
 #### 6️⃣ Abra o Pull Request
 
-O PR é o pedido: *"revisem meu ramo e juntem na `develop`"*. Tem dois jeitos de abrir.
+O PR é o pedido: *"juntem meu ramo na `develop`"*. Tem dois jeitos de abrir.
 
 **Pelo site:** depois do push, o GitHub mostra um botão amarelo **"Compare & pull request"**. Confira se está **`base: develop` ← `compare: seu-ramo`**. A descrição já vem com um **modelo e um checklist**. Preencha:
 
@@ -1021,12 +1021,13 @@ O PR é o pedido: *"revisem meu ramo e juntem na `develop`"*. Tem dois jeitos de
 gh pr create --base develop --title "feat(modelo): gerador de peças" --body "Implementa RF03/RN04. Testes em GeradorPecasTest."
 ```
 
-#### 7️⃣ Revisão, merge e limpeza
+#### 7️⃣ Merge e limpeza
 
-1. Um colega lê o código na aba **Files changed** do PR e comenta o que precisar.
-2. Pediram ajuste? **Não abra outro PR.** Corrija no mesmo ramo, faça commit e dê `git push`, e o PR se atualiza sozinho.
-3. Tudo certo: clique em **Squash and merge**. Todos os seus commits viram um só na `develop`, **com você como autor**.
-4. Apague o ramo no botão **Delete branch** e limpe o seu computador:
+1. Espere o **CI** ficar verde. O botão de merge só libera com os testes do backend, do frontend e o JAR completo passando.
+2. Não precisa esperar aprovação de ninguém. Se quiser uma segunda opinião, peça no PR, mas **não é obrigatório**.
+3. Algo quebrou no CI? **Não abra outro PR.** Corrija no mesmo ramo, faça commit e dê `git push`, e o PR se atualiza sozinho.
+4. Tudo verde: clique em **Squash and merge**. Todos os seus commits viram um só na `develop`, **com você como autor**.
+5. Apague o ramo no botão **Delete branch** e limpe o seu computador:
 
 ```bash
 git switch develop
@@ -1142,7 +1143,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | **Pull** | Trazer do GitHub os commits dos outros |
 | **Clone** | A primeira cópia do repositório para o seu computador |
 | **Merge** | Juntar um ramo em outro |
-| **Pull Request (PR)** | O pedido de revisão e merge de um ramo, feito no GitHub |
+| **Pull Request (PR)** | O pedido de merge de um ramo, feito no GitHub. O CI confere o PR antes de liberar o merge |
 | **Conflito** | Duas mudanças na mesma linha, que precisam de decisão humana |
 | **Staging** | A área onde ficam os arquivos que vão entrar no próximo commit (`git add`) |
 | **HEAD** | O ponto onde você está agora no histórico |
