@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.LongSupplier;
 
 /**
  * Uma partida no tempo: o motor, a fila de comandos e o laço de 60 ciclos por
@@ -38,6 +40,9 @@ public final class SessaoPartida {
     private final MotorJogo motor;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
     private final MedidorDesempenho medidor = new MedidorDesempenho(System::nanoTime);
+    private final LongSupplier relogio;
+    private final AtomicInteger ouvintes = new AtomicInteger();
+    private volatile long semOuvinteDesde;
     private ScheduledExecutorService laco;
 
     /**
@@ -47,8 +52,22 @@ public final class SessaoPartida {
      * @param motor motor da partida
      */
     public SessaoPartida(String id, MotorJogo motor) {
+        this(id, motor, System::nanoTime);
+    }
+
+    /**
+     * Cria a sessão, ainda parada, com um relógio próprio, para os testes
+     * controlarem há quanto tempo ela está sem ninguém ouvindo.
+     *
+     * @param id      identificador da partida
+     * @param motor   motor da partida
+     * @param relogio instante atual, em nanossegundos
+     */
+    public SessaoPartida(String id, MotorJogo motor, LongSupplier relogio) {
         this.id = Objects.requireNonNull(id, "id");
         this.motor = Objects.requireNonNull(motor, "motor");
+        this.relogio = Objects.requireNonNull(relogio, "relógio");
+        this.semOuvinteDesde = relogio.getAsLong();
     }
 
     /**
@@ -107,6 +126,7 @@ public final class SessaoPartida {
      */
     public void inscrever(ObservadorPartida observador) {
         motor.inscrever(observador);
+        ouvintes.incrementAndGet();
     }
 
     /**
@@ -116,6 +136,21 @@ public final class SessaoPartida {
      */
     public void desinscrever(ObservadorPartida observador) {
         motor.desinscrever(observador);
+        if (ouvintes.updateAndGet(n -> Math.max(0, n - 1)) == 0) {
+            semOuvinteDesde = relogio.getAsLong();
+        }
+    }
+
+    /**
+     * Informa se a partida está sem ninguém ouvindo há pelo menos o tempo dado,
+     * como quando a aba foi fechada e não voltou (RF31). Uma partida criada e
+     * nunca conectada conta desde a criação.
+     *
+     * @param toleranciaNanos tempo sem ouvinte tolerado, em nanossegundos
+     * @return {@code true} se ninguém ouve a partida há pelo menos esse tempo
+     */
+    public boolean abandonadaHa(long toleranciaNanos) {
+        return ouvintes.get() == 0 && relogio.getAsLong() - semOuvinteDesde >= toleranciaNanos;
     }
 
     /**

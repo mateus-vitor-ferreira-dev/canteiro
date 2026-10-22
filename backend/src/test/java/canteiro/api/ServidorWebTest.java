@@ -1,5 +1,8 @@
 package canteiro.api;
 
+import canteiro.controle.GerenciadorPartidas;
+import canteiro.modelo.estruturas.GeradorPecas;
+import canteiro.modelo.materiais.CatalogoMateriais;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +37,8 @@ class ServidorWebTest {
 
     private static final int PORTA_LIVRE = 0;
     private static final int OK = 200;
+    private static final int CRIADO = 201;
+    private static final int INDISPONIVEL = 503;
     private static final int TEMPO_LIMITE_MS = 1000;
 
     private final HttpClient cliente = HttpClient.newHttpClient();
@@ -97,6 +102,32 @@ class ServidorWebTest {
             assertThrows(ConnectException.class, () -> socket.connect(destino, TEMPO_LIMITE_MS),
                     "o servidor deveria escutar só em 127.0.0.1 (RNF13)");
         }
+    }
+
+    @Test
+    void recusaPartidaNovaQuandoOServidorEstaCheio() throws IOException, InterruptedException {
+        CatalogoMateriais catalogo = CatalogoMateriais.padrao();
+        ServidorWeb cheio = new ServidorWeb(new GerenciadorPartidas(
+                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 1, System::nanoTime));
+        int portaCheio = cheio.iniciar(PORTA_LIVRE);
+        try {
+            assertEquals(CRIADO, criarPartida(portaCheio).statusCode());
+            HttpResponse<String> recusada = criarPartida(portaCheio);
+
+            assertEquals(INDISPONIVEL, recusada.statusCode());
+            assertEquals("SERVIDOR_CHEIO", json.readTree(recusada.body()).get("erro").asText());
+        } finally {
+            cheio.parar();
+        }
+    }
+
+    private HttpResponse<String> criarPartida(int portaDoServidor) throws IOException, InterruptedException {
+        URI endereco = URI.create("http://" + ServidorWeb.HOST + ":" + portaDoServidor + "/api/partidas");
+        HttpRequest pedido = HttpRequest.newBuilder(endereco)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"dificuldade\": \"FACIL\", \"modoTreino\": false}"))
+                .build();
+        return cliente.send(pedido, HttpResponse.BodyHandlers.ofString());
     }
 
     private static Optional<InetAddress> enderecoDeRede() throws IOException {
