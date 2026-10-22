@@ -9,19 +9,22 @@ import java.util.Objects;
  * pasta é temporária.
  *
  * @param configuracoes teclas e volume do jogador (RF27)
+ * @param ranking       as melhores partidas (RF21, RF22)
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
-public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes) {
+public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes, RankingArquivo ranking) {
 
     /**
      * Confere que nada falta.
      *
      * @param configuracoes teclas e volume do jogador
+     * @param ranking       as melhores partidas
      * @throws NullPointerException se algum arquivo for nulo
      */
     public ArquivosDoJogo {
         Objects.requireNonNull(configuracoes, "configurações");
+        Objects.requireNonNull(ranking, "ranking");
     }
 
     /**
@@ -31,6 +34,6 @@ public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes) {
      * @return os arquivos do jogo nessa pasta
      */
     public static ArquivosDoJogo em(Path pasta) {
-        return new ArquivosDoJogo(new ArquivoConfiguracoes(pasta));
+        return new ArquivosDoJogo(new ArquivoConfiguracoes(pasta), new RankingArquivo(pasta));
     }
 }
