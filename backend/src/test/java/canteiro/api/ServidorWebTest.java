@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -17,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
 import java.net.URI;
+import java.nio.file.Path;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -43,12 +45,15 @@ class ServidorWebTest {
 
     private final HttpClient cliente = HttpClient.newHttpClient();
     private final ObjectMapper json = new ObjectMapper();
+    @TempDir
+    Path pasta;
+
     private ServidorWeb servidor;
     private int porta;
 
     @BeforeEach
     void subirServidor() {
-        servidor = new ServidorWeb(ServidoresDeTeste.gerenciador());
+        servidor = new ServidorWeb(ServidoresDeTeste.gerenciador(), ServidoresDeTeste.arquivos(pasta));
         porta = servidor.iniciar(PORTA_LIVRE);
     }
 
@@ -108,7 +113,8 @@ class ServidorWebTest {
     void recusaPartidaNovaQuandoOServidorEstaCheio() throws IOException, InterruptedException {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
         ServidorWeb cheio = new ServidorWeb(new GerenciadorPartidas(
-                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 1, System::nanoTime));
+                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 1, System::nanoTime),
+                ServidoresDeTeste.arquivos(pasta));
         int portaCheio = cheio.iniciar(PORTA_LIVRE);
         try {
             assertEquals(CRIADO, criarPartida(portaCheio).statusCode());

@@ -282,8 +282,8 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
 | RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido em cada PR, por quem o abre |
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ✅ | Colisão, rotação, linhas, centro de massa (#11, #20, #21, #28) e serialização do protocolo (#23) |
-| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
-| RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
+| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | 🟡 | Materiais e configurações: arquivo ausente, vazio, ilegível ou com valor inválido vira o padrão do JAR, com aviso no log; o jogo sempre abre. Testado com arquivos feitos para quebrar (#24). Falta o ranking (#31) |
+| RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ✅ | Cada valor é conferido na leitura (densidade positiva, cor RRGGBB, volume de 0 a 100); o inválido volta para o padrão só daquele item e vai para o log (#24) |
 | RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4). **Desvio:** a versão online escuta em `0.0.0.0` dentro do contêiner, por `CANTEIRO_HOST`; o padrão do JAR não mudou (#87) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | ✅ | REST e WebSocket validam tudo: JSON malformado vira erro 400 ou evento ERRO, e a partida continua (#4, #23) |
 | RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ✅ | Swagger nas rotas REST (#43); record e protocolo.ts espelhados, com teste de serialização contra exemplos fixos (#23) |
@@ -322,12 +322,12 @@ As mensagens do WebSocket não aparecem no Swagger. A referência delas é o có
 
 ### Dados persistidos
 
-Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário. Os valores padrão vão dentro do JAR e são usados se o arquivo faltar ou vier corrompido.
+Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário, criada quando algo precisa ser gravado. Os valores padrão vão dentro do JAR (`backend/src/main/resources/dados/`) e são usados se o arquivo faltar ou vier corrompido. O código fica em `persistencia/`: `LeitorPropriedades` lê sem nunca lançar exceção, `CarregadorMateriais` monta o catálogo e `ArquivoConfiguracoes` lê e grava as teclas e o volume.
 
 | Arquivo | Formato | Conteúdo |
 |---|---|---|
-| `materiais.properties` | chave = valor | Código, nome, densidade, cor e bônus de cada material. Carregado no `HashMap` do catálogo |
-| `configuracoes.properties` | chave = valor | Teclas de comando, volume e texturas para daltonismo |
+| `materiais.properties` | chave = valor | Densidade e cor de cada material (`ACO.densidade=7.85`, `ACO.cor=4E5A6B`). Carregado no catálogo ao abrir o jogo |
+| `configuracoes.properties` | chave = valor | Só as teclas que o jogador trocou (`tecla.PAUSA=KeyP,Escape`) e o volume |
 | `ranking.csv` | CSV | Nome, pontuação, nível, linhas, colapsos e data. Só entram partidas **sem uso do desfazer** (RN15) |
 | `repeticoes/<data>.txt` | uma jogada por linha | Semente do gerador e, para cada jogada, o ciclo e o comando: o suficiente para reconstruir a partida inteira |
 
@@ -506,7 +506,7 @@ canteiro/
 
 | Pasta ou arquivo | Para que serve |
 |---|---|
-| `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`, `configuracoes.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11) |
+| `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11). As configurações não precisam de arquivo padrão: sem nada salvo, nenhuma tecla foi trocada e o volume é 60 |
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
@@ -736,11 +736,12 @@ O comportamento muda por variáveis de ambiente, sem mexer no código. Sem nenhu
 | `PORT` | `7070` | definida pela hospedagem | Porta de escuta |
 | `CANTEIRO_ABRIR_NAVEGADOR` | `true` | `false` | Abrir o navegador ao subir. Um servidor não tem tela |
 | `CANTEIRO_LIMITE_PARTIDAS` | sem limite | `10` | Quantas partidas podem existir ao mesmo tempo. Cada uma tem um laço de 60 Hz numa thread própria |
+| `CANTEIRO_PASTA` | `~/.canteiro` | `/app/dados` | Onde ficam os arquivos do jogador (materiais, configurações, ranking). O usuário do contêiner não tem pasta pessoal |
 
 Em qualquer modo, **a partida sem conexão por 10 minutos é descartada** (RF31). Assim, as abas fechadas não deixam laços rodando para sempre.
 
 > [!WARNING]
-> **No plano grátis, o Render desliga o serviço depois de 15 minutos sem acesso.** A primeira visita depois disso demora cerca de um minuto para carregar, e as partidas abertas se perdem, porque ficam em memória.
+> **No plano grátis, o Render desliga o serviço depois de 15 minutos sem acesso.** A primeira visita depois disso demora cerca de um minuto para carregar, e as partidas abertas se perdem, porque ficam em memória. **Os arquivos em `/app/dados` também não sobrevivem** a um reinício ou a um deploy novo: o plano grátis não tem disco permanente, então o ranking online recomeça do zero de vez em quando. O ranking que vale de verdade é o do JAR, na `~/.canteiro/` de cada jogador.
 
 ---
 
