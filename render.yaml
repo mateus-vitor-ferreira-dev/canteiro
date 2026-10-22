@@ -6,7 +6,7 @@ services:
     runtime: docker
     plan: free
     region: virginia
-    branch: main
+    branch: develop
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/dificuldades
     autoDeploy: true

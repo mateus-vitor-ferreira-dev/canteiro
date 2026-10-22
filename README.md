@@ -718,7 +718,7 @@ Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=tr
 
 ### 7. No ar: Docker e Render
 
-Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Render** (plano grátis), configurado pelo `render.yaml`, que publica a `main` sozinho a cada merge.
+Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Render** (plano grátis), configurado pelo `render.yaml`, que publica a `develop` sozinho a cada merge.
 
 ```bash
 docker build -t canteiro .
