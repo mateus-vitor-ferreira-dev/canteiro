@@ -10,6 +10,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
   <a href="docs/proposta/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
+  <a href="https://canteiro.digitalcodexa.com"><img src="https://img.shields.io/badge/jogar-online-16A34A?style=for-the-badge" alt="Jogar online"/></a>
   <a href="https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mateus-vitor-ferreira-dev/canteiro/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"/></a>
 </p>
 
@@ -29,7 +30,9 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <img src="docs/imagens/tela-principal.png" alt="Tela inicial do CANTEIRO: menu com nova partida, ranking, repetições e configurações" width="820"/>
 
-<sub>Tela inicial do jogo, capturada da versão atual. O jogo ainda está sendo construído.</sub>
+<sub>Tela inicial do jogo, capturada da versão atual. A partida está completa; faltam o ranking gravado em arquivo e os recursos desejáveis.</sub>
+
+**▶️ Jogue agora: [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com)**, sem instalar nada. Na rede da UFLA, use [canteiro.onrender.com](https://canteiro.onrender.com).
 
 </div>
 
@@ -153,7 +156,7 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 
 **Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o Svelte com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
 
-**Local de verdade.** O servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
+**Local de verdade, e também online.** Pelo JAR, o servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). A versão online roda o mesmo JAR num contêiner, com o endereço e o limite de partidas definidos por variáveis de ambiente, sem mudar uma linha do jogo ([No ar: Docker e Render](#7-no-ar-docker-e-render)). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
 
 ---
 
@@ -258,7 +261,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ✅ | Sons gerados no navegador (Web Audio), um por evento, com liga e desliga no botão ou na tecla M; o volume ajustável vem na tela de configurações (#38) |
 | RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | ✅ | Sobe o servidor e abre o navegador (#4), com o frontend dentro do JAR (#8) |
 | RF30 | Pausar a partida automaticamente quando a conexão com o navegador cair ou quando a aba do jogo perder o foco | E | ☕ 🌐 | ✅ | A partida pausa quando a conexão cai (#23) e quando a aba perde o foco (#25) |
-| RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ✅ | Reconecta em intervalos crescentes e volta pausada no mesmo ponto; se o backend reiniciou, avisa que a partida se perdeu (#33) |
+| RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ✅ | Reconecta em intervalos crescentes e volta pausada no mesmo ponto; se o backend reiniciou, avisa que a partida se perdeu (#33). Sem reconexão em 10 minutos, a partida é descartada (#87) |
 
 </details>
 
@@ -281,7 +284,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ✅ | Colisão, rotação, linhas, centro de massa (#11, #20, #21, #28) e serialização do protocolo (#23) |
 | RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
 | RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
-| RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |
+| RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4). **Desvio:** a versão online escuta em `0.0.0.0` dentro do contêiner, por `CANTEIRO_HOST`; o padrão do JAR não mudou (#87) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | ✅ | REST e WebSocket validam tudo: JSON malformado vira erro 400 ou evento ERRO, e a partida continua (#4, #23) |
 | RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ✅ | Swagger nas rotas REST (#43); record e protocolo.ts espelhados, com teste de serialização contra exemplos fixos (#23) |
 | RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8); testado num contêiner só com Java 17, sem Node (#40) |
@@ -614,7 +617,7 @@ Javalin.create(config -> {
 ## 🚀 Rodando localmente
 
 > [!NOTE]
-> **O que já dá para ver:** a tela de escolha da dificuldade, com os dados vindos do backend. A partida em si chega com o modelo, a partir das semanas 3 – 4.
+> **O que já dá para ver:** o jogo completo, do menu ao fim da partida, com estabilidade, colapso, sons e reconexão. Ranking, repetições, relatório e configurações já têm tela, mas ainda esperam as rotas do backend. Só quer jogar? Abra [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com).
 
 ### 1. Pré-requisitos
 
@@ -1180,20 +1183,21 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | Semanas | Etapa | Lado | Entrega |
 |---|---|---|---|
 | ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) |
-| 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
-| ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
-| ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
-| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
-| ⬜ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada |
-| ⬜ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Requisitos desejáveis |
+| ✅ 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
+| ✅ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
+| ✅ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
+| ✅ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
+| ✅ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada, e o jogo [no ar](https://canteiro.digitalcodexa.com) |
+| 🔄 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Requisitos desejáveis: as telas estão prontas; faltam as rotas e os arquivos (#24, #31, #35, #37, #70, #71) |
 | ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ 🌐 | **Entrega final** |
 
 ### Entregáveis
 
 - 📦 **Código-fonte**: o repositório completo, com `backend/`, `frontend/`, testes e arquivos de dados de exemplo
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
+- 🌐 **Versão online**: o mesmo jogo em [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com), publicado a cada merge na `develop`
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. O principal desvio até aqui é a troca da interface em Swing por uma interface no navegador
+- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios até aqui são a troca da interface em Swing por uma interface no navegador e a versão online, que escuta fora do `127.0.0.1` dentro do contêiner
 - 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
 - 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 
