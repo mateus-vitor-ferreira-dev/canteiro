@@ -46,6 +46,7 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
             centroDeMassa: 3.6,
             eixo: 5,
             alerta: false,
+            previa: null,
         },
         ...parcial,
     };

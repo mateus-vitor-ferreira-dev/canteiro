@@ -160,6 +160,18 @@ export type EstabilidadeDto = {
     centroDeMassa: number;
     eixo: number;
     alerta: boolean;
+    /** Como a estrutura ficaria com a peça atual pousada na fantasma; `null` sem peça caindo. */
+    previa: PreviaDto | null;
+};
+
+/** A estabilidade prevista para a jogada da peça atual. Espelho de `EstadoDto.PreviaDto`. */
+export type PreviaDto = {
+    indice: number;
+    desvio: number;
+    centroDeMassa: number;
+    eixo: number;
+    /** Se a jogada passaria do limite e derrubaria a obra. */
+    derruba: boolean;
 };
 
 /** O estado completo, enviado a cada mudança. Espelho de `EstadoDto`. */

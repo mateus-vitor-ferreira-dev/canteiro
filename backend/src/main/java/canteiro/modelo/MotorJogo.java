@@ -327,6 +327,21 @@ public final class MotorJogo {
     }
 
     /**
+     * A estabilidade que a estrutura teria se a peça atual pousasse onde está
+     * a peça fantasma, já sem as linhas que ela completaria. Deixa o jogador
+     * planejar o equilíbrio antes de soltar a peça.
+     *
+     * @return a estabilidade prevista, ou {@code null} se não houver peça caindo
+     */
+    public Estabilidade previa() {
+        if (emQueda == null) {
+            return null;
+        }
+        return analisador.previa(tabuleiro, emQueda.celulasNoPouso(), emQueda.peca().material(),
+                Progressao.limiteDesvio(placar.nivel()));
+    }
+
+    /**
      * Devolve o analisador estrutural, para leitura.
      *
      * @return o analisador da partida

@@ -56,7 +56,8 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
                 pares(motor.celulasFantasma()),
                 motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
                 reservada == null ? null : PecaDto.de(reservada, reservada.celulas()), motor.podeReservar(),
-                PlacarDto.de(motor.placar(), motor.ciclo()), EstabilidadeDto.de(motor.estabilidade()));
+                PlacarDto.de(motor.placar(), motor.ciclo()),
+                EstabilidadeDto.de(motor.estabilidade(), motor.previa()));
     }
 
     private static List<List<String>> grade(MotorJogo motor) {
@@ -117,12 +118,31 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      * @param centroDeMassa em colunas a partir da borda esquerda
      * @param eixo          meio da base de apoio, em colunas
      * @param alerta        se está perto de desabar
+     * @param previa        como a estrutura ficaria com a peça atual pousada na posição da peça
+     *                      fantasma, ou {@code null} se não há peça caindo
      */
     public record EstabilidadeDto(double indice, double desvio, double limite, double centroDeMassa, double eixo,
-                                  boolean alerta) {
+                                  boolean alerta, PreviaDto previa) {
 
-        static EstabilidadeDto de(Estabilidade e) {
-            return new EstabilidadeDto(e.indice(), e.desvio(), e.limite(), e.centroDeMassa(), e.eixo(), e.alerta());
+        static EstabilidadeDto de(Estabilidade e, Estabilidade previa) {
+            return new EstabilidadeDto(e.indice(), e.desvio(), e.limite(), e.centroDeMassa(), e.eixo(), e.alerta(),
+                    previa == null ? null : PreviaDto.de(previa));
+        }
+    }
+
+    /**
+     * A estabilidade prevista para a jogada da peça atual.
+     *
+     * @param indice        de 1 a 0
+     * @param desvio        em colunas
+     * @param centroDeMassa em colunas a partir da borda esquerda
+     * @param eixo          meio da base de apoio, em colunas
+     * @param derruba       se a jogada passaria do limite e causaria colapso
+     */
+    public record PreviaDto(double indice, double desvio, double centroDeMassa, double eixo, boolean derruba) {
+
+        static PreviaDto de(Estabilidade e) {
+            return new PreviaDto(e.indice(), e.desvio(), e.centroDeMassa(), e.eixo(), e.passouDoLimite());
         }
     }
 }
