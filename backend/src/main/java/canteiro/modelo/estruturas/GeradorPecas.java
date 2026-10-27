@@ -33,6 +33,7 @@ import java.util.Random;
  */
 public final class GeradorPecas implements FontePecas {
 
+    private final long semente;
     private final Random sorteio;
     private final CatalogoMateriais catalogo;
     private final Deque<Forma> sacola = new ArrayDeque<>();
@@ -50,9 +51,15 @@ public final class GeradorPecas implements FontePecas {
      *                                  material liberado não estiver no catálogo
      */
     public GeradorPecas(long semente, CatalogoMateriais catalogo, int nivelInicial) {
+        this.semente = semente;
         this.sorteio = new Random(semente);
         this.catalogo = Objects.requireNonNull(catalogo, "catálogo");
         this.liberados = materiaisDoNivel(nivelInicial);
+    }
+
+    @Override
+    public long semente() {
+        return semente;
     }
 
     @Override

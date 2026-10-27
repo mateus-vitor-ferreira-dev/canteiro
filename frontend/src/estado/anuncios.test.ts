@@ -24,6 +24,12 @@ describe("anuncioDoEvento", () => {
         ).toBe("1 linha eliminada. Obra ousada!");
     });
 
+    it("anuncia a meta cumprida, com o bônus", () => {
+        expect(anuncioDoEvento(evento("META_CUMPRIDA", { pontos: 1000 }))).toBe(
+            "Meta cumprida! Mais 1000 pontos",
+        );
+    });
+
     it("avisa o colapso, a subida de nível e o fim de jogo", () => {
         expect(anuncioDoEvento(evento("COLAPSO"))).toBe("A estrutura desabou!");
         expect(anuncioDoEvento(evento("NIVEL_SUBIU"), 4)).toBe("Subiu para o nível 4");

@@ -20,6 +20,7 @@ final class FonteLista implements FontePecas {
     private final Random sorteio;
     private final List<Material> paraSortear;
     private int proxima;
+    private long semente;
 
     private FonteLista(Random sorteio, List<Material> paraSortear) {
         this.sorteio = sorteio;
@@ -32,6 +33,16 @@ final class FonteLista implements FontePecas {
 
     static FonteLista sorteada(long semente, List<Material> materiais) {
         return new FonteLista(new Random(semente), materiais);
+    }
+
+    FonteLista comSemente(long semente) {
+        this.semente = semente;
+        return this;
+    }
+
+    @Override
+    public long semente() {
+        return semente;
     }
 
     FonteLista depois(Forma forma, Material material) {

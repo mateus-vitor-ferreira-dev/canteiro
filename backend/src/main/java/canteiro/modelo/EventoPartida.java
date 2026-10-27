@@ -74,6 +74,8 @@ public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas,
         COLAPSO,
         /** O jogador subiu de nível. */
         NIVEL_SUBIU,
+        /** O jogador cumpriu a meta do nível e ganhou o bônus; traz os pontos (RN19). */
+        META_CUMPRIDA,
         /** A partida acabou. */
         FIM_DE_JOGO
     }

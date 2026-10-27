@@ -55,6 +55,12 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
             alerta: false,
             previa: null,
         },
+        meta: {
+            descricao: "Elimine 3 linhas ou mais de uma vez",
+            progresso: 0,
+            alvo: 1,
+            cumprida: false,
+        },
         ...parcial,
     };
 }

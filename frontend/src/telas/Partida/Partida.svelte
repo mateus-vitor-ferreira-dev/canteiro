@@ -11,6 +11,7 @@
     import { Som } from "@/estado/som.svelte";
     import { comandoDoEvento } from "@/estado/teclado";
     import FaixaModo from "./FaixaModo.svelte";
+    import MetaDoNivel from "./MetaDoNivel.svelte";
     import CamadaPartida from "./CamadaPartida.svelte";
     import ColunaApoio from "./ColunaApoio.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -111,6 +112,9 @@
         <div class="lateral">
             <Placar placar={partida.estado.placar} />
             <PainelEstabilidade estabilidade={partida.estado.estabilidade} />
+            {#if partida.estado.meta}
+                <MetaDoNivel meta={partida.estado.meta} />
+            {/if}
         </div>
     {:else}
         <p class="aviso">{partida.conectado ? "Preparando a obra…" : "Conectando…"}</p>

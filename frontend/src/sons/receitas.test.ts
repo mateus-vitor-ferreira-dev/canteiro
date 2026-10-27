@@ -7,8 +7,13 @@ function evento(tipo: TipoEvento, dados: EventoDto["dados"] = {}): EventoDto {
 }
 
 describe("receitaDoEvento", () => {
-    it("fixação, linhas e colapso têm som (RF28)", () => {
-        for (const tipo of ["PECA_FIXADA", "LINHAS_ELIMINADAS", "COLAPSO"] as const) {
+    it("fixação, linhas, colapso e meta cumprida têm som (RF28)", () => {
+        for (const tipo of [
+            "PECA_FIXADA",
+            "LINHAS_ELIMINADAS",
+            "COLAPSO",
+            "META_CUMPRIDA",
+        ] as const) {
             expect(receitaDoEvento(evento(tipo)).length).toBeGreaterThan(0);
         }
     });
@@ -35,7 +40,12 @@ describe("receitaDoEvento", () => {
     });
 
     it("toda nota tem volume entre 0 e 1 e duração positiva", () => {
-        for (const tipo of ["PECA_FIXADA", "LINHAS_ELIMINADAS", "COLAPSO"] as const) {
+        for (const tipo of [
+            "PECA_FIXADA",
+            "LINHAS_ELIMINADAS",
+            "COLAPSO",
+            "META_CUMPRIDA",
+        ] as const) {
             for (const nota of receitaDoEvento(evento(tipo, { linhas: [1, 2, 3, 4] }))) {
                 expect(nota.ganho).toBeGreaterThan(0);
                 expect(nota.ganho).toBeLessThanOrEqual(1);
