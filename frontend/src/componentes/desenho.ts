@@ -1,4 +1,4 @@
-import type { EstadoDto, Posicao, QuedaDto } from "@/api/protocolo";
+import type { EstadoDto, Posicao, PreviaDto, QuedaDto } from "@/api/protocolo";
 import { desenharBloco } from "@/estilos/materiais";
 
 /** Linhas ocultas no topo da grade: o backend manda, mas a tela não mostra (RN01). */
@@ -19,6 +19,7 @@ const COR_FANTASMA = "rgba(255, 255, 255, 0.45)";
 const COR_EIXO = "#f2b53a";
 const COR_CENTRO = "#ff6b5e";
 const COR_CENTRO_BORDA = "#ffffff";
+const COR_PREVIA = "rgba(255, 255, 255, 0.85)";
 const COR_CLARAO = "244, 112, 103";
 const OPACIDADE_CLARAO = 0.45;
 const FOLGA = 1;
@@ -125,7 +126,11 @@ function desenharGrade(ctx: CanvasRenderingContext2D, celula: number): void {
     }
 }
 
-/** O eixo da base (tracejado âmbar) e o centro de massa (círculo vermelho de borda branca). */
+/**
+ * O eixo da base (tracejado âmbar), o centro de massa (círculo vermelho de borda
+ * branca) e onde ele vai parar se a peça cair na fantasma (anel vazado; vermelho
+ * e tracejado se a jogada derruba a obra).
+ */
 function desenharEquilibrio(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto,
@@ -152,6 +157,25 @@ function desenharEquilibrio(
     ctx.arc(estado.estabilidade.centroDeMassa * celula, altura - celula / 2, raio, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
+    const previa = estado.estabilidade.previa;
+    if (previa) {
+        desenharPrevia(ctx, previa, altura - celula / 2, celula);
+    }
+}
+
+function desenharPrevia(
+    ctx: CanvasRenderingContext2D,
+    previa: PreviaDto,
+    y: number,
+    celula: number,
+): void {
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = previa.derruba ? COR_CENTRO : COR_PREVIA;
+    ctx.setLineDash(previa.derruba ? [3, 3] : []);
+    ctx.beginPath();
+    ctx.arc(previa.centroDeMassa * celula, y, celula / 3, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.setLineDash([]);
 }
 
 /**

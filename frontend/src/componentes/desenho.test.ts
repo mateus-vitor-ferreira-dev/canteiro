@@ -49,6 +49,25 @@ describe("desenharTabuleiro", () => {
         expect(blocos).toHaveLength(5);
     });
 
+    it("desenha o anel da prévia onde o centro de massa vai parar, tracejado se derruba", () => {
+        const tabuleiro = estadoDeTeste().tabuleiro.map((linha, l) =>
+            linha.map((_, c) => (l === 21 && c === 0 ? "ACO" : null)),
+        );
+        const previa = { indice: 0, desvio: 3, centroDeMassa: 2, eixo: 5, derruba: true };
+        const base = estadoDeTeste({ tabuleiro });
+        const estado = { ...base, estabilidade: { ...base.estabilidade, previa } };
+        const arcos: number[] = [];
+        const tracos: number[][] = [];
+        const { ctx } = contextoFalso();
+        ctx.arc = (x: number) => void arcos.push(x);
+        ctx.setLineDash = (traco: number[]) => void tracos.push(traco);
+
+        desenharTabuleiro(ctx, estado, 10);
+
+        expect(arcos).toEqual([36, 20]);
+        expect(tracos).toContainEqual([3, 3]);
+    });
+
     it("sem estado, pinta só o fundo", () => {
         const { ctx, pintados } = contextoFalso();
         desenharTabuleiro(ctx, null, 10);

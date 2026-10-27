@@ -6,6 +6,10 @@ import canteiro.modelo.Tabuleiro;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.materiais.Material;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Análise estrutural da pilha: centro de massa, base de apoio e índice de
  * estabilidade (RN07 a RN10).
@@ -110,11 +114,88 @@ public final class AnalisadorEstrutural {
             double meio = Dimensoes.COLUNAS / 2.0;
             return new Estabilidade(1, 0, limite, meio, meio, false);
         }
-        double centro = centroDeMassa();
-        double eixo = eixoDaBase(tabuleiro);
+        return medir(centroDeMassa(), eixoDaBase(tabuleiro), limite);
+    }
+
+    /**
+     * A estabilidade que a estrutura teria se a peça fosse fixada nas células
+     * dadas, sem mexer nos acumuladores. As linhas que a peça completaria saem
+     * da conta, como no jogo de verdade. Custa O(1): só olha as linhas da peça
+     * e, para achar a base, as linhas de baixo.
+     *
+     * @param tabuleiro tabuleiro atual, sem a peça
+     * @param celulas   onde a peça pousaria (a peça fantasma)
+     * @param material  material da peça
+     * @param limite    desvio máximo tolerado no nível
+     * @return a estabilidade prevista; estrutura que ficaria vazia é totalmente estável
+     */
+    public Estabilidade previa(Tabuleiro tabuleiro, List<Celula> celulas, Material material, double limite) {
+        Set<Integer> completas = linhasQueCompletam(tabuleiro, celulas);
+        double massa = massaTotal;
+        double soma = momento;
+        for (Celula celula : celulas) {
+            if (!completas.contains(celula.linha())) {
+                massa += material.massaPorBloco();
+                soma += material.massaPorBloco() * (celula.coluna() + MEIO_DA_COLUNA);
+            }
+        }
+        for (int linha : completas) {
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+                Bloco bloco = tabuleiro.bloco(linha, coluna);
+                if (bloco != null) {
+                    massa -= bloco.massa();
+                    soma -= bloco.massa() * (coluna + MEIO_DA_COLUNA);
+                }
+            }
+        }
+        if (massa < MASSA_DESPREZIVEL) {
+            double meio = Dimensoes.COLUNAS / 2.0;
+            return new Estabilidade(1, 0, limite, meio, meio, false);
+        }
+        return medir(soma / massa, eixoComPeca(tabuleiro, celulas, completas), limite);
+    }
+
+    private static Estabilidade medir(double centro, double eixo, double limite) {
         double desvio = Math.abs(centro - eixo);
         double indice = Math.max(0, 1 - desvio / limite);
         return new Estabilidade(indice, desvio, limite, centro, eixo, indice < Estabilidade.LIMIAR_ALERTA);
+    }
+
+    private static Set<Integer> linhasQueCompletam(Tabuleiro tabuleiro, List<Celula> celulas) {
+        Set<Integer> completas = new HashSet<>();
+        for (Celula celula : celulas) {
+            int linha = celula.linha();
+            long daPeca = celulas.stream().filter(c -> c.linha() == linha).count();
+            int ocupadas = 0;
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+                ocupadas += tabuleiro.ocupada(linha, coluna) ? 1 : 0;
+            }
+            if (ocupadas + daPeca == Dimensoes.COLUNAS) {
+                completas.add(linha);
+            }
+        }
+        return completas;
+    }
+
+    /** O eixo da base com a peça no lugar, pulando as linhas que ela completaria. */
+    private static double eixoComPeca(Tabuleiro tabuleiro, List<Celula> celulas, Set<Integer> completas) {
+        for (int linha = Dimensoes.LINHAS - 1; linha >= 0; linha--) {
+            if (completas.contains(linha)) {
+                continue;
+            }
+            int primeira = -1;
+            int ultima = -1;
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+                if (tabuleiro.ocupada(linha, coluna) || celulas.contains(new Celula(linha, coluna))) {
+                    primeira = primeira < 0 ? coluna : primeira;
+                    ultima = coluna;
+                }
+            }
+            if (primeira >= 0) {
+                return (primeira + ultima + 1) / 2.0;
+            }
+        }
+        return Dimensoes.COLUNAS / 2.0;
     }
 
     /**
@@ -125,20 +206,7 @@ public final class AnalisadorEstrutural {
      * @return eixo, em colunas a partir da borda esquerda; o meio do tabuleiro se estiver vazio
      */
     public static double eixoDaBase(Tabuleiro tabuleiro) {
-        for (int linha = Dimensoes.LINHAS - 1; linha >= 0; linha--) {
-            int primeira = -1;
-            int ultima = -1;
-            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
-                if (tabuleiro.ocupada(linha, coluna)) {
-                    primeira = primeira < 0 ? coluna : primeira;
-                    ultima = coluna;
-                }
-            }
-            if (primeira >= 0) {
-                return (primeira + ultima + 1) / 2.0;
-            }
-        }
-        return Dimensoes.COLUNAS / 2.0;
+        return eixoComPeca(tabuleiro, List.of(), Set.of());
     }
 
     /**

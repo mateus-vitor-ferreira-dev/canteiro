@@ -8,21 +8,26 @@
 
     const percentual = $derived(Math.round(estabilidade.indice * 100));
     const lado = $derived(estabilidade.centroDeMassa < estabilidade.eixo ? "esquerda" : "direita");
-    /** Onde o centro de massa fica no medidor: 0 % no limite da esquerda, 50 % no eixo, 100 % no da direita. */
-    const ponteiro = $derived(
-        Math.min(
-            100,
-            Math.max(
-                0,
-                50 + ((estabilidade.centroDeMassa - estabilidade.eixo) / estabilidade.limite) * 50,
-            ),
-        ),
-    );
+    /** Onde um centro de massa fica no medidor: 0 % no limite da esquerda, 50 % no eixo, 100 % no da direita. */
+    function noMedidor(centro: number, eixo: number): number {
+        return Math.min(100, Math.max(0, 50 + ((centro - eixo) / estabilidade.limite) * 50));
+    }
+
+    const ponteiro = $derived(noMedidor(estabilidade.centroDeMassa, estabilidade.eixo));
+    const previa = $derived(estabilidade.previa);
+    const previsto = $derived(previa ? Math.round(previa.indice * 100) : null);
 </script>
 
 <section class="painel" class:alerta={estabilidade.alerta} aria-label="Estabilidade">
     <h2>Estabilidade</h2>
-    <p class="percentual">{percentual} %</p>
+    <p class="percentual">
+        {percentual} %
+        {#if previsto !== null && previsto !== percentual}
+            <span class="previsto" class:cai={previa?.derruba}>
+                <span class="so-leitor">com esta jogada, </span>→ {previsto} %
+            </span>
+        {/if}
+    </p>
     <div
         class="barra"
         role="meter"
@@ -42,6 +47,13 @@
     <div class="medidor" aria-hidden="true">
         <span class="eixo"></span>
         <span class="ponteiro" style:left="{ponteiro}%"></span>
+        {#if previa}
+            <span
+                class="ponteiro previa"
+                class:cai={previa.derruba}
+                style:left="{noMedidor(previa.centroDeMassa, previa.eixo)}%"
+            ></span>
+        {/if}
     </div>
 
     <dl>
@@ -51,7 +63,9 @@
         <dd>{formatarColunas(estabilidade.limite)}</dd>
     </dl>
 
-    {#if estabilidade.alerta}
+    {#if previa?.derruba}
+        <p class="aviso" role="alert">Esta jogada derruba a obra!</p>
+    {:else if estabilidade.alerta}
         <p class="aviso" role="alert">Atenção: carga demais à {lado}!</p>
     {/if}
 </section>
@@ -72,6 +86,15 @@
     }
     .alerta .percentual,
     .aviso {
+        color: var(--cor-vermelho);
+    }
+    .previsto {
+        margin-left: 0.25rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--cor-texto-suave);
+    }
+    .previsto.cai {
         color: var(--cor-vermelho);
     }
     .barra {
@@ -114,6 +137,15 @@
         border: 2px solid #fff;
         border-radius: 50%;
         transition: left 120ms linear;
+    }
+    .ponteiro.previa {
+        background: none;
+        border-color: var(--cor-marinho);
+        transition: none;
+    }
+    .ponteiro.previa.cai {
+        border-color: var(--cor-vermelho);
+        border-style: dashed;
     }
     dl {
         display: grid;
