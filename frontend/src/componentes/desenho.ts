@@ -48,16 +48,36 @@ const JANELA_TABLET = 768;
  *
  * @param largura largura da janela, em pixels
  * @param altura altura da janela, em pixels
+ * @param comFaixa se a faixa de treino ou de repetição aparece em cima do tabuleiro
  */
-export function celulaParaJanela(largura: number, altura: number): number {
+export function celulaParaJanela(largura: number, altura: number, comFaixa = false): number {
     if (largura >= JANELA_COMPUTADOR) {
         return tamanhoDaCelula(largura - 700, altura - 190);
     }
     if (largura >= JANELA_TABLET) {
         return tamanhoDaCelula(largura - 400, altura - 260);
     }
-    return tamanhoDaCelula(largura - 40, altura - 300);
+    const faixa = comFaixa ? ALTURA_FAIXA : 0;
+    return tamanhoDaCelula(
+        largura - LADOS_CELULAR,
+        altura - ALTURA_FORA_DO_TABULEIRO_CELULAR - faixa,
+    );
 }
+
+/**
+ * No celular, o que fica ao lado do tabuleiro: o respiro da página, a moldura
+ * e a coluna das miniaturas (reserva e próximas).
+ */
+const LADOS_CELULAR = 96;
+
+/**
+ * No celular, o que fica em cima e embaixo do tabuleiro: o cabeçalho
+ * compacto, o resumo da partida, as duas linhas de botões e os respiros.
+ */
+const ALTURA_FORA_DO_TABULEIRO_CELULAR = 270;
+
+/** A faixa que avisa que a partida é de treino ou uma repetição. */
+const ALTURA_FAIXA = 34;
 
 /** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
 export function desenharTabuleiro(

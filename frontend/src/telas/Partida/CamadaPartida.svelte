@@ -43,7 +43,11 @@
 {:else if partida.pausada}
     <div class="camada" role="status">
         <h2>Pausado</h2>
-        <p>Aperte <kbd>P</kbd> para continuar.</p>
+        <p class="no-teclado">Aperte <kbd>P</kbd> para continuar.</p>
+        <p class="no-toque">
+            Toque em continuar, no canto dos botões. No tabuleiro: arraste para mover, toque para
+            girar, deslize rápido para baixo para cair e para cima para guardar.
+        </p>
     </div>
 {:else if partida.encerrada && partida.estado && repeticao}
     <div class="camada" role="status">
@@ -94,6 +98,21 @@
         border: 0;
         border-radius: 8px;
         cursor: pointer;
+    }
+    /* Cada jogador lê só o jeito de jogar do seu aparelho. */
+    @media (hover: hover) and (pointer: fine) {
+        .no-toque {
+            display: none;
+        }
+    }
+    @media (hover: none), (pointer: coarse) {
+        .no-teclado {
+            display: none;
+        }
+    }
+    .no-toque {
+        max-width: 28ch;
+        font-size: 0.9rem;
     }
     .secundario {
         color: #fff;

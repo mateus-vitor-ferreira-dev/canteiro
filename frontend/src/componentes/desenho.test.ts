@@ -3,6 +3,7 @@ import { estadoDeTeste } from "@/testes-apoio";
 import {
     CELULA_MAXIMA,
     CELULA_MINIMA,
+    celulaParaJanela,
     desenharColapso,
     desenharTabuleiro,
     naTela,
@@ -126,6 +127,15 @@ describe("desenharColapso", () => {
         expect(pintados[0]).toBe("#1b2432@50,190");
         expect(pintados[1]).toBe("#4e5a6b@51,91");
         expect(pintados[2]).toMatch(/^rgba\(244, 112, 103, 0.45\)@0,0$/);
+    });
+});
+
+describe("celulaParaJanela", () => {
+    it("num celular de 360 × 760, o tabuleiro e as miniaturas cabem na largura e na altura", () => {
+        const celula = celulaParaJanela(360, 760);
+        expect(celula).toBe(24);
+        expect(10 * celula + 96).toBeLessThanOrEqual(360);
+        expect(20 * celula + 270).toBeLessThanOrEqual(760);
     });
 });
 

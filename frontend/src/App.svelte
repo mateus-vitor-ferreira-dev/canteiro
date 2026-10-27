@@ -33,12 +33,12 @@
 
 <svelte:window onpopstate={(evento) => navegacao.restaurar(evento.state)} />
 
-<header>
+<header class:em-partida={navegacao.tela.nome === "partida"}>
     <h1>CANTEIRO</h1>
     <p>O jogo de encaixe em que a pilha tem peso e precisa ficar de pé.</p>
 </header>
 
-<main bind:this={principal}>
+<main bind:this={principal} class:em-partida={navegacao.tela.nome === "partida"}>
     {#if navegacao.tela.nome === "menu"}
         <Menu aoEscolher={(tela) => navegacao.ir(tela)} />
     {:else if navegacao.tela.nome === "nova-partida"}
@@ -135,6 +135,19 @@
     @media (max-width: 599px) {
         header p {
             display: none;
+        }
+    }
+    /* No celular, a partida precisa de cada pixel da altura: cabeçalho e respiros encolhem. */
+    @media (max-width: 767px) {
+        header.em-partida {
+            padding: 0.4rem 1rem;
+            border-bottom-width: 4px;
+        }
+        header.em-partida h1 {
+            font-size: 1.25rem;
+        }
+        main.em-partida {
+            padding: 0.5rem;
         }
     }
     @media (min-width: 768px) {

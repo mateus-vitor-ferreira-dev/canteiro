@@ -3,18 +3,16 @@
     import { untrack } from "svelte";
     import type { Comando, PlacarDto } from "@/api/protocolo";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
-    import Tabuleiro from "@/componentes/Tabuleiro.svelte";
     import { celulaParaJanela } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
     import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { Som } from "@/estado/som.svelte";
     import { comandoDoEvento } from "@/estado/teclado";
-    import FaixaModo from "./FaixaModo.svelte";
+    import MesaDeJogo from "./MesaDeJogo.svelte";
     import MetaDoNivel from "./MetaDoNivel.svelte";
-    import CamadaPartida from "./CamadaPartida.svelte";
+    import { vibrarNoEvento } from "@/util/vibracao";
     import ColunaApoio from "./ColunaApoio.svelte";
-    import ControlesToque from "./ControlesToque.svelte";
     import Placar from "./Placar.svelte";
 
     let {
@@ -52,7 +50,10 @@
     $effect(() => {
         const evento = partida.ultimoEvento;
         if (evento) {
-            untrack(() => som.tocar(evento));
+            untrack(() => {
+                som.tocar(evento);
+                vibrarNoEvento(evento);
+            });
         }
     });
 
@@ -60,7 +61,7 @@
     let alturaJanela = $state(800);
 
     /** O tabuleiro cresce e encolhe com a janela. */
-    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela));
+    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela, treino || repeticao));
 
     const anuncio = $derived(
         partida.ultimoEvento
@@ -121,47 +122,41 @@
     {/if}
 
     <div class="jogo">
-        <FaixaModo {treino} {repeticao} />
-        <div class="palco">
-            <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
-            <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
-        </div>
-
-        <ControlesToque
-            aoComando={aoTocar}
-            pausada={partida.pausada}
-            {treino}
-            soPausa={repeticao}
-        />
+        <MesaDeJogo {partida} {som} {celula} {treino} {repeticao} {aoTocar} {aoSair} {aoTerminar} />
     </div>
 
     <ColunaApoio estado={partida.estado} {som} {treino} {repeticao} />
 </div>
 
 <style>
-    /* Celular: uma coluna, com o placar em cima e os botões embaixo do tabuleiro. */
+    /*
+     * Celular: tudo numa tela, sem rolar, só com a mesa de jogo. Placar, painel
+     * e legendas completos ficam para as telas maiores.
+     */
     .partida {
         display: grid;
-        grid-template-areas: "lateral" "jogo" "aside";
-        gap: 1rem;
+        grid-template-areas: "jogo";
         justify-items: center;
     }
-    .lateral {
-        grid-area: lateral;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        width: 100%;
+    .lateral,
+    .partida > :global(aside) {
+        display: none;
     }
-    /* O tabuleiro e os botões de toque ficam sempre juntos. */
     .jogo {
         grid-area: jogo;
-        display: grid;
-        gap: 1rem;
-        justify-items: center;
+        width: 100%;
     }
-    .palco {
-        position: relative;
+    @media (min-width: 768px) {
+        .lateral {
+            grid-area: lateral;
+            display: grid;
+        }
+        .partida > :global(aside) {
+            display: block;
+        }
+        .jogo {
+            width: auto;
+        }
     }
     /* Tablet: o tabuleiro à esquerda e todo o resto numa coluna ao lado. */
     @media (min-width: 768px) {
