@@ -4,7 +4,9 @@
     import Tabuleiro from "@/componentes/Tabuleiro.svelte";
     import type { PartidaAoVivo } from "@/estado/partida.svelte";
     import type { Som } from "@/estado/som.svelte";
+    import { LIMIAR_RANGIDO } from "@/componentes/efeitos";
     import CamadaPartida from "./CamadaPartida.svelte";
+    import Destaques from "./Destaques.svelte";
     import ControlesToque from "./ControlesToque.svelte";
     import FaixaModo from "./FaixaModo.svelte";
     import MiniaturasCompactas from "./MiniaturasCompactas.svelte";
@@ -37,6 +39,25 @@
         /** Chamado com o placar final, quando o jogador abre o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
     } = $props();
+
+    /** De quanto em quanto tempo a estrutura range, enquanto está para cair. */
+    const INTERVALO_RANGIDO_MS = 2400;
+
+    const rangendo = $derived(
+        partida.estado?.estado === "PECA_CAINDO" &&
+            partida.estado.estabilidade.indice < LIMIAR_RANGIDO &&
+            partida.estado.tabuleiro.some((linha) => linha.some(Boolean)),
+    );
+
+    // Perto do limite, a obra range de tempos em tempos, até sair do perigo.
+    $effect(() => {
+        if (!rangendo) {
+            return;
+        }
+        som.ranger();
+        const relogio = setInterval(() => som.ranger(), INTERVALO_RANGIDO_MS);
+        return () => clearInterval(relogio);
+    });
 </script>
 
 <div class="mesa-de-jogo">
@@ -54,6 +75,7 @@
                 {celula}
                 aoComando={aoTocar}
             />
+            <Destaques evento={partida.ultimoEvento} nivel={partida.estado?.placar.nivel} />
             <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
         </div>
         {#if partida.estado}

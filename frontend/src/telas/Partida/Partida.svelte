@@ -51,7 +51,7 @@
         const evento = partida.ultimoEvento;
         if (evento) {
             untrack(() => {
-                som.tocar(evento);
+                som.tocar(evento, partida.estado?.placar.sequencia ?? 0);
                 vibrarNoEvento(evento);
             });
         }

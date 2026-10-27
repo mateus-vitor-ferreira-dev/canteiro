@@ -1,5 +1,5 @@
 import type { EventoDto } from "@/api/protocolo";
-import { receitaDoEvento, type Nota } from "@/sons/receitas";
+import { RANGIDO, receitaDoEvento, type Nota } from "@/sons/receitas";
 import { tocarNotas } from "@/sons/sintetizador";
 import { configuracoes } from "./configuracoes.svelte";
 
@@ -55,9 +55,21 @@ export class Som {
         }
     }
 
-    /** Toca o som do evento, se houver um e se o som estiver ligado. */
-    tocar(evento: EventoDto): void {
-        const notas = receitaDoEvento(evento);
+    /**
+     * Toca o som do evento, se houver um e se o som estiver ligado.
+     *
+     * @param sequencia peças seguidas que fecharam linha: o arpejo das linhas sobe com ela
+     */
+    tocar(evento: EventoDto, sequencia = 0): void {
+        this.#tocarNotas(receitaDoEvento(evento, sequencia));
+    }
+
+    /** A estrutura rangendo, quando está para cair. */
+    ranger(): void {
+        this.#tocarNotas(RANGIDO);
+    }
+
+    #tocarNotas(notas: readonly Nota[]): void {
         if (this.ligado && notas.length > 0) {
             this.#tocador(notas, this.#volume());
         }

@@ -10,6 +10,7 @@
         desenharTabuleiro,
     } from "./desenho";
     import { densidadeDaTela, prefereMenosMovimento } from "@/util/tela";
+    import { DURACAO_CLARAO_LINHAS_MS, balancoDoCentro, desenharClaraoLinhas } from "./efeitos";
 
     let {
         estado,
@@ -68,6 +69,24 @@
     const largura = $derived(COLUNAS * celula);
     const altura = $derived(LINHAS_VISIVEIS * celula);
     let colapso: { quedas: QuedaDto[]; inicio: number } | null = null;
+    let clarao: { linhas: number[]; inicio: number } | null = null;
+    let tremendo = $state(false);
+    const menosMovimento = prefereMenosMovimento();
+
+    // Linhas que somem acendem; o colapso sacode o tabuleiro. Com movimento reduzido, nada disso.
+    $effect(() => {
+        if (menosMovimento || !evento) {
+            return;
+        }
+        if (evento.evento === "LINHAS_ELIMINADAS" && evento.dados.linhas?.length) {
+            clarao = { linhas: evento.dados.linhas, inicio: performance.now() };
+        }
+        if (evento.evento === "COLAPSO") {
+            tremendo = true;
+            const fim = setTimeout(() => (tremendo = false), 450);
+            return () => clearTimeout(fim);
+        }
+    });
 
     // Cada evento é um objeto novo: um COLAPSO recém-chegado começa a animação.
     // Com movimento reduzido, os blocos já aparecem no lugar, sem queda nem clarão.
@@ -92,7 +111,19 @@
         const desenhar = (agora: number) => {
             // Desenha em pixels do CSS; a escala deixa o traço nítido em telas de alta densidade.
             ctx.setTransform(densidade, 0, 0, densidade, 0, 0);
-            desenharTabuleiro(ctx, estado, celula);
+            const balanco =
+                estado && !menosMovimento
+                    ? balancoDoCentro(estado.estabilidade.indice, agora, celula)
+                    : 0;
+            desenharTabuleiro(ctx, estado, celula, balanco);
+            if (clarao) {
+                const progresso = (agora - clarao.inicio) / DURACAO_CLARAO_LINHAS_MS;
+                if (progresso < 1) {
+                    desenharClaraoLinhas(ctx, clarao.linhas, progresso, celula);
+                } else {
+                    clarao = null;
+                }
+            }
             if (colapso && estado) {
                 const progresso = (agora - colapso.inicio) / DURACAO_COLAPSO_MS;
                 if (progresso < 1) {
@@ -115,6 +146,7 @@
     style:width="{largura}px"
     style:height="{altura}px"
     class:com-gestos={aoComando}
+    class:tremendo
     aria-label="Tabuleiro da partida"
     onpointerdown={aoEncostar}
     onpointermove={aoArrastar}
@@ -127,6 +159,30 @@
         display: block;
         border-radius: 8px;
         box-shadow: 0 0 0 4px var(--cor-marinho);
+    }
+    .tremendo {
+        animation: tremer 450ms ease-out;
+    }
+    @keyframes tremer {
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+        15% {
+            transform: translate(-6px, 2px);
+        }
+        30% {
+            transform: translate(5px, -2px);
+        }
+        45% {
+            transform: translate(-4px, 1px);
+        }
+        60% {
+            transform: translate(3px, -1px);
+        }
+        80% {
+            transform: translate(-1px, 0);
+        }
     }
     /* O dedo no tabuleiro é jogada, não rolagem nem zoom da página. */
     .com-gestos {

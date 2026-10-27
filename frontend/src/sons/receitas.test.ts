@@ -18,8 +18,19 @@ describe("receitaDoEvento", () => {
         }
     });
 
+    it("a sequência sobe o arpejo das linhas, até dez semitons", () => {
+        const linhas = evento("LINHAS_ELIMINADAS", { linhas: [21] });
+        const sem = receitaDoEvento(linhas)[0]?.frequencia ?? 0;
+        expect(receitaDoEvento(linhas, 12)[0]?.frequencia).toBeCloseTo(sem * 2 ** (10 / 12));
+        expect(receitaDoEvento(linhas, 1)[0]?.frequencia).toBeGreaterThan(sem);
+    });
+
+    it("subir de nível tem som próprio", () => {
+        expect(receitaDoEvento(evento("NIVEL_SUBIU")).length).toBeGreaterThan(0);
+    });
+
     it("os outros eventos são silenciosos", () => {
-        for (const tipo of ["NIVEL_SUBIU", "FIM_DE_JOGO", "ERRO"] as const) {
+        for (const tipo of ["FIM_DE_JOGO", "ERRO"] as const) {
             expect(receitaDoEvento(evento(tipo))).toEqual([]);
         }
     });
