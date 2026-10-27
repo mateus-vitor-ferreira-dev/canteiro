@@ -3,21 +3,16 @@
     import { untrack } from "svelte";
     import type { Comando, PlacarDto } from "@/api/protocolo";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
-    import Tabuleiro from "@/componentes/Tabuleiro.svelte";
     import { celulaParaJanela } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
     import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
     import { Som } from "@/estado/som.svelte";
     import { comandoDoEvento } from "@/estado/teclado";
-    import FaixaModo from "./FaixaModo.svelte";
+    import MesaDeJogo from "./MesaDeJogo.svelte";
     import MetaDoNivel from "./MetaDoNivel.svelte";
-    import MiniaturasCompactas from "./MiniaturasCompactas.svelte";
-    import ResumoCompacto from "./ResumoCompacto.svelte";
     import { vibrarNoEvento } from "@/util/vibracao";
-    import CamadaPartida from "./CamadaPartida.svelte";
     import ColunaApoio from "./ColunaApoio.svelte";
-    import ControlesToque from "./ControlesToque.svelte";
     import Placar from "./Placar.svelte";
 
     let {
@@ -127,35 +122,7 @@
     {/if}
 
     <div class="jogo">
-        <FaixaModo {treino} {repeticao} />
-        {#if partida.estado}
-            <div class="so-celular resumo">
-                <ResumoCompacto estado={partida.estado} {som} />
-            </div>
-        {/if}
-        <div class="mesa">
-            <div class="palco">
-                <Tabuleiro
-                    estado={partida.estado}
-                    evento={partida.ultimoEvento}
-                    {celula}
-                    aoComando={aoTocar}
-                />
-                <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
-            </div>
-            {#if partida.estado}
-                <div class="so-celular">
-                    <MiniaturasCompactas estado={partida.estado} />
-                </div>
-            {/if}
-        </div>
-
-        <ControlesToque
-            aoComando={aoTocar}
-            pausada={partida.pausada}
-            {treino}
-            soPausa={repeticao}
-        />
+        <MesaDeJogo {partida} {som} {celula} {treino} {repeticao} {aoTocar} {aoSair} {aoTerminar} />
     </div>
 
     <ColunaApoio estado={partida.estado} {som} {treino} {repeticao} />
@@ -163,9 +130,8 @@
 
 <style>
     /*
-     * Celular: tudo numa tela, sem rolar. O resumo em cima, o tabuleiro com as
-     * miniaturas ao lado e as duas linhas de botões embaixo. Placar, painel e
-     * legendas completos ficam para as telas maiores.
+     * Celular: tudo numa tela, sem rolar, só com a mesa de jogo. Placar, painel
+     * e legendas completos ficam para as telas maiores.
      */
     .partida {
         display: grid;
@@ -176,29 +142,11 @@
     .partida > :global(aside) {
         display: none;
     }
-    /* O tabuleiro e os botões de toque ficam sempre juntos. */
     .jogo {
         grid-area: jogo;
-        display: grid;
-        gap: 0.5rem;
-        justify-items: center;
         width: 100%;
-    }
-    .resumo {
-        width: 100%;
-    }
-    .mesa {
-        display: flex;
-        gap: 0.5rem;
-        align-items: flex-start;
-    }
-    .palco {
-        position: relative;
     }
     @media (min-width: 768px) {
-        .so-celular {
-            display: none;
-        }
         .lateral {
             grid-area: lateral;
             display: grid;
@@ -207,7 +155,6 @@
             display: block;
         }
         .jogo {
-            gap: 1rem;
             width: auto;
         }
     }
