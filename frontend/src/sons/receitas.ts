@@ -86,35 +86,70 @@ const META: readonly Nota[] = [
     { onda: "triangle", inicio: 0.2, duracao: 0.6, frequencia: 1046.5, ganho: 0.3 },
 ];
 
+/** Nível novo: sol, dó e mi subindo, em onda quadrada, com o mi de cima sustentado. */
+const NIVEL: readonly Nota[] = [
+    { onda: "square", inicio: 0, duracao: 0.12, frequencia: 392, ganho: 0.12 },
+    { onda: "square", inicio: 0.12, duracao: 0.12, frequencia: 523.25, ganho: 0.12 },
+    { onda: "triangle", inicio: 0.24, duracao: 0.5, frequencia: 659.25, ganho: 0.32 },
+];
+
+/**
+ * A estrutura rangendo, quando está para cair: um gemido grave que desce,
+ * com o chiado da madeira e do ferro forçados.
+ */
+export const RANGIDO: readonly Nota[] = [
+    { onda: "triangle", inicio: 0, duracao: 0.5, frequencia: 95, frequenciaFinal: 62, ganho: 0.3 },
+    {
+        onda: "ruido",
+        inicio: 0.05,
+        duracao: 0.35,
+        frequencia: 700,
+        frequenciaFinal: 300,
+        ganho: 0.12,
+    },
+];
+
+/** Cada peça da sequência sobe o arpejo um semitom, até uma oitava menos dois. */
+const SEMITONS_MAXIMOS = 10;
+
 /**
  * O que tocar para cada evento da partida (RF28): fixação, linhas eliminadas,
- * colapso e meta cumprida. Os outros eventos não têm som.
+ * colapso, nível novo e meta cumprida. Os outros eventos não têm som.
+ *
+ * @param sequencia quantas peças seguidas fecharam linha: o arpejo das linhas sobe com ela
  *
  * @returns as notas, ou lista vazia se o evento é silencioso
  */
-export function receitaDoEvento(evento: EventoDto): readonly Nota[] {
+export function receitaDoEvento(evento: EventoDto, sequencia = 0): readonly Nota[] {
     switch (evento.evento) {
         case "PECA_FIXADA":
             return FIXACAO;
         case "LINHAS_ELIMINADAS":
-            return arpejo(evento.dados.linhas?.length ?? 1);
+            return arpejo(evento.dados.linhas?.length ?? 1, sequencia);
         case "COLAPSO":
             return COLAPSO;
         case "META_CUMPRIDA":
             return META;
+        case "NIVEL_SUBIU":
+            return NIVEL;
         default:
             return [];
     }
 }
 
-/** Uma nota subindo para cada linha: quatro de uma vez soam como um acorde completo. */
-function arpejo(linhas: number): Nota[] {
+/**
+ * Uma nota subindo para cada linha: quatro de uma vez soam como um acorde
+ * completo. A sequência sobe o arpejo inteiro, para a sequência longa soar
+ * como tensão crescendo.
+ */
+function arpejo(linhas: number, sequencia: number): Nota[] {
     const quantas = Math.min(Math.max(linhas, 1), ARPEJO_HZ.length);
+    const transposicao = 2 ** (Math.min(Math.max(sequencia, 0), SEMITONS_MAXIMOS) / 12);
     return ARPEJO_HZ.slice(0, quantas).map((frequencia, i) => ({
         onda: "triangle",
         inicio: i * INTERVALO_ARPEJO,
         duracao: i === quantas - 1 ? 0.35 : 0.18,
-        frequencia,
+        frequencia: frequencia * transposicao,
         ganho: 0.35,
     }));
 }

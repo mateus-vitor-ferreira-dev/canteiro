@@ -79,11 +79,16 @@ const ALTURA_FORA_DO_TABULEIRO_CELULAR = 270;
 /** A faixa que avisa que a partida é de treino ou uma repetição. */
 const ALTURA_FAIXA = 34;
 
-/** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
+/**
+ * Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada
+ * quadrado, em pixels; `balanco`, quanto o centro de massa sai do lugar quando
+ * a estrutura range.
+ */
 export function desenharTabuleiro(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto | null,
     celula: number,
+    balanco = 0,
 ): void {
     ctx.fillStyle = COR_FUNDO;
     ctx.fillRect(0, 0, COLUNAS * celula, LINHAS_VISIVEIS * celula);
@@ -105,7 +110,7 @@ export function desenharTabuleiro(
         const material = estado.pecaAtual.material;
         estado.pecaAtual.blocos.forEach((posicao) => pintar(ctx, posicao, material, celula));
     }
-    desenharEquilibrio(ctx, estado, celula);
+    desenharEquilibrio(ctx, estado, celula, balanco);
 }
 
 /** Posição na tela de uma célula da grade, ou `null` se ela estiver nas linhas ocultas. */
@@ -155,6 +160,7 @@ function desenharEquilibrio(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto,
     celula: number,
+    balanco: number,
 ): void {
     const vazio = estado.tabuleiro.every((linha) => linha.every((m) => m === null));
     if (vazio) {
@@ -174,7 +180,13 @@ function desenharEquilibrio(
     ctx.fillStyle = COR_CENTRO;
     ctx.strokeStyle = COR_CENTRO_BORDA;
     ctx.beginPath();
-    ctx.arc(estado.estabilidade.centroDeMassa * celula, altura - celula / 2, raio, 0, 2 * Math.PI);
+    ctx.arc(
+        estado.estabilidade.centroDeMassa * celula + balanco,
+        altura - celula / 2,
+        raio,
+        0,
+        2 * Math.PI,
+    );
     ctx.fill();
     ctx.stroke();
     const previa = estado.estabilidade.previa;

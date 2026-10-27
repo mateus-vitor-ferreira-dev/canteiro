@@ -4,7 +4,7 @@ import { VOLUME_PADRAO } from "./configuracoes.svelte";
 import { Som } from "./som.svelte";
 
 const FIXADA: EventoDto = { tipo: "EVENTO", evento: "PECA_FIXADA", dados: {} };
-const NIVEL: EventoDto = { tipo: "EVENTO", evento: "NIVEL_SUBIU", dados: {} };
+const FIM: EventoDto = { tipo: "EVENTO", evento: "FIM_DE_JOGO", dados: {} };
 
 function armazenamento(inicial: Record<string, string> = {}) {
     const dados = { ...inicial };
@@ -36,8 +36,17 @@ describe("Som", () => {
 
     it("evento sem som não chama o tocador", () => {
         const tocador = vi.fn();
-        new Som(tocador, armazenamento()).tocar(NIVEL);
+        new Som(tocador, armazenamento()).tocar(FIM);
         expect(tocador).not.toHaveBeenCalled();
+    });
+
+    it("range a estrutura, e fica mudo se o som estiver desligado", () => {
+        const tocador = vi.fn();
+        const som = new Som(tocador, armazenamento());
+        som.ranger();
+        som.alternar();
+        som.ranger();
+        expect(tocador).toHaveBeenCalledTimes(1);
     });
 
     it("desligado, fica mudo, e lembra a escolha na próxima partida", () => {
