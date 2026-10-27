@@ -11,6 +11,7 @@ function estabilidade(parcial: Partial<EstabilidadeDto> = {}): EstabilidadeDto {
         centroDeMassa: 4.36,
         eixo: 5,
         alerta: false,
+        previa: null,
         ...parcial,
     };
 }
@@ -63,5 +64,25 @@ describe("PainelEstabilidade", () => {
         });
         rerender({ estabilidade: estabilidade({ indice: 0.4 }) });
         expect(screen.getByText("40 %")).toBeInTheDocument();
+    });
+
+    it("mostra o índice que a jogada da peça atual deixaria", () => {
+        render(PainelEstabilidade, {
+            estabilidade: estabilidade({
+                previa: { indice: 0.4, desvio: 1.2, centroDeMassa: 3.8, eixo: 5, derruba: false },
+            }),
+        });
+        expect(screen.getByText(/→ 40 %/)).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("avisa quando a jogada vai derrubar a obra", () => {
+        render(PainelEstabilidade, {
+            estabilidade: estabilidade({
+                alerta: true,
+                previa: { indice: 0, desvio: 2.4, centroDeMassa: 2.6, eixo: 5, derruba: true },
+            }),
+        });
+        expect(screen.getByRole("alert")).toHaveTextContent("Esta jogada derruba a obra!");
     });
 });
