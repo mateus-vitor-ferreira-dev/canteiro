@@ -62,7 +62,8 @@ class ProtocoloJsonTest {
         assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
                 "reservada", "podeReservar", "placar", "estabilidade"), campos(estado));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
-        assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos"), campos(estado.get("placar")));
+        assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos", "sequencia"),
+                campos(estado.get("placar")));
         assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta", "previa"),
                 campos(estado.get("estabilidade")));
         assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba"),

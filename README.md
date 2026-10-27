@@ -99,7 +99,10 @@ Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e
 | 👀 **Fila** | O jogador vê as **3 próximas** peças, com forma e material |
 | 📥 **Reserva** | Dá para guardar uma peça e trocar pela reservada, **uma vez por peça gerada** |
 | 🧹 **Linhas** | Linha completa é eliminada. Eliminar 2, 3 ou 4 linhas de uma vez rende bônus progressivo |
-| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente |
+| ⏱️ **Ajuste** | A peça que encosta no apoio espera **meio segundo** antes de fixar: dá para deslizar ou girar no último instante |
+| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente. Um anel no tabuleiro mostra **onde o centro de massa vai parar** com a jogada da peça atual |
+| 🎯 **Obra ousada** | Fechar linha com a estabilidade abaixo de **25 %** vale **50 % a mais**: arriscar compensa |
+| 🔗 **Sequência** | Cada peça seguida que fecha linha soma **10 %** aos pontos da próxima eliminação, até o dobro |
 | 💥 **Colapso** | Desvio acima do limite: os blocos acima da linha crítica caem, a pontuação perde o equivalente a **2 linhas** e o contador de colapsos sobe |
 | 📈 **Nível** | Sobe a cada **10 linhas**. A queda acelera e o desvio tolerado diminui |
 | 🏁 **Fim** | Quando uma peça nasce já colidindo, ou quando há um colapso com a pilha acima de **18 linhas** |
@@ -201,7 +204,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ### Regras de negócio
 
 <details>
-<summary><strong>RN01 – RN16</strong>: as regras do jogo, todas no backend</summary>
+<summary><strong>RN01 – RN18</strong>: as regras do jogo, todas no backend</summary>
 
 | Código | Regra |
 |---|---|
@@ -221,6 +224,8 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RN14 | O nível avança a cada 10 linhas eliminadas. A cada nível, o intervalo de queda diminui e o limite de desvio é reduzido |
 | RN15 | Só entram no ranking pontuações de partidas concluídas sem uso do desfazer |
 | RN16 | O elemento que a gravidade encosta no apoio espera 500 ms antes de ser fixado. Mover ou girar nesse tempo recomeça a espera, até 15 vezes por elemento. Descer à mão sobre o apoio e a queda instantânea fixam na hora |
+| RN17 | Eliminar linhas com o índice de estabilidade abaixo de 25 %, medido depois de o elemento assentar e antes de as linhas sumirem, é uma obra ousada e vale 50 % a mais |
+| RN18 | Cada elemento seguido que elimina linha soma 10 % aos pontos da eliminação seguinte, até 100 %. Um elemento que não elimina linha ou um colapso zera a sequência |
 
 </details>
 
@@ -245,7 +250,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ✅ | Reserva em pilha, com uma troca por peça, e a peça guardada ao lado do tabuleiro (#13) |
 | RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
-| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22) |
+| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22), com os bônus da obra ousada e da sequência de linhas (#103) |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |
 | RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ✅ | Índice, desvio e limite sempre na tela, e o eixo e o centro de massa desenhados no tabuleiro (#28, #25); prévia de onde o centro de massa vai parar com a jogada da peça atual (#107) |
 | RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29); aviso de que a jogada da peça atual derruba a obra (#107) |

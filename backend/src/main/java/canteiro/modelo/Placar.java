@@ -3,7 +3,7 @@ package canteiro.modelo;
 import canteiro.modelo.materiais.Material;
 
 /**
- * Pontuação, linhas, nível e colapsos da partida.
+ * Pontuação, linhas, nível, colapsos e sequência de linhas da partida.
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -14,6 +14,7 @@ public final class Placar {
     private int linhas;
     private int nivel;
     private int colapsos;
+    private int sequencia;
 
     /**
      * Começa zerado, no nível inicial.
@@ -37,7 +38,22 @@ public final class Placar {
      * @return {@code true} se o nível subiu
      */
     public boolean registrarLinhas(int quantidade, Material predominante) {
-        pontuacao += Pontuacao.pontos(quantidade, nivel, predominante);
+        return registrarLinhas(quantidade, predominante, false);
+    }
+
+    /**
+     * Soma os pontos de uma eliminação, com os bônus de ousadia e de sequência,
+     * e aumenta a sequência (RN17, RN18). Sobe de nível a cada 10 linhas (RN14);
+     * os pontos usam o nível de antes da subida.
+     *
+     * @param quantidade   linhas eliminadas de uma vez
+     * @param predominante material predominante nessas linhas
+     * @param ousada       se a estrutura estava abaixo do limiar de ousadia
+     * @return {@code true} se o nível subiu
+     */
+    public boolean registrarLinhas(int quantidade, Material predominante, boolean ousada) {
+        pontuacao += Pontuacao.pontos(quantidade, nivel, predominante, ousada, sequencia);
+        sequencia++;
         int nivelAntes = nivel;
         int subidas = (linhas + quantidade) / Progressao.LINHAS_POR_NIVEL - linhas / Progressao.LINHAS_POR_NIVEL;
         linhas += quantidade;
@@ -52,6 +68,23 @@ public final class Placar {
     public void registrarColapso() {
         pontuacao = Math.max(0, pontuacao - Pontuacao.penalidadeColapso(nivel));
         colapsos++;
+        sequencia = 0;
+    }
+
+    /**
+     * Uma peça assentou sem fechar linha: a sequência zera (RN18).
+     */
+    public void quebrarSequencia() {
+        sequencia = 0;
+    }
+
+    /**
+     * Quantas peças seguidas fecharam linha (RN18).
+     *
+     * @return o tamanho da sequência atual
+     */
+    public int sequencia() {
+        return sequencia;
     }
 
     /**
