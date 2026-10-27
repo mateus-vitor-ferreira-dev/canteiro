@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ErroApi, SEM_CONEXAO, criarPartida, listarDificuldades } from "./cliente";
+import {
+    ErroApi,
+    SEM_CONEXAO,
+    criarPartida,
+    listarDificuldades,
+    listarRepeticoes,
+    reproduzirRepeticao,
+} from "./cliente";
 import type { DificuldadeDto } from "./protocolo";
 
 const NORMAL: DificuldadeDto = {
@@ -49,6 +56,24 @@ describe("listarDificuldades", () => {
     });
 });
 
+describe("repetições", () => {
+    it("lista as gravações e pede a reprodução de uma pelo id", async () => {
+        const gravadas = [
+            { id: "g 1", data: "2026-09-28T14:32:05", dificuldade: "NORMAL", pontuacao: 900 },
+        ];
+        responder(gravadas);
+        await expect(listarRepeticoes()).resolves.toEqual(gravadas);
+        expect(fetch).toHaveBeenLastCalledWith("/api/repeticoes", expect.anything());
+
+        responder({ id: "rep1" }, 201);
+        await expect(reproduzirRepeticao("g 1")).resolves.toEqual({ id: "rep1" });
+        expect(fetch).toHaveBeenLastCalledWith(
+            "/api/repeticoes/g%201/reproduzir",
+            expect.objectContaining({ method: "POST" }),
+        );
+    });
+});
+
 describe("criarPartida", () => {
     it("manda a dificuldade e devolve o id", async () => {
         responder({ id: "a1b2c3d4" }, 201);
@@ -58,7 +83,10 @@ describe("criarPartida", () => {
         const [caminho, opcoes] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
         expect(caminho).toBe("/api/partidas");
         expect(opcoes.method).toBe("POST");
-        expect(JSON.parse(opcoes.body as string)).toEqual({ dificuldade: "NORMAL" });
+        expect(JSON.parse(opcoes.body as string)).toEqual({
+            dificuldade: "NORMAL",
+            modoTreino: false,
+        });
     });
 
     it("transforma a dificuldade inválida em ErroApi", async () => {

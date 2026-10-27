@@ -40,4 +40,15 @@ public interface FontePecas {
     default void nivelMudou(int nivel) {
         // uma fonte que não muda com o nível não precisa fazer nada
     }
+
+    /**
+     * A semente da partida, para sortear outras coisas além das peças (como
+     * as metas de cada nível) e a repetição continuar dando a mesma partida.
+     * Por padrão, zero: uma fonte fixa não sorteia nada.
+     *
+     * @return a semente do sorteio
+     */
+    default long semente() {
+        return 0;
+    }
 }

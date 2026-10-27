@@ -41,4 +41,4 @@ ranking.csv
 repeticao_*.txt
 
 # Especificação interna: fica só na máquina de quem mantém, não vai para o GitHub
-docs/ESPECIFICACAO.md
+docs/especificacao/

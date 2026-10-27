@@ -1,23 +1,100 @@
-<!-- Moldura do jogo. Por enquanto troca só entre escolher a dificuldade e jogar; o menu e a navegação completa vêm na #26. -->
+<!-- Moldura do jogo: o cabeçalho e a tela aberta, escolhida pela navegação (RF01). -->
 <script lang="ts">
+    import { tick } from "svelte";
+    import { Navegacao } from "@/estado/navegacao.svelte";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
+    import Aviso from "@/telas/Aviso/Aviso.svelte";
+    import Configuracoes from "@/telas/Configuracoes/Configuracoes.svelte";
+    import FimDePartida from "@/telas/FimDePartida/FimDePartida.svelte";
+    import Menu from "@/telas/Menu/Menu.svelte";
     import NovaPartida from "@/telas/NovaPartida/NovaPartida.svelte";
     import Partida from "@/telas/Partida/Partida.svelte";
+    import Ranking from "@/telas/Ranking/Ranking.svelte";
+    import Relatorio from "@/telas/Relatorio/Relatorio.svelte";
+    import Repeticoes from "@/telas/Repeticoes/Repeticoes.svelte";
 
-    let partidaId = $state<string | null>(null);
+    /** Troca a navegação nos testes. */
+    let { navegacao = new Navegacao() }: { navegacao?: Navegacao } = $props();
+
+    let principal: HTMLElement | undefined = $state();
+
+    // Teclas e volume do jogador: se não carregarem, o jogo segue com o padrão.
+    void configuracoes.carregar();
+
+    // Ao trocar de tela, o foco vai para o título dela: quem usa teclado ou
+    // leitor de tela sabe onde está. O menu e a partida cuidam do próprio foco.
+    $effect(() => {
+        const nome = navegacao.tela.nome;
+        if (nome !== "menu" && nome !== "partida") {
+            void tick().then(() => principal?.querySelector<HTMLElement>("h2")?.focus());
+        }
+    });
 </script>
 
-<header>
+<svelte:window onpopstate={(evento) => navegacao.restaurar(evento.state)} />
+
+<header class:em-partida={navegacao.tela.nome === "partida"}>
     <h1>CANTEIRO</h1>
     <p>O jogo de encaixe em que a pilha tem peso e precisa ficar de pé.</p>
 </header>
 
-<main>
-    {#if partidaId}
-        {#key partidaId}
-            <Partida id={partidaId} aoSair={() => (partidaId = null)} />
+<main bind:this={principal} class:em-partida={navegacao.tela.nome === "partida"}>
+    {#if navegacao.tela.nome === "menu"}
+        <Menu aoEscolher={(tela) => navegacao.ir(tela)} />
+    {:else if navegacao.tela.nome === "nova-partida"}
+        <button type="button" class="voltar" onclick={() => navegacao.voltarAoMenu()}>
+            Voltar ao menu
+        </button>
+        <NovaPartida aoCriar={(id, treino) => navegacao.ir({ nome: "partida", id, treino })} />
+    {:else if navegacao.tela.nome === "partida"}
+        {@const { id, treino, repeticao } = navegacao.tela}
+        {#key id}
+            <Partida
+                {id}
+                {treino}
+                {repeticao}
+                aoSair={() => navegacao.ir({ nome: repeticao ? "repeticoes" : "nova-partida" })}
+                aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar, treino })}
+            />
         {/key}
+    {:else if navegacao.tela.nome === "fim"}
+        {@const tela = navegacao.tela}
+        <FimDePartida
+            partidaId={tela.id}
+            placar={tela.placar}
+            treino={tela.treino}
+            aoSalvo={(nome) => navegacao.ir({ nome: "ranking", destaque: nome })}
+            aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVerRelatorio={() => navegacao.ir({ ...tela, nome: "relatorio" })}
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
+    {:else if navegacao.tela.nome === "relatorio"}
+        {@const tela = navegacao.tela}
+        <Relatorio
+            partidaId={tela.id}
+            aoVoltar={() => navegacao.ir({ ...tela, nome: "fim" })}
+            aoJogarDeNovo={() => navegacao.ir({ nome: "nova-partida" })}
+        />
+    {:else if navegacao.tela.nome === "ranking"}
+        <Ranking
+            destaque={navegacao.tela.destaque}
+            aoJogar={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
+    {:else if navegacao.tela.nome === "configuracoes"}
+        <Configuracoes aoVoltar={() => navegacao.voltarAoMenu()} />
+    {:else if navegacao.tela.nome === "repeticoes"}
+        <Repeticoes
+            aoReproduzir={(id) => navegacao.ir({ nome: "partida", id, repeticao: true })}
+            aoJogar={() => navegacao.ir({ nome: "nova-partida" })}
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
     {:else}
-        <NovaPartida aoCriar={(id) => (partidaId = id)} />
+        <Aviso
+            titulo="Até a próxima obra"
+            texto="Pode fechar esta aba. O navegador não deixa o jogo fechá-la sozinho."
+            aoVoltar={() => navegacao.voltarAoMenu()}
+        />
     {/if}
 </main>
 
@@ -30,8 +107,11 @@
     }
     h1 {
         margin: 0;
+        font-family: var(--fonte-destaque);
         font-size: clamp(1.5rem, 6vw, 2rem);
-        letter-spacing: -0.02em;
+        font-stretch: 125%;
+        font-weight: 800;
+        letter-spacing: 0.01em;
     }
     header p {
         margin: 0.25rem 0 0;
@@ -40,9 +120,34 @@
     main {
         padding: 1rem;
     }
+    .voltar {
+        min-height: 44px;
+        margin: 0 0 1rem;
+        padding: 0 0.5rem;
+        font: inherit;
+        color: var(--cor-marinho);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        background: none;
+        border: 0;
+        cursor: pointer;
+    }
     @media (max-width: 599px) {
         header p {
             display: none;
+        }
+    }
+    /* No celular, a partida precisa de cada pixel da altura: cabeçalho e respiros encolhem. */
+    @media (max-width: 767px) {
+        header.em-partida {
+            padding: 0.4rem 1rem;
+            border-bottom-width: 4px;
+        }
+        header.em-partida h1 {
+            font-size: 1.25rem;
+        }
+        main.em-partida {
+            padding: 0.5rem;
         }
     }
     @media (min-width: 768px) {

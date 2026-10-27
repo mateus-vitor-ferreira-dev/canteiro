@@ -1,18 +1,22 @@
 package canteiro.controle;
 
 import canteiro.modelo.Comando;
+import canteiro.modelo.EstadoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.ObservadorPartida;
 import canteiro.modelo.constantes.Tempo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.LongSupplier;
 
 /**
  * Uma partida no tempo: o motor, a fila de comandos e o laço de 60 ciclos por
@@ -35,6 +39,10 @@ public final class SessaoPartida {
     private final String id;
     private final MotorJogo motor;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
+    private final MedidorDesempenho medidor = new MedidorDesempenho(System::nanoTime);
+    private final LongSupplier relogio;
+    private final AtomicInteger ouvintes = new AtomicInteger();
+    private volatile long semOuvinteDesde;
     private ScheduledExecutorService laco;
 
     /**
@@ -44,8 +52,22 @@ public final class SessaoPartida {
      * @param motor motor da partida
      */
     public SessaoPartida(String id, MotorJogo motor) {
+        this(id, motor, System::nanoTime);
+    }
+
+    /**
+     * Cria a sessão, ainda parada, com um relógio próprio, para os testes
+     * controlarem há quanto tempo ela está sem ninguém ouvindo.
+     *
+     * @param id      identificador da partida
+     * @param motor   motor da partida
+     * @param relogio instante atual, em nanossegundos
+     */
+    public SessaoPartida(String id, MotorJogo motor, LongSupplier relogio) {
         this.id = Objects.requireNonNull(id, "id");
         this.motor = Objects.requireNonNull(motor, "motor");
+        this.relogio = Objects.requireNonNull(relogio, "relógio");
+        this.semOuvinteDesde = relogio.getAsLong();
     }
 
     /**
@@ -104,6 +126,7 @@ public final class SessaoPartida {
      */
     public void inscrever(ObservadorPartida observador) {
         motor.inscrever(observador);
+        ouvintes.incrementAndGet();
     }
 
     /**
@@ -113,6 +136,21 @@ public final class SessaoPartida {
      */
     public void desinscrever(ObservadorPartida observador) {
         motor.desinscrever(observador);
+        if (ouvintes.updateAndGet(n -> Math.max(0, n - 1)) == 0) {
+            semOuvinteDesde = relogio.getAsLong();
+        }
+    }
+
+    /**
+     * Informa se a partida está sem ninguém ouvindo há pelo menos o tempo dado,
+     * como quando a aba foi fechada e não voltou (RF31). Uma partida criada e
+     * nunca conectada conta desde a criação.
+     *
+     * @param toleranciaNanos tempo sem ouvinte tolerado, em nanossegundos
+     * @return {@code true} se ninguém ouve a partida há pelo menos esse tempo
+     */
+    public boolean abandonadaHa(long toleranciaNanos) {
+        return ouvintes.get() == 0 && relogio.getAsLong() - semOuvinteDesde >= toleranciaNanos;
     }
 
     /**
@@ -128,11 +166,28 @@ public final class SessaoPartida {
 
     /** Um erro num ciclo não pode matar o laço: o agendador para de vez se a tarefa lançar exceção. */
     private void cicloProtegido() {
+        long inicio = System.nanoTime();
         try {
             ciclo();
         } catch (RuntimeException erro) {
             LOG.error("Erro no ciclo da partida {}", id, erro);
         }
+        medidor.registrar(System.nanoTime() - inicio);
+        medidor.fecharJanelaSeVenceu().ifPresent(this::registrarNoLog);
+    }
+
+    /**
+     * Uma linha a cada janela do medidor, para conferir as metas de desempenho
+     * (RNF01). Partida pausada ou encerrada não escreve: o laço dela continua
+     * rodando, mas sem nada para medir, e só encheria o log.
+     */
+    private void registrarNoLog(MedidorDesempenho.Medicao medicao) {
+        if (motor.estado() == EstadoPartida.PAUSA || motor.estado() == EstadoPartida.FIM_DE_JOGO) {
+            return;
+        }
+        LOG.info(String.format(Locale.ROOT,
+                "Partida %s: %.1f ciclos/s, ciclo médio %.3f ms, máximo %.3f ms, memória %d MB",
+                id, medicao.ciclosPorSegundo(), medicao.mediaMs(), medicao.maximoMs(), medicao.memoriaMb()));
     }
 
     /**

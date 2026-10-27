@@ -3,6 +3,7 @@ import { estadoDeTeste } from "@/testes-apoio";
 import {
     CELULA_MAXIMA,
     CELULA_MINIMA,
+    celulaParaJanela,
     desenharColapso,
     desenharTabuleiro,
     naTela,
@@ -47,6 +48,25 @@ describe("desenharTabuleiro", () => {
         expect(blocos).toContain("#4e5a6b@1,191");
         expect(blocos.filter((p) => p.startsWith("#e6c48f"))).toHaveLength(4);
         expect(blocos).toHaveLength(5);
+    });
+
+    it("desenha o anel da prévia onde o centro de massa vai parar, tracejado se derruba", () => {
+        const tabuleiro = estadoDeTeste().tabuleiro.map((linha, l) =>
+            linha.map((_, c) => (l === 21 && c === 0 ? "ACO" : null)),
+        );
+        const previa = { indice: 0, desvio: 3, centroDeMassa: 2, eixo: 5, derruba: true };
+        const base = estadoDeTeste({ tabuleiro });
+        const estado = { ...base, estabilidade: { ...base.estabilidade, previa } };
+        const arcos: number[] = [];
+        const tracos: number[][] = [];
+        const { ctx } = contextoFalso();
+        ctx.arc = (x: number) => void arcos.push(x);
+        ctx.setLineDash = (traco: number[]) => void tracos.push(traco);
+
+        desenharTabuleiro(ctx, estado, 10);
+
+        expect(arcos).toEqual([36, 20]);
+        expect(tracos).toContainEqual([3, 3]);
     });
 
     it("sem estado, pinta só o fundo", () => {
@@ -107,6 +127,15 @@ describe("desenharColapso", () => {
         expect(pintados[0]).toBe("#1b2432@50,190");
         expect(pintados[1]).toBe("#4e5a6b@51,91");
         expect(pintados[2]).toMatch(/^rgba\(244, 112, 103, 0.45\)@0,0$/);
+    });
+});
+
+describe("celulaParaJanela", () => {
+    it("num celular de 360 × 760, o tabuleiro e as miniaturas cabem na largura e na altura", () => {
+        const celula = celulaParaJanela(360, 760);
+        expect(celula).toBe(24);
+        expect(10 * celula + 96).toBeLessThanOrEqual(360);
+        expect(20 * celula + 270).toBeLessThanOrEqual(760);
     });
 });
 

@@ -32,7 +32,9 @@ public record EventoDto(String tipo, String evento, DadosDto dados) {
      */
     public static EventoDto de(EventoPartida evento) {
         List<QuedaDto> quedas = evento.quedas().stream().map(QuedaDto::de).toList();
-        return new EventoDto(TIPO, evento.tipo().name(), new DadosDto(evento.linhas(), quedas, null));
+        Integer pontos = evento.pontos() == 0 ? null : evento.pontos();
+        Boolean ousada = evento.ousada() ? Boolean.TRUE : null;
+        return new EventoDto(TIPO, evento.tipo().name(), new DadosDto(evento.linhas(), quedas, pontos, ousada, null));
     }
 
     /**
@@ -42,7 +44,7 @@ public record EventoDto(String tipo, String evento, DadosDto dados) {
      * @return o evento de erro
      */
     public static EventoDto erro(String mensagem) {
-        return new EventoDto(TIPO, ERRO, new DadosDto(List.of(), List.of(), mensagem));
+        return new EventoDto(TIPO, ERRO, new DadosDto(List.of(), List.of(), null, null, mensagem));
     }
 
     /**
@@ -50,10 +52,13 @@ public record EventoDto(String tipo, String evento, DadosDto dados) {
      *
      * @param linhas   linhas eliminadas
      * @param quedas   blocos que caíram no colapso
+     * @param pontos   quanto a pontuação mudou: ganho da eliminação ou desconto (negativo) do colapso
+     * @param ousada   {@code true} se as linhas foram fechadas numa obra ousada (RN17)
      * @param mensagem explicação de um erro
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    public record DadosDto(List<Integer> linhas, List<QuedaDto> quedas, String mensagem) {
+    public record DadosDto(List<Integer> linhas, List<QuedaDto> quedas, Integer pontos, Boolean ousada,
+                           String mensagem) {
     }
 
     /**

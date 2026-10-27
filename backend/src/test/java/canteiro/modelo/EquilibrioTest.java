@@ -2,10 +2,12 @@ package canteiro.modelo;
 
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
+import canteiro.modelo.fisica.Estabilidade;
 import canteiro.modelo.materiais.Aco;
 import canteiro.modelo.materiais.Alvenaria;
 import canteiro.modelo.materiais.Concreto;
 import canteiro.modelo.materiais.Madeira;
+import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Forma;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -46,6 +50,108 @@ class EquilibrioTest {
             }
         }
         assertTrue(partidas >= 1);
+    }
+
+    @Test
+    void previaConfereComOQueAcontecePorQuinhentasPecas() {
+        Random sorteio = new Random(7);
+        int pecas = 0;
+        int partidas = 0;
+        while (pecas < 500) {
+            MotorJogo motor = new MotorJogo(Dificuldade.DIFICIL,
+                    FonteLista.sorteada(partidas++, List.of(madeira, new Alvenaria(), new Concreto(), aco)));
+            motor.avancarCiclo();
+            Registro registro = new Registro();
+            motor.inscrever(registro);
+            while (!motor.estado().encerrada() && pecas < 500) {
+                mexerAoAcaso(motor, sorteio);
+                Estabilidade previa = motor.previa();
+                int nivel = motor.placar().nivel();
+                long colapsosAntes = registro.colapsos();
+                motor.aplicar(Comando.QUEDA_INSTANTANEA);
+                pecas++;
+                if (motor.placar().nivel() != nivel) {
+                    continue; // o limite mudou no meio da jogada
+                }
+                boolean desabou = registro.colapsos() > colapsosAntes;
+                assertEquals(previa.passouDoLimite(), desabou, "a prévia avisa o colapso, peça " + pecas);
+                if (!desabou) {
+                    assertEquals(motor.estabilidade().centroDeMassa(), previa.centroDeMassa(), 1e-6);
+                    assertEquals(motor.estabilidade().eixo(), previa.eixo(), 1e-9);
+                    assertEquals(motor.estabilidade().indice(), previa.indice(), 1e-6);
+                }
+            }
+        }
+    }
+
+    @Test
+    void previaDescontaAsLinhasQueAPecaCompleta() {
+        // duas I de madeira deixam o fundo com as colunas 8 e 9 vazias; a O de aço fecha a linha
+        MotorJogo motor = new MotorJogo(Dificuldade.FACIL, FonteLista.fixa()
+                .depois(Forma.I, madeira).depois(Forma.I, madeira).depois(Forma.O, aco));
+        motor.avancarCiclo();
+        derrubar(motor, -3);
+        derrubar(motor, 1);
+        for (int i = 0; i < 4; i++) {
+            motor.aplicar(Comando.DIREITA);
+        }
+        Estabilidade previa = motor.previa();
+        motor.aplicar(Comando.QUEDA_INSTANTANEA);
+
+        assertEquals(1, motor.placar().linhas(), "a linha de baixo fechou");
+        assertEquals(9.0, previa.centroDeMassa(), 1e-9, "sobra só a metade de cima da O, nas colunas 8 e 9");
+        assertEquals(9.0, previa.eixo(), 1e-9);
+        assertEquals(motor.estabilidade().indice(), previa.indice(), 1e-9);
+    }
+
+    @Test
+    void fecharLinhaComAEstruturaPertoDeCairEhObraOusada() {
+        EventoPartida linhas = fecharFundoComO(new Aco(1000, 0x4E5A6B));
+        assertTrue(linhas.ousada(), "a O pesadíssima na ponta tirou a obra do eixo antes de a linha sumir");
+        assertEquals(Pontuacao.pontos(1, 1, madeira, true, 0), linhas.pontos(), "a madeira predomina na linha");
+    }
+
+    @Test
+    void fecharLinhaComAEstruturaFirmeNaoEhOusada() {
+        EventoPartida linhas = fecharFundoComO(madeira);
+        assertFalse(linhas.ousada());
+        assertEquals(Pontuacao.pontos(1, 1, madeira), linhas.pontos());
+    }
+
+    @Test
+    void sequenciaSobeComPecasSeguidasQueFecharamLinhaEZeraAoErrar() {
+        // cinco O fecham as duas linhas de baixo; a quinta inaugura a sequência
+        MotorJogo motor = new MotorJogo(Dificuldade.FACIL, FonteLista.fixa().depois(Forma.O, madeira));
+        motor.avancarCiclo();
+        for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna += 2) {
+            derrubar(motor, coluna - 4);
+        }
+        assertEquals(1, motor.placar().sequencia());
+        derrubar(motor, 0);
+        assertEquals(0, motor.placar().sequencia(), "a peça não fechou linha");
+    }
+
+    /** Duas I de madeira no fundo, nas colunas 0 a 7, e uma O do material dado fechando a linha. */
+    private EventoPartida fecharFundoComO(Material material) {
+        MotorJogo motor = new MotorJogo(Dificuldade.FACIL, FonteLista.fixa()
+                .depois(Forma.I, madeira).depois(Forma.I, madeira).depois(Forma.O, material));
+        motor.avancarCiclo();
+        derrubar(motor, -3);
+        derrubar(motor, 1);
+        Registro registro = new Registro();
+        motor.inscrever(registro);
+        derrubar(motor, 4);
+        assertEquals(0, motor.placar().colapsos(), "sem a linha de baixo, a metade de cima da O está na própria base");
+        return registro.eventos.stream().filter(e -> e.tipo() == EventoPartida.Tipo.LINHAS_ELIMINADAS)
+                .findFirst().orElseThrow();
+    }
+
+    @Test
+    void semPecaCaindoNaoHaPrevia() {
+        MotorJogo motor = new MotorJogo(Dificuldade.FACIL, FonteLista.fixa().depois(Forma.O, aco));
+        assertNull(motor.previa());
+        motor.avancarCiclo();
+        assertTrue(motor.previa().indice() == 1.0, "uma peça sozinha está sobre a própria base");
     }
 
     @Test
@@ -111,6 +217,13 @@ class EquilibrioTest {
             motor.aplicar(deslocamento < 0 ? Comando.ESQUERDA : Comando.DIREITA);
         }
         motor.aplicar(Comando.QUEDA_INSTANTANEA);
+    }
+
+    private static void mexerAoAcaso(MotorJogo motor, Random sorteio) {
+        Comando[] movimentos = {Comando.ESQUERDA, Comando.DIREITA, Comando.GIRAR_HORARIO, Comando.GIRAR_ANTI_HORARIO};
+        for (int i = sorteio.nextInt(8); i > 0; i--) {
+            motor.aplicar(movimentos[sorteio.nextInt(movimentos.length)]);
+        }
     }
 
     private static void jogarAoAcaso(MotorJogo motor, Random sorteio) {

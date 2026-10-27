@@ -1,12 +1,13 @@
 package canteiro.modelo;
 
-import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
+import canteiro.modelo.estruturas.HistoricoJogadas;
+import canteiro.modelo.estruturas.Jogada;
+import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
-import canteiro.modelo.fisica.Colapso;
 import canteiro.modelo.fisica.Estabilidade;
-import canteiro.modelo.materiais.Material;
+import canteiro.modelo.metas.Meta;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.List;
@@ -20,8 +21,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * <p>O motor <strong>não implementa regra, só delega</strong>: pergunta ao
  * {@link Tabuleiro} se há colisão, pede a ele que fixe e elimine linhas, pede
- * ao {@link AnalisadorEstrutural} a estabilidade, ao {@link Colapso} o
- * desabamento e à {@link FontePecas} a próxima peça. A partida é uma máquina de
+ * ao {@link AnalisadorEstrutural} a estabilidade, à {@link FontePecas} a
+ * próxima peça e ao {@link Assentamento} o que vem depois que a peça assenta:
+ * linhas, pontos, nível e colapso. A partida é uma máquina de
  * estados ({@link EstadoPartida}) e avança em ciclos, não no relógio: a mesma
  * sequência de comandos sempre dá a mesma partida.</p>
  *
@@ -37,8 +39,11 @@ public final class MotorJogo {
     private final FontePecas fonte;
     private final Placar placar;
     private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
-    private int ciclosPorQueda;
+    private final Reserva reserva = new Reserva();
+    private final HistoricoJogadas historico = new HistoricoJogadas();
+    private final AtrasoFixacao atraso = new AtrasoFixacao();
     private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
+    private final Assentamento assentamento;
 
     private EstadoPartida estado = EstadoPartida.GERANDO_PECA;
     private PecaEmQueda emQueda;
@@ -56,12 +61,13 @@ public final class MotorJogo {
     public MotorJogo(Dificuldade dificuldade, FontePecas fonte) {
         this.fonte = Objects.requireNonNull(fonte, "fonte de peças");
         this.placar = new Placar(Objects.requireNonNull(dificuldade, "dificuldade").nivelInicial());
-        this.ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
+        this.assentamento = new Assentamento(tabuleiro, analisador, placar, fonte, this::emitir, e -> estado = e);
     }
 
     /**
      * Avança um ciclo: gera a peça se for a vez, e desce a atual quando o
-     * intervalo de queda se esgota. Pausada ou encerrada, a partida não anda.
+     * intervalo de queda se esgota. Apoiada, a peça espera o tempo de ajuste
+     * antes de ser fixada (RN16). Pausada ou encerrada, a partida não anda.
      */
     public void avancarCiclo() {
         if (estado == EstadoPartida.PAUSA || estado.encerrada()) {
@@ -70,19 +76,33 @@ public final class MotorJogo {
         ciclo++;
         if (estado == EstadoPartida.GERANDO_PECA) {
             gerarPeca();
-        } else if (++ciclosDesdeQueda >= ciclosPorQueda) {
-            descerOuFixar();
+        } else if (emQueda.apoiada()) {
+            if (atraso.contarCiclo()) {
+                assentar();
+            }
+        } else {
+            atraso.soltou();
+            if (++ciclosDesdeQueda >= ciclosPorQueda()) {
+                descer();
+            }
         }
         avisarSeMudou();
     }
 
     /**
-     * Aplica um comando do jogador. Comandos que não cabem no estado atual,
-     * ou que fariam a peça colidir, são ignorados.
+     * Aplica um comando do jogador e o registra no histórico (RF23). Comandos
+     * que não cabem no estado atual, ou que fariam a peça colidir, são
+     * ignorados, mas também ficam registrados: repetidos no mesmo ciclo, são
+     * ignorados de novo, e o replay dá a mesma partida. Depois do fim de jogo,
+     * nada é registrado.
      *
      * @param comando comando recebido
      */
     public void aplicar(Comando comando) {
+        if (estado.encerrada()) {
+            return;
+        }
+        historico.registrar(new Jogada(ciclo, comando));
         switch (comando) {
             case PAUSAR -> mudarEstadoSe(EstadoPartida.PECA_CAINDO, EstadoPartida.PAUSA);
             case RETOMAR -> mudarEstadoSe(EstadoPartida.PAUSA, EstadoPartida.PECA_CAINDO);
@@ -97,24 +117,49 @@ public final class MotorJogo {
 
     private void aplicarNaPeca(Comando comando) {
         switch (comando) {
-            case ESQUERDA -> mudou |= emQueda.mover(0, -1);
-            case DIREITA -> mudou |= emQueda.mover(0, 1);
+            case ESQUERDA -> ajustou(emQueda.mover(0, -1));
+            case DIREITA -> ajustou(emQueda.mover(0, 1));
             case DESCER -> descerOuFixar();
             case QUEDA_INSTANTANEA -> {
                 emQueda.cairAtePouso();
                 assentar();
             }
-            case GIRAR_HORARIO -> mudou |= emQueda.girar(true);
-            case GIRAR_ANTI_HORARIO -> mudou |= emQueda.girar(false);
+            case GIRAR_HORARIO -> ajustou(emQueda.girar(true));
+            case GIRAR_ANTI_HORARIO -> ajustou(emQueda.girar(false));
+            case RESERVAR -> reservar();
             default -> {
-                // RESERVAR e DESFAZER dependem da reserva e do histórico (#13, #14, #26)
+                // DESFAZER depende do modo treino (#37)
             }
         }
     }
 
+    /** Um movimento que deu certo redesenha a peça e, se ela está apoiada, recomeça a espera. */
+    private void ajustou(boolean deuCerto) {
+        if (deuCerto) {
+            mudou = true;
+            atraso.movimentou();
+        }
+    }
+
+    /**
+     * Guarda a peça atual na reserva e põe no topo a que estava guardada, ou
+     * a próxima da fila na primeira vez (RN05). Só uma troca por peça.
+     */
+    private void reservar() {
+        if (reserva.podeTrocar()) {
+            entrar(reserva.trocar(emQueda.peca()).orElseGet(fonte::proxima));
+        }
+    }
+
     private void gerarPeca() {
-        emQueda = PecaEmQueda.nascer(fonte.proxima(), tabuleiro);
+        reserva.liberar();
+        entrar(fonte.proxima());
+    }
+
+    private void entrar(Peca peca) {
+        emQueda = PecaEmQueda.nascer(peca, tabuleiro);
         ciclosDesdeQueda = 0;
+        atraso.novaPeca();
         mudou = true;
         if (emQueda.colide()) {
             estado = EstadoPartida.FIM_DE_JOGO;
@@ -124,6 +169,13 @@ public final class MotorJogo {
         }
     }
 
+    /** A gravidade desce a peça uma linha. */
+    private void descer() {
+        ciclosDesdeQueda = 0;
+        mudou |= emQueda.mover(1, 0);
+    }
+
+    /** Descer à mão: sobre o apoio, fixa na hora, sem esperar o ajuste. */
     private void descerOuFixar() {
         ciclosDesdeQueda = 0;
         if (emQueda.mover(1, 0)) {
@@ -134,58 +186,12 @@ public final class MotorJogo {
     }
 
     private void assentar() {
-        estado = EstadoPartida.FIXANDO;
-        for (Celula celula : emQueda.fixar()) {
-            analisador.registrar(celula, emQueda.peca().material());
-        }
-        emitir(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
-        eliminarLinhas();
+        boolean acabou = assentamento.executar(emQueda);
         emQueda = null;
-        if (estabilidade().passouDoLimite() && desabou()) {
-            return;
+        if (!acabou) {
+            estado = EstadoPartida.GERANDO_PECA;
+            gerarPeca();
         }
-        estado = EstadoPartida.GERANDO_PECA;
-        gerarPeca();
-    }
-
-    private void eliminarLinhas() {
-        List<Integer> completas = tabuleiro.linhasCompletas();
-        if (completas.isEmpty()) {
-            return;
-        }
-        estado = EstadoPartida.ELIMINANDO_LINHAS;
-        Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
-        for (int linhaCompleta : completas) {
-            for (int c = 0; c < Dimensoes.COLUNAS; c++) {
-                analisador.remover(new Celula(linhaCompleta, c), tabuleiro.bloco(linhaCompleta, c).material());
-            }
-        }
-        tabuleiro.eliminarLinhasCompletas();
-        emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
-        if (placar.registrarLinhas(completas.size(), predominante)) {
-            ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
-            fonte.nivelMudou(placar.nivel());
-            emitir(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
-        }
-    }
-
-    /**
-     * Executa o colapso (RN11, RN12). Se a pilha estava acima do limite de
-     * altura, a partida acaba (RN13).
-     *
-     * @return {@code true} se a partida acabou
-     */
-    private boolean desabou() {
-        estado = EstadoPartida.COLAPSO;
-        boolean altaDemais = tabuleiro.alturaPilha() > Dimensoes.ALTURA_LIMITE_COLAPSO;
-        List<Queda> quedas = Colapso.executar(tabuleiro);
-        placar.registrarColapso();
-        emitir(new EventoPartida(EventoPartida.Tipo.COLAPSO, List.of(), quedas));
-        if (altaDemais) {
-            estado = EstadoPartida.FIM_DE_JOGO;
-            emitir(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO));
-        }
-        return altaDemais;
     }
 
     private void mudarEstadoSe(EstadoPartida esperado, EstadoPartida novo) {
@@ -277,6 +283,24 @@ public final class MotorJogo {
     }
 
     /**
+     * Devolve a peça guardada na reserva (RF10).
+     *
+     * @return a peça, ou {@code null} se nada foi guardado ainda
+     */
+    public Peca pecaReservada() {
+        return reserva.guardada().orElse(null);
+    }
+
+    /**
+     * Informa se o jogador ainda pode trocar a peça atual pela reservada.
+     *
+     * @return {@code false} depois de uma troca, até a próxima peça sair da fila
+     */
+    public boolean podeReservar() {
+        return reserva.podeTrocar();
+    }
+
+    /**
      * Devolve o tabuleiro, para leitura.
      *
      * @return o tabuleiro da partida
@@ -295,21 +319,36 @@ public final class MotorJogo {
     }
 
     /**
-     * Total de linhas eliminadas na partida.
-     *
-     * @return quantidade de linhas
-     */
-    public int linhasEliminadas() {
-        return placar.linhas();
-    }
-
-    /**
      * Estabilidade atual da estrutura, com o limite do nível atual.
      *
      * @return índice, desvio, centro de massa, eixo da base e alerta
      */
     public Estabilidade estabilidade() {
-        return analisador.estabilidade(tabuleiro, Progressao.limiteDesvio(placar.nivel()));
+        return assentamento.estabilidade();
+    }
+
+    /**
+     * A meta do nível atual, com o progresso (RN19).
+     *
+     * @return a meta
+     */
+    public Meta meta() {
+        return assentamento.meta();
+    }
+
+    /**
+     * A estabilidade que a estrutura teria se a peça atual pousasse onde está
+     * a peça fantasma, já sem as linhas que ela completaria. Deixa o jogador
+     * planejar o equilíbrio antes de soltar a peça.
+     *
+     * @return a estabilidade prevista, ou {@code null} se não houver peça caindo
+     */
+    public Estabilidade previa() {
+        if (emQueda == null) {
+            return null;
+        }
+        return analisador.previa(tabuleiro, emQueda.celulasNoPouso(), emQueda.peca().material(),
+                Progressao.limiteDesvio(placar.nivel()));
     }
 
     /**
@@ -319,6 +358,15 @@ public final class MotorJogo {
      */
     public AnalisadorEstrutural analisador() {
         return analisador;
+    }
+
+    /**
+     * Devolve as jogadas da partida, na ordem em que aconteceram (RF23).
+     *
+     * @return cópia imutável das jogadas, que o replay percorre
+     */
+    public List<Jogada> jogadas() {
+        return historico.emOrdem();
     }
 
     /**
@@ -336,6 +384,6 @@ public final class MotorJogo {
      * @return intervalo de queda, em ciclos
      */
     public int ciclosPorQueda() {
-        return ciclosPorQueda;
+        return Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
     }
 }

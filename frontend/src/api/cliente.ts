@@ -1,9 +1,14 @@
 import type {
     CodigoDificuldade,
+    ConfiguracoesDto,
     DificuldadeDto,
+    EntradaRankingDto,
     ErroDto,
     NovaPartidaDto,
     PartidaCriadaDto,
+    RegistroRankingDto,
+    RelatorioDto,
+    RepeticaoDto,
 } from "./protocolo";
 
 /** Código usado quando o backend nem chegou a responder. */
@@ -34,9 +39,15 @@ export function listarDificuldades(): Promise<DificuldadeDto[]> {
 /**
  * Cria uma partida na dificuldade escolhida (RF02). Ela começa quando o
  * navegador conecta em `/ws/partidas/{id}`.
+ *
+ * @param dificuldade a dificuldade escolhida
+ * @param modoTreino se é uma partida de treino, com o desfazer liberado (RF26)
  */
-export function criarPartida(dificuldade: CodigoDificuldade): Promise<PartidaCriadaDto> {
-    const corpo: NovaPartidaDto = { dificuldade };
+export function criarPartida(
+    dificuldade: CodigoDificuldade,
+    modoTreino = false,
+): Promise<PartidaCriadaDto> {
+    const corpo: NovaPartidaDto = { dificuldade, modoTreino };
     return buscarJson<PartidaCriadaDto>("/api/partidas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +55,82 @@ export function criarPartida(dificuldade: CodigoDificuldade): Promise<PartidaCri
     });
 }
 
+/** As dez maiores pontuações, da maior para a menor (RF22). */
+export function listarRanking(): Promise<EntradaRankingDto[]> {
+    return buscarJson<EntradaRankingDto[]>("/api/ranking");
+}
+
+/**
+ * Registra no ranking a partida encerrada, com o nome do jogador (RF21). A
+ * pontuação o backend lê da própria partida.
+ */
+export async function registrarNoRanking(partidaId: string, nome: string): Promise<void> {
+    const corpo: RegistroRankingDto = { partidaId, nome };
+    await buscar("/api/ranking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+    });
+}
+
+const NAO_ENCONTRADO = 404;
+
+/** As teclas e o volume salvos (RF27). */
+export function lerConfiguracoes(): Promise<ConfiguracoesDto> {
+    return buscarJson<ConfiguracoesDto>("/api/configuracoes");
+}
+
+/** Salva as teclas e o volume. O backend recusa tecla repetida e volume fora de 0 a 100. */
+export async function salvarConfiguracoes(configuracoes: ConfiguracoesDto): Promise<void> {
+    await buscar("/api/configuracoes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(configuracoes),
+    });
+}
+
+/** O relatório da partida: estabilidade a cada peça, colapsos e materiais (RF25). */
+export function buscarRelatorio(partidaId: string): Promise<RelatorioDto> {
+    return buscarJson<RelatorioDto>(`/api/partidas/${encodeURIComponent(partidaId)}/relatorio`);
+}
+
+/** As partidas gravadas, da mais recente para a mais antiga (RF24). */
+export function listarRepeticoes(): Promise<RepeticaoDto[]> {
+    return buscarJson<RepeticaoDto[]>("/api/repeticoes");
+}
+
+/**
+ * Cria a reprodução de uma partida gravada (RF24). O id devolvido abre em
+ * `/ws/partidas/{id}`, como uma partida comum, só que ninguém joga: o backend
+ * refaz as jogadas.
+ */
+export function reproduzirRepeticao(id: string): Promise<PartidaCriadaDto> {
+    return buscarJson<PartidaCriadaDto>(`/api/repeticoes/${encodeURIComponent(id)}/reproduzir`, {
+        method: "POST",
+    });
+}
+
+/**
+ * Texto para o jogador quando uma parte do jogo que depende do backend falha.
+ * Enquanto o backend não tem a rota, ela responde 404: aí o aviso diz que a
+ * parte ainda não existe, em vez de mostrar um código de erro.
+ *
+ * @param erro o que foi lançado
+ * @param parte como a parte é chamada na frase, como `"O ranking"`
+ */
+export function mensagemIndisponivel(erro: unknown, parte: string): string {
+    if (erro instanceof ErroApi && erro.status === NAO_ENCONTRADO) {
+        return `${parte} ainda não está disponível nesta versão do jogo.`;
+    }
+    return erro instanceof Error ? erro.message : "Não foi possível falar com o jogo.";
+}
+
 async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
+    return (await (await buscar(caminho, opcoes)).json()) as T;
+}
+
+/** Faz a requisição e transforma falha de rede ou resposta de erro em {@link ErroApi}. */
+async function buscar(caminho: string, opcoes: RequestInit = {}): Promise<Response> {
     let resposta: Response;
     try {
         resposta = await fetch(caminho, {
@@ -62,7 +148,7 @@ async function buscarJson<T>(caminho: string, opcoes: RequestInit = {}): Promise
         const erro = await lerErro(resposta);
         throw new ErroApi(erro.erro, erro.mensagem, resposta.status);
     }
-    return (await resposta.json()) as T;
+    return resposta;
 }
 
 async function lerErro(resposta: Response): Promise<ErroDto> {

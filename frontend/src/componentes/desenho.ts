@@ -1,4 +1,4 @@
-import type { EstadoDto, Posicao, QuedaDto } from "@/api/protocolo";
+import type { EstadoDto, Posicao, PreviaDto, QuedaDto } from "@/api/protocolo";
 import { desenharBloco } from "@/estilos/materiais";
 
 /** Linhas ocultas no topo da grade: o backend manda, mas a tela não mostra (RN01). */
@@ -19,6 +19,7 @@ const COR_FANTASMA = "rgba(255, 255, 255, 0.45)";
 const COR_EIXO = "#f2b53a";
 const COR_CENTRO = "#ff6b5e";
 const COR_CENTRO_BORDA = "#ffffff";
+const COR_PREVIA = "rgba(255, 255, 255, 0.85)";
 const COR_CLARAO = "244, 112, 103";
 const OPACIDADE_CLARAO = 0.45;
 const FOLGA = 1;
@@ -37,11 +38,57 @@ export function tamanhoDaCelula(larguraDisponivel: number, alturaDisponivel: num
     return Math.min(CELULA_MAXIMA, Math.max(CELULA_MINIMA, cabe));
 }
 
-/** Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada quadrado, em pixels. */
+const JANELA_COMPUTADOR = 1100;
+const JANELA_TABLET = 768;
+
+/**
+ * O lado da célula para a janela do navegador. Desconta o que fica ao lado do
+ * tabuleiro (colunas laterais) ou em cima e embaixo dele (cabeçalho, placar e
+ * botões), conforme o arranjo da tela de partida em cada largura.
+ *
+ * @param largura largura da janela, em pixels
+ * @param altura altura da janela, em pixels
+ * @param comFaixa se a faixa de treino ou de repetição aparece em cima do tabuleiro
+ */
+export function celulaParaJanela(largura: number, altura: number, comFaixa = false): number {
+    if (largura >= JANELA_COMPUTADOR) {
+        return tamanhoDaCelula(largura - 700, altura - 190);
+    }
+    if (largura >= JANELA_TABLET) {
+        return tamanhoDaCelula(largura - 400, altura - 260);
+    }
+    const faixa = comFaixa ? ALTURA_FAIXA : 0;
+    return tamanhoDaCelula(
+        largura - LADOS_CELULAR,
+        altura - ALTURA_FORA_DO_TABULEIRO_CELULAR - faixa,
+    );
+}
+
+/**
+ * No celular, o que fica ao lado do tabuleiro: o respiro da página, a moldura
+ * e a coluna das miniaturas (reserva e próximas).
+ */
+const LADOS_CELULAR = 96;
+
+/**
+ * No celular, o que fica em cima e embaixo do tabuleiro: o cabeçalho
+ * compacto, o resumo da partida, as duas linhas de botões e os respiros.
+ */
+const ALTURA_FORA_DO_TABULEIRO_CELULAR = 270;
+
+/** A faixa que avisa que a partida é de treino ou uma repetição. */
+const ALTURA_FAIXA = 34;
+
+/**
+ * Desenha o tabuleiro inteiro num contexto 2D. `celula` é o lado de cada
+ * quadrado, em pixels; `balanco`, quanto o centro de massa sai do lugar quando
+ * a estrutura range.
+ */
 export function desenharTabuleiro(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto | null,
     celula: number,
+    balanco = 0,
 ): void {
     ctx.fillStyle = COR_FUNDO;
     ctx.fillRect(0, 0, COLUNAS * celula, LINHAS_VISIVEIS * celula);
@@ -63,7 +110,7 @@ export function desenharTabuleiro(
         const material = estado.pecaAtual.material;
         estado.pecaAtual.blocos.forEach((posicao) => pintar(ctx, posicao, material, celula));
     }
-    desenharEquilibrio(ctx, estado, celula);
+    desenharEquilibrio(ctx, estado, celula, balanco);
 }
 
 /** Posição na tela de uma célula da grade, ou `null` se ela estiver nas linhas ocultas. */
@@ -104,11 +151,16 @@ function desenharGrade(ctx: CanvasRenderingContext2D, celula: number): void {
     }
 }
 
-/** O eixo da base (tracejado âmbar) e o centro de massa (círculo vermelho de borda branca). */
+/**
+ * O eixo da base (tracejado âmbar), o centro de massa (círculo vermelho de borda
+ * branca) e onde ele vai parar se a peça cair na fantasma (anel vazado; vermelho
+ * e tracejado se a jogada derruba a obra).
+ */
 function desenharEquilibrio(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto,
     celula: number,
+    balanco: number,
 ): void {
     const vazio = estado.tabuleiro.every((linha) => linha.every((m) => m === null));
     if (vazio) {
@@ -128,9 +180,34 @@ function desenharEquilibrio(
     ctx.fillStyle = COR_CENTRO;
     ctx.strokeStyle = COR_CENTRO_BORDA;
     ctx.beginPath();
-    ctx.arc(estado.estabilidade.centroDeMassa * celula, altura - celula / 2, raio, 0, 2 * Math.PI);
+    ctx.arc(
+        estado.estabilidade.centroDeMassa * celula + balanco,
+        altura - celula / 2,
+        raio,
+        0,
+        2 * Math.PI,
+    );
     ctx.fill();
     ctx.stroke();
+    const previa = estado.estabilidade.previa;
+    if (previa) {
+        desenharPrevia(ctx, previa, altura - celula / 2, celula);
+    }
+}
+
+function desenharPrevia(
+    ctx: CanvasRenderingContext2D,
+    previa: PreviaDto,
+    y: number,
+    celula: number,
+): void {
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = previa.derruba ? COR_CENTRO : COR_PREVIA;
+    ctx.setLineDash(previa.derruba ? [3, 3] : []);
+    ctx.beginPath();
+    ctx.arc(previa.centroDeMassa * celula, y, celula / 3, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.setLineDash([]);
 }
 
 /**

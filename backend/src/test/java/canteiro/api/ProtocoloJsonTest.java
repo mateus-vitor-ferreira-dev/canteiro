@@ -7,7 +7,7 @@ import canteiro.modelo.Dificuldade;
 import canteiro.modelo.EventoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.Queda;
-import canteiro.modelo.estruturas.FonteSimples;
+import canteiro.modelo.estruturas.GeradorPecas;
 import canteiro.modelo.materiais.CatalogoMateriais;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -59,16 +60,34 @@ class ProtocoloJsonTest {
         JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motorComUmaPeca())));
 
         assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
-                "placar", "estabilidade"), campos(estado));
+                "reservada", "podeReservar", "placar", "estabilidade", "meta"), campos(estado));
+        assertEquals(List.of("descricao", "progresso", "alvo", "cumprida"), campos(estado.get("meta")));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
-        assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos"), campos(estado.get("placar")));
-        assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta"),
+        assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos", "sequencia"),
+                campos(estado.get("placar")));
+        assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta", "previa"),
                 campos(estado.get("estabilidade")));
+        assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba"),
+                campos(estado.at("/estabilidade/previa")));
         assertEquals(22, estado.get("tabuleiro").size());
         assertEquals(10, estado.get("tabuleiro").get(0).size());
         assertEquals(3, estado.get("proximas").size());
         assertEquals(4, estado.at("/proximas/0/blocos").size(), "as próximas vêm com a forma, para a tela desenhar");
         assertEquals(4, estado.get("pecaFantasma").size());
+    }
+
+    @Test
+    void reservaVaiNoEstado() throws Exception {
+        MotorJogo motor = motorComUmaPeca();
+        JsonNode antes = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertTrue(antes.get("reservada").isNull(), "nada guardado ainda");
+        assertTrue(antes.get("podeReservar").asBoolean());
+
+        motor.aplicar(canteiro.modelo.Comando.RESERVAR);
+        JsonNode depois = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertEquals(List.of("forma", "material", "blocos"), campos(depois.get("reservada")));
+        assertEquals(4, depois.at("/reservada/blocos").size());
+        assertFalse(depois.get("podeReservar").asBoolean());
     }
 
     @Test
@@ -83,7 +102,7 @@ class ProtocoloJsonTest {
 
     private static MotorJogo motorComUmaPeca() {
         MotorJogo motor = new MotorJogo(Dificuldade.DIFICIL,
-                new FonteSimples(3, CatalogoMateriais.padrao(), Dificuldade.DIFICIL.materiaisLiberados()));
+                new GeradorPecas(3, CatalogoMateriais.padrao(), Dificuldade.DIFICIL.nivelInicial()));
         motor.avancarCiclo();
         return motor;
     }

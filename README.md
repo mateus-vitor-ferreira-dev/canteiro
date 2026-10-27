@@ -9,7 +9,9 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 <p>
   <img src="https://img.shields.io/badge/status-em_desenvolvimento-F59E0B?style=for-the-badge" alt="Em desenvolvimento"/>
   <img src="https://img.shields.io/badge/UFLA-Programação_Aplicada_à_Engenharia-004B87?style=for-the-badge" alt="UFLA"/>
-  <a href="docs/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
+  <a href="docs/proposta/Proposta_Projeto_Canteiro.pdf"><img src="https://img.shields.io/badge/proposta-PDF-1F3864?style=for-the-badge" alt="Proposta do projeto"/></a>
+  <a href="https://canteiro.digitalcodexa.com"><img src="https://img.shields.io/badge/jogar-online-16A34A?style=for-the-badge" alt="Jogar online"/></a>
+  <a href="https://github.com/users/mateus-vitor-ferreira-dev/projects/5"><img src="https://img.shields.io/badge/board-tarefas-6E40C9?style=for-the-badge&logo=github&logoColor=white" alt="Board de tarefas"/></a>
   <a href="https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mateus-vitor-ferreira-dev/canteiro/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"/></a>
 </p>
 
@@ -27,9 +29,11 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <br/><br/>
 
-<img src="docs/imagens/tela-principal.png" alt="Esboço da tela principal do CANTEIRO" width="820"/>
+<img src="docs/imagens/tela-principal.png" alt="Tela inicial do CANTEIRO: menu com nova partida, ranking, repetições e configurações" width="820"/>
 
-<sub>Esboço da tela principal. O jogo ainda está sendo construído.</sub>
+<sub>Tela inicial do jogo, capturada da versão atual. A partida está completa; faltam o ranking gravado em arquivo e os recursos desejáveis.</sub>
+
+**▶️ Jogue agora: [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com)**, sem instalar nada. Na rede da UFLA, use [canteiro.onrender.com](https://canteiro.onrender.com).
 
 </div>
 
@@ -55,7 +59,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/Apresentacao_Canteiro.pdf)**.
+> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
 
 ---
 
@@ -95,7 +99,11 @@ Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e
 | 👀 **Fila** | O jogador vê as **3 próximas** peças, com forma e material |
 | 📥 **Reserva** | Dá para guardar uma peça e trocar pela reservada, **uma vez por peça gerada** |
 | 🧹 **Linhas** | Linha completa é eliminada. Eliminar 2, 3 ou 4 linhas de uma vez rende bônus progressivo |
-| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente |
+| ⏱️ **Ajuste** | A peça que encosta no apoio espera **meio segundo** antes de fixar: dá para deslizar ou girar no último instante |
+| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente. Um anel no tabuleiro mostra **onde o centro de massa vai parar** com a jogada da peça atual |
+| 🎯 **Obra ousada** | Fechar linha com a estabilidade abaixo de **25 %** vale **50 % a mais**: arriscar compensa |
+| 🔗 **Sequência** | Cada peça seguida que fecha linha soma **10 %** aos pontos da próxima eliminação, até o dobro |
+| 🏅 **Meta do nível** | Cada nível sorteia um objetivo curto, como "elimine 3 linhas de uma vez". Cumprir vale **500 × nível** pontos |
 | 💥 **Colapso** | Desvio acima do limite: os blocos acima da linha crítica caem, a pontuação perde o equivalente a **2 linhas** e o contador de colapsos sobe |
 | 📈 **Nível** | Sobe a cada **10 linhas**. A queda acelera e o desvio tolerado diminui |
 | 🏁 **Fim** | Quando uma peça nasce já colidindo, ou quando há um colapso com a pilha acima de **18 linhas** |
@@ -153,7 +161,7 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 
 **Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o Svelte com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
 
-**Local de verdade.** O servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
+**Local de verdade, e também online.** Pelo JAR, o servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). A versão online roda o mesmo JAR num contêiner, com o endereço e o limite de partidas definidos por variáveis de ambiente, sem mudar uma linha do jogo ([No ar: Docker e Render](#7-no-ar-docker-e-render)). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
 
 ---
 
@@ -180,7 +188,7 @@ Nenhuma estrutura de dados está aqui para cumprir o enunciado. **Cada uma exist
 
 ## 📋 Requisitos
 
-Os critérios de aceitação de cada requisito estão na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 12). Aqui fica a lista e, principalmente, **o andamento de cada requisito**.
+Os critérios de aceitação de cada requisito estão na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 12). Aqui fica a lista e, principalmente, **o andamento de cada requisito**.
 
 | Status | Significado |
 |---|---|
@@ -189,7 +197,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 28 prontos e 4 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 35 prontos e 6 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -197,7 +205,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ### Regras de negócio
 
 <details>
-<summary><strong>RN01 – RN15</strong>: as regras do jogo, todas no backend</summary>
+<summary><strong>RN01 – RN19</strong>: as regras do jogo, todas no backend</summary>
 
 | Código | Regra |
 |---|---|
@@ -216,6 +224,10 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RN13 | A partida termina se um elemento recém-gerado colidir imediatamente com a estrutura, ou se houver colapso com a pilha ocupando mais de 18 linhas |
 | RN14 | O nível avança a cada 10 linhas eliminadas. A cada nível, o intervalo de queda diminui e o limite de desvio é reduzido |
 | RN15 | Só entram no ranking pontuações de partidas concluídas sem uso do desfazer |
+| RN16 | O elemento que a gravidade encosta no apoio espera 500 ms antes de ser fixado. Mover ou girar nesse tempo recomeça a espera, até 15 vezes por elemento. Descer à mão sobre o apoio e a queda instantânea fixam na hora |
+| RN17 | Eliminar linhas com o índice de estabilidade abaixo de 25 %, medido depois de o elemento assentar e antes de as linhas sumirem, é uma obra ousada e vale 50 % a mais |
+| RN18 | Cada elemento seguido que elimina linha soma 10 % aos pontos da eliminação seguinte, até 100 %. Um elemento que não elimina linha ou um colapso zera a sequência |
+| RN19 | Cada nível tem uma meta, sorteada pela semente da partida entre: eliminar 2 linhas com o material mais pesado do nível predominando, eliminar 3 linhas ou mais de uma vez, eliminar 4 linhas sem o índice cair abaixo de 50 % ou fechar uma linha numa obra ousada. Cumprir a meta soma 500 × nível pontos, uma vez por nível; a meta não cumprida é trocada no nível seguinte, sem desconto |
 
 </details>
 
@@ -228,37 +240,37 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 
 | Código | Descrição | Prior. | Lado | Status | Onde está |
 |---|---|:-:|:-:|:-:|---|
-| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ⬜ |  |
+| RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; cada opção abre a sua tela (#26, #32, #38, #68) |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25) |
-| RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | 🟡 | O motor gera peças continuamente a partir de uma FontePecas (#20); falta a sacola (#12) |
-| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | 🟡 | Materiais e catálogo (#9); falta sortear o material de cada peça |
+| RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ✅ | O motor gera peças continuamente (#20) pelo método da sacola, com semente (#12) |
+| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12) |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ✅ | As 3 próximas peças, com forma e material, ao lado do tabuleiro (#23, #25) |
 | RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ✅ | Queda contada em ciclos, no intervalo do nível atual (#20, #22) |
 | RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ✅ | Colisão no tabuleiro (#11) e movimento no motor (#20) |
 | RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | ✅ | Peças no padrão SRS (#10) e rotação com deslocamento corretivo nos dois sentidos (#21) |
 | RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ✅ | Queda instantânea até o primeiro apoio, com peça fantasma (#20) |
-| RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ⬜ |  |
-| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20) |
+| RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ✅ | Reserva em pilha, com uma troca por peça, e a peça guardada ao lado do tabuleiro (#13) |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
-| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22) |
+| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22), com os bônus da obra ousada e da sequência de linhas (#103) |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |
-| RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ✅ | Índice, desvio e limite sempre na tela, e o eixo e o centro de massa desenhados no tabuleiro (#28, #25) |
-| RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29) |
-| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva, penalidade e evento COLAPSO (#28), com a animação de 1 s na tela (#29) |
+| RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ✅ | Índice, desvio e limite sempre na tela, e o eixo e o centro de massa desenhados no tabuleiro (#28, #25); prévia de onde o centro de massa vai parar com a jogada da peça atual (#107) |
+| RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29); aviso de que a jogada da peça atual derruba a obra (#107) |
+| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva, penalidade e evento COLAPSO (#28), com a animação de 1 s na tela (#29); o tabuleiro treme no colapso e as linhas eliminadas acendem (#106) |
 | RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ✅ | Sobe a cada 10 linhas, acelera a queda e aperta o limite de desvio (#22, #28) |
 | RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ✅ | P ou Esc pausa e retoma, com a camada de pausa (#20, #23, #25) |
-| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | 🟡 | O motor encerra a partida nas duas condições da RN13 (#20, #28); falta a tela de fim (#32) |
-| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ⬜ |  |
-| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ⬜ |  |
-| RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ⬜ |  |
-| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ⬜ |  |
-| RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | ⬜ |  |
-| RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ | ⬜ |  |
-| RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | ⬜ |  |
-| RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ⬜ |  |
+| RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ✅ | O motor encerra a partida nas duas condições da RN13 (#20, #28); tela de fim com pontuação, nível, linhas, colapsos e tempo (#32) |
+| RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ✅ | Campo do nome no fim de partida (#32) e `POST /api/ranking`, que lê a pontuação da própria partida, só aceita partida encerrada e uma vez só, e grava em `ranking.csv` (#31) |
+| RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ✅ | Tela do ranking, com o nome recém-salvo em destaque (#32), e `GET /api/ranking` com as dez melhores, uma por jogador (#31) |
+| RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
+| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | 🟡 | Tela das repetições, com data, dificuldade e pontuação de cada partida gravada; a reprodução abre no tabuleiro de sempre, avisa que é uma gravação e só aceita pausar (#68); faltam a gravação e as rotas `GET /api/repeticoes` e `POST /api/repeticoes/{id}/reproduzir` (#35) |
+| RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | 🟡 | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); falta a rota `GET /api/partidas/{id}/relatorio` (#70) |
+| RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ 🌐 | 🟡 | Na tela: a opção de modo treino ao criar a partida, desfazer por U, Ctrl+Z ou botão de toque, e o aviso de que o treino não entra no ranking (#69); falta o motor desfazer a jogada (#37). Até lá, o backend recusa a partida de treino com um aviso claro |
+| RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | 🟡 | Tela de configurações com a troca de cada tecla e o volume; a partida e a legenda usam as teclas novas, guardadas no navegador (#38); falta guardar no servidor (#71) |
+| RF28 | Tocar efeitos sonoros para fixação, eliminação de linha e colapso | D | 🌐 | ✅ | Sons gerados no navegador (Web Audio), um por evento, com liga e desliga no botão ou na tecla M; o volume ajustável vem na tela de configurações (#38). Sons de nível novo e de meta cumprida, arpejo que sobe com a sequência de linhas e a estrutura rangendo perto do limite (#106) |
 | RF29 | Ao abrir o JAR, subir o servidor e abrir o jogo no navegador padrão. Se não for possível abrir o navegador, mostrar o endereço no terminal | E | ☕ | ✅ | Sobe o servidor e abre o navegador (#4), com o frontend dentro do JAR (#8) |
 | RF30 | Pausar a partida automaticamente quando a conexão com o navegador cair ou quando a aba do jogo perder o foco | E | ☕ 🌐 | ✅ | A partida pausa quando a conexão cai (#23) e quando a aba perde o foco (#25) |
-| RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ✅ | Reconecta em intervalos crescentes e volta pausada no mesmo ponto; se o backend reiniciou, avisa que a partida se perdeu (#33) |
+| RF31 | Reconectar sozinho após uma queda de conexão e retomar a partida do ponto em que parou | D | ☕ 🌐 | ✅ | Reconecta em intervalos crescentes e volta pausada no mesmo ponto; se o backend reiniciou, avisa que a partida se perdeu (#33). Sem reconexão em 10 minutos, a partida é descartada (#87) |
 
 </details>
 
@@ -269,22 +281,22 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 
 | Código | Categoria | Descrição | Status | Onde está |
 |---|---|---|:-:|---|
-| RNF01 | Desempenho | O frontend deve desenhar o tabuleiro a 60 quadros por segundo e o backend deve atualizar o estado 60 vezes por segundo, em máquina com processador de dois núcleos e 4 GB de memória | 🟡 | 60 ciclos no backend (#23) e 60 quadros medidos no navegador em 5 s (#25); falta a medição de 10 min (#27) |
+| RNF01 | Desempenho | O frontend deve desenhar o tabuleiro a 60 quadros por segundo e o backend deve atualizar o estado 60 vezes por segundo, em máquina com processador de dois núcleos e 4 GB de memória | 🟡 | 60 ciclos no backend (#23) e 60 quadros medidos no navegador em 5 s (#25). O laço escreve no log, a cada 10 s, os ciclos por segundo, o tempo do ciclo e a memória (#78): em 10 min de jogo automático, 59,7 a 60,1 ciclos/s, ciclo médio de 0,03 ms e memória de até 72 MB, contra as metas de 60 ± 1, 4 ms e 200 MB. Falta repetir a medição na máquina de referência, de dois núcleos e 4 GB (#27) |
 | RNF02 | Desempenho | O recálculo do centro de massa deve ser incremental, em tempo constante por bloco alterado, sem percorrer o tabuleiro a cada quadro | ✅ | Dois acumuladores (massa e momento), O(1) por bloco; confere com a varredura após 500 peças (#28) |
 | RNF03 | Desempenho | O tempo entre o pressionamento de uma tecla e a resposta visual não deve passar de 50 ms, contando a ida e a volta pelo WebSocket | ✅ | Da tecla ao estado novo: mediana de 13 ms e pior caso de 32 ms, medidos jogando pelo JAR (#25) |
-| RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | ⬜ |  |
-| RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ✅ | Legenda das teclas sempre visível na partida, gerada da mesma tabela que o teclado usa (#25); legenda dos materiais e botões de toque no celular (#59) |
+| RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | 🟡 | O CI abre o JAR no Linux, no Windows e no macOS com Java 17 e confere a tela e a API (#40); falta o teste com dois cliques e nos navegadores em máquinas reais |
+| RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ✅ | Legenda das teclas sempre visível na partida, gerada da mesma tabela que o teclado usa (#25); legenda dos materiais e botões de toque no celular (#59); no celular, gestos no tabuleiro, botões em duas linhas e a partida inteira numa tela, sem rolar (#105) |
 | RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ✅ | Textura em cada material (veios, tijolos, pontilhado, hachura) e borda clara nos blocos, legenda com nome e peso; conferido com simulação de protanopia, deuteranopia, tritanopia e escala de cinza (#59) |
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
-| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido na revisão de cada PR |
+| RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido em cada PR, por quem o abre |
 | RNF10 | Confiabilidade | Colisão, rotação, eliminação de linhas, centro de massa e a serialização do protocolo devem ter testes automatizados | ✅ | Colisão, rotação, linhas, centro de massa (#11, #20, #21, #28) e serialização do protocolo (#23) |
-| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ⬜ |  |
-| RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ⬜ |  |
-| RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4) |
+| RNF11 | Confiabilidade | Falha na leitura dos arquivos de ranking ou de configuração não deve impedir o jogo; o sistema recorre a valores padrão | ✅ | Materiais e configurações: arquivo ausente, vazio, ilegível ou com valor inválido vira o padrão do JAR, com aviso no log; o jogo sempre abre. Testado com arquivos feitos para quebrar (#24). O ranking ignora linha estragada e começa vazio se o arquivo for ilegível (#31) |
+| RNF12 | Segurança | Arquivos de dados devem ser validados na leitura; conteúdo malformado é rejeitado com registro em log, sem interromper a aplicação | ✅ | Cada valor é conferido na leitura (densidade positiva, cor RRGGBB, volume de 0 a 100); o inválido volta para o padrão só daquele item e vai para o log (#24) |
+| RNF13 | Segurança | O servidor deve escutar apenas em `127.0.0.1`, nunca em todas as interfaces de rede. Em produção, só a própria origem é aceita; a origem do servidor de desenvolvimento do Vite só é liberada em modo de desenvolvimento | ✅ | Escuta só em `127.0.0.1`; `ServidorWebTest` confirma que o IP de rede é recusado (#4). **Desvio:** a versão online escuta em `0.0.0.0` dentro do contêiner, por `CANTEIRO_HOST`; o padrão do JAR não mudou (#87) |
 | RNF14 | Confiabilidade | Toda mensagem recebida pela API ou pelo WebSocket deve ser validada. Mensagem malformada ou comando desconhecido gera uma resposta de erro, nunca uma exceção que derrube a partida | ✅ | REST e WebSocket validam tudo: JSON malformado vira erro 400 ou evento ERRO, e a partida continua (#4, #23) |
 | RNF15 | Manutenibilidade | O protocolo entre backend e frontend deve estar documentado e tipado dos dois lados: `record`s no Java e tipos no TypeScript. O TypeScript roda em modo `strict`, sem `any` | ✅ | Swagger nas rotas REST (#43); record e protocolo.ts espelhados, com teste de serialização contra exemplos fixos (#23) |
-| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8) |
+| RNF16 | Portabilidade | O comando de empacotamento deve gerar um único JAR que já contenha o frontend compilado. O jogador não precisa de Node.js | ✅ | `./mvnw package` gera um JAR com o backend (#4) e o frontend compilado (#8); testado num contêiner só com Java 17, sem Node (#40) |
 
 </details>
 
@@ -304,7 +316,7 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 
 | Canal | Direção | O que passa |
 |---|---|---|
-| `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida e devolve o `id` |
+| `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida (e `modoTreino`, para o treino) e devolve o `id` |
 | `WS /ws/partidas/{id}` | front → back | `{ "tipo": "COMANDO", "comando": "GIRAR_HORARIO" }` |
 | `WS /ws/partidas/{id}` | back → front | `ESTADO` (tabuleiro, peça, fila, reserva, placar, estabilidade) e `EVENTO` (linhas eliminadas, colapso, nível, fim) |
 | `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |
@@ -319,13 +331,13 @@ As mensagens do WebSocket não aparecem no Swagger. A referência delas é o có
 
 ### Dados persistidos
 
-Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário. Os valores padrão vão dentro do JAR e são usados se o arquivo faltar ou vier corrompido.
+Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário, criada quando algo precisa ser gravado. Os valores padrão vão dentro do JAR (`backend/src/main/resources/dados/`) e são usados se o arquivo faltar ou vier corrompido. O código fica em `persistencia/`: `LeitorPropriedades` lê sem nunca lançar exceção, `CarregadorMateriais` monta o catálogo e `ArquivoConfiguracoes` lê e grava as teclas e o volume.
 
 | Arquivo | Formato | Conteúdo |
 |---|---|---|
-| `materiais.properties` | chave = valor | Código, nome, densidade, cor e bônus de cada material. Carregado no `HashMap` do catálogo |
-| `configuracoes.properties` | chave = valor | Teclas de comando, volume e texturas para daltonismo |
-| `ranking.csv` | CSV | Nome, pontuação, nível, linhas, colapsos e data. Só entram partidas **sem uso do desfazer** (RN15) |
+| `materiais.properties` | chave = valor | Densidade e cor de cada material (`ACO.densidade=7.85`, `ACO.cor=4E5A6B`). Carregado no catálogo ao abrir o jogo |
+| `configuracoes.properties` | chave = valor | Só as teclas que o jogador trocou (`tecla.PAUSA=KeyP,Escape`) e o volume |
+| `ranking.csv` | CSV (`;`) | Nome, pontuação, nível, linhas, colapsos e data, a melhor partida de cada jogador. Só entram partidas **sem uso do desfazer** (RN15) |
 | `repeticoes/<data>.txt` | uma jogada por linha | Semente do gerador e, para cada jogada, o ciclo e o comando: o suficiente para reconstruir a partida inteira |
 
 ---
@@ -360,10 +372,11 @@ Se você está na dúvida entre o backend e o frontend, faça a pergunta: **"iss
 | Colocar um som ou uma imagem | `frontend/public/sons/` ou `frontend/public/imagens/` | #38 |
 | Escrever um teste automático do backend | `backend/src/test/java/canteiro/`, **no mesmo pacote** da classe testada | toda tarefa de programação |
 | Escrever um teste automático do frontend | Ao lado do arquivo testado, com o final `.test.ts` | toda tarefa de programação |
-| Escrever um roteiro de teste manual | `docs/testes/` | #17, #27 |
+| Escrever ou executar um roteiro de teste manual | `docs/testes/` ([como testar](docs/testes/README.md)) | #17, #27, #30 |
 | Escrever o manual da equipe | `docs/EQUIPE.md` | #18 |
 | Atualizar o andamento de um requisito | Este README, seção [📋 Requisitos](#-requisitos) | #19 |
-| Relatório, slides, documentos de entrega | `docs/` | #39 |
+| Relatório de plataforma e desvios | `docs/` | #39 |
+| Slides e vídeo da apresentação | `docs/apresentacao/` | #84 |
 | Registrar um bug ou uma ideia | Não é pasta: é uma **issue nova**, com o modelo certo, no [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5) | — |
 
 ### Um exemplo de ponta a ponta: a lista de dificuldades
@@ -385,9 +398,10 @@ E cada passo tem o seu teste: [`DificuldadeTest`](backend/src/test/java/canteiro
 
 | Quem | Onde vai trabalhar na maior parte do tempo |
 |---|---|
-| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, física), `backend/.../api/` e `controle/` (servidor e WebSocket), `frontend/src/telas/Partida/` e `componentes/` |
-| **Marcelo** | `backend/.../modelo/estruturas/` (sacola, fila, pilha, histórico), `backend/.../persistencia/` (arquivos e ranking) e as telas de apoio em `frontend/src/telas/` (Menu, Ranking, Repetições, Relatório, Configurações) |
-| **Wanessa** | `docs/` (roteiros de teste, manual da equipe, relatório), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
+| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket) e todo o `frontend/src/` (a tela de partida e as telas de apoio) |
+| **Marcelo** | `backend/.../persistencia/` (materiais, configurações, ranking e repetições em arquivo) e o que usa esses arquivos em `backend/.../api/rotas/` e `controle/` (ranking, configurações, relatório, replay e modo treino) |
+| **Wanessa** | `docs/` (manual da equipe, relatório e apresentação), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`** |
+| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores) e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
 
 ### O que ninguém edita à mão
 
@@ -408,7 +422,7 @@ canteiro/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/canteiro/
-│   │   │   │   ├── app/             main: sobe o servidor e abre o navegador
+│   │   │   │   ├── app/             main e configuração: sobe o servidor e abre o navegador
 │   │   │   │   ├── api/             ServidorWeb
 │   │   │   │   │   ├── rotas/       uma classe por recurso: RotasDificuldades...
 │   │   │   │   │   ├── ws/          CanalPartida (WebSocket)
@@ -419,6 +433,7 @@ canteiro/
 │   │   │   │   │   ├── materiais/   Material + os 4 materiais
 │   │   │   │   │   ├── estruturas/  sacola, fila, pilha, histórico
 │   │   │   │   │   ├── fisica/      centro de massa, estabilidade, colapso
+│   │   │   │   │   ├── metas/       a meta de cada nível e o sorteio
 │   │   │   │   │   └── constantes/  dimensões e limites do jogo
 │   │   │   │   └── persistencia/    ranking, materiais, repetições
 │   │   │   └── resources/
@@ -444,13 +459,14 @@ canteiro/
 │   ├── package.json                 a receita do frontend
 │   └── vite.config.ts
 ├── docs/
-│   ├── Proposta_Projeto_Canteiro.pdf  proposta do projeto
-│   ├── Apresentacao_Canteiro.pdf    slides para a apresentação em vídeo
+│   ├── proposta/                    proposta do projeto (completa e o resumo da etapa 1)
+│   ├── apresentacao/                slides e vídeo da apresentação
 │   ├── EQUIPE.md                    manual da equipe (a criar, #18)
-│   ├── testes/                      roteiros de teste manual (a criar, #17)
+│   ├── testes/                      testes manuais: roteiros, execuções, sessões e o relatório
 │   └── imagens/                     imagens do README e o gerador dos diagramas
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
+├── Dockerfile · .dockerignore · render.yaml   imagem e hospedagem pública
 └── README.md
 ```
 
@@ -474,6 +490,7 @@ canteiro/
 | `modelo/materiais/` | `Material` (abstrata) e os 4 materiais | A segunda hierarquia, independente da primeira. A cor é um número RGB, não `java.awt.Color` | ❌ |
 | `modelo/estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
 | `modelo/fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
+| `modelo/metas/` | `Meta` (interface), um tipo de meta por classe e o `QuadroMetas`, que sorteia a do nível | Uma meta nova é uma classe nova, sem mexer no motor | ❌ |
 | `modelo/constantes/` | `COLUNAS = 10`, `LINHAS = 20`... | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 | `persistencia/` | Catálogo de materiais, configurações, ranking, repetições | Arquivo tem outro tipo de erro (sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
 
@@ -500,15 +517,16 @@ canteiro/
 
 | Pasta ou arquivo | Para que serve |
 |---|---|
-| `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`, `configuracoes.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11) |
+| `backend/src/main/resources/dados/` | Os valores padrão (`materiais.properties`) que vão **dentro do JAR** e entram em ação se o arquivo do usuário faltar ou vier corrompido (RNF11). As configurações não precisam de arquivo padrão: sem nada salvo, nenhuma tecla foi trocada e o volume é 60 |
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README e, em breve, o manual da equipe (`EQUIPE.md`) e os roteiros de teste manual (`testes/`) |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e, em breve, o manual da equipe (`EQUIPE.md`) |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
 | `.editorconfig` | UTF-8, LF e indentação iguais em qualquer editor |
+| `Dockerfile` · `.dockerignore` · `render.yaml` | A imagem do jogo para hospedagem pública e a configuração do Render. Veja [No ar: Docker e Render](#7-no-ar-docker-e-render) |
 | `target/`, `node_modules/`, `dist/` | **Não versionadas.** São geradas pelo Maven e pelo npm. Pode apagar quando quiser |
 
 > [!NOTE]
@@ -610,7 +628,7 @@ Javalin.create(config -> {
 ## 🚀 Rodando localmente
 
 > [!NOTE]
-> **O que já dá para ver:** a tela de escolha da dificuldade, com os dados vindos do backend. A partida em si chega com o modelo, a partir das semanas 3 – 4.
+> **O que já dá para ver:** o jogo completo, do menu ao fim da partida, com estabilidade, colapso, sons e reconexão. Ranking, repetições, relatório e configurações já têm tela, mas ainda esperam as rotas do backend. Só quer jogar? Abra [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com).
 
 ### 1. Pré-requisitos
 
@@ -658,6 +676,8 @@ O Vite repassa as chamadas `/api` e `/ws` para o backend, então para o navegado
 > **No IntelliJ:** abra a pasta `canteiro/backend` (*File → Open*); ele reconhece o `pom.xml`. Para subir o backend, abra `Aplicacao.java` e clique no ▶ ao lado do `main`. **No VS Code:** abra a pasta `canteiro` inteira e instale o *Extension Pack for Java*, o *ESLint* e o *Prettier*.
 
 ### 4. Gerando o JAR
+
+> **Só quer jogar?** Baixe o `canteiro.jar` da versão mais recente em [Releases](https://github.com/mateus-vitor-ferreira-dev/canteiro/releases) e rode com Java 17 ou mais novo. Não precisa compilar nada.
 
 ```bash
 cd backend
@@ -709,6 +729,30 @@ Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=tr
 | `Cannot find module` depois de um `git pull` | Alguém adicionou uma dependência | `npm install` de novo |
 | `ArquiteturaTest` falhou | Alguém importou Javalin, JSON, gráfico ou uma camada de cima dentro do modelo | A mensagem mostra o arquivo e a linha. Mova o código para `api` ou `app` |
 | `javadoc:javadoc` falhou com `warning: no comment` | Classe ou método público sem Javadoc | Documente o que a mensagem aponta |
+
+### 7. No ar: Docker e Render
+
+Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Render** (plano grátis), configurado pelo `render.yaml`, que publica a `develop` sozinho a cada merge.
+
+```bash
+docker build -t canteiro .
+docker run -p 7070:7070 canteiro      # abra http://localhost:7070
+```
+
+O comportamento muda por variáveis de ambiente, sem mexer no código. Sem nenhuma delas, vale o jogo local: só `127.0.0.1`, porta 7070 e o navegador abrindo sozinho.
+
+| Variável | Padrão local | No contêiner | Para que serve |
+|---|---|---|---|
+| `CANTEIRO_HOST` | `127.0.0.1` | `0.0.0.0` | Endereço de escuta. Fora do contêiner, mantenha o padrão (RNF13) |
+| `PORT` | `7070` | definida pela hospedagem | Porta de escuta |
+| `CANTEIRO_ABRIR_NAVEGADOR` | `true` | `false` | Abrir o navegador ao subir. Um servidor não tem tela |
+| `CANTEIRO_LIMITE_PARTIDAS` | sem limite | `10` | Quantas partidas podem existir ao mesmo tempo. Cada uma tem um laço de 60 Hz numa thread própria |
+| `CANTEIRO_PASTA` | `~/.canteiro` | `/app/dados` | Onde ficam os arquivos do jogador (materiais, configurações, ranking). O usuário do contêiner não tem pasta pessoal |
+
+Em qualquer modo, **a partida sem conexão por 10 minutos é descartada** (RF31). Assim, as abas fechadas não deixam laços rodando para sempre.
+
+> [!WARNING]
+> **No plano grátis, o Render desliga o serviço depois de 15 minutos sem acesso.** A primeira visita depois disso demora cerca de um minuto para carregar, e as partidas abertas se perdem, porque ficam em memória. **Os arquivos em `/app/dados` também não sobrevivem** a um reinício ou a um deploy novo: o plano grátis não tem disco permanente, então o ranking online recomeça do zero de vez em quando. O ranking que vale de verdade é o do JAR, na `~/.canteiro/` de cada jogador.
 
 ---
 
@@ -845,7 +889,7 @@ O **Git** é um programa que tira **fotos do projeto** ao longo do tempo. Cada f
 
 O **GitHub** é o site onde fica a **cópia oficial** do projeto, que todo mundo compartilha. Cada integrante tem uma **cópia local** no próprio computador, trabalha nela e depois **envia** (`push`) as mudanças para o GitHub.
 
-Um **branch** (ramo) é uma **linha paralela de trabalho**. Você cria um ramo, mexe à vontade, e nada do que você faz ali afeta o trabalho dos outros até ser revisado e juntado (*merge*) ao ramo principal.
+Um **branch** (ramo) é uma **linha paralela de trabalho**. Você cria um ramo, mexe à vontade, e nada do que você faz ali afeta o trabalho dos outros até ser juntado (*merge*) ao ramo principal.
 
 ### Os ramos deste repositório
 
@@ -1004,7 +1048,7 @@ git push
 
 #### 6️⃣ Abra o Pull Request
 
-O PR é o pedido: *"revisem meu ramo e juntem na `develop`"*. Tem dois jeitos de abrir.
+O PR é o pedido: *"juntem meu ramo na `develop`"*. Tem dois jeitos de abrir.
 
 **Pelo site:** depois do push, o GitHub mostra um botão amarelo **"Compare & pull request"**. Confira se está **`base: develop` ← `compare: seu-ramo`**. A descrição já vem com um **modelo e um checklist**. Preencha:
 
@@ -1017,12 +1061,13 @@ O PR é o pedido: *"revisem meu ramo e juntem na `develop`"*. Tem dois jeitos de
 gh pr create --base develop --title "feat(modelo): gerador de peças" --body "Implementa RF03/RN04. Testes em GeradorPecasTest."
 ```
 
-#### 7️⃣ Revisão, merge e limpeza
+#### 7️⃣ Merge e limpeza
 
-1. Um colega lê o código na aba **Files changed** do PR e comenta o que precisar.
-2. Pediram ajuste? **Não abra outro PR.** Corrija no mesmo ramo, faça commit e dê `git push`, e o PR se atualiza sozinho.
-3. Tudo certo: clique em **Squash and merge**. Todos os seus commits viram um só na `develop`, **com você como autor**.
-4. Apague o ramo no botão **Delete branch** e limpe o seu computador:
+1. Espere o **CI** ficar verde. O botão de merge só libera com os testes do backend, do frontend e o JAR completo passando.
+2. Não precisa esperar aprovação de ninguém. Se quiser uma segunda opinião, peça no PR, mas **não é obrigatório**.
+3. Algo quebrou no CI? **Não abra outro PR.** Corrija no mesmo ramo, faça commit e dê `git push`, e o PR se atualiza sozinho.
+4. Tudo verde: clique em **Squash and merge**. Todos os seus commits viram um só na `develop`, **com você como autor**.
+5. Apague o ramo no botão **Delete branch** e limpe o seu computador:
 
 ```bash
 git switch develop
@@ -1138,7 +1183,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | **Pull** | Trazer do GitHub os commits dos outros |
 | **Clone** | A primeira cópia do repositório para o seu computador |
 | **Merge** | Juntar um ramo em outro |
-| **Pull Request (PR)** | O pedido de revisão e merge de um ramo, feito no GitHub |
+| **Pull Request (PR)** | O pedido de merge de um ramo, feito no GitHub. O CI confere o PR antes de liberar o merge |
 | **Conflito** | Duas mudanças na mesma linha, que precisam de decisão humana |
 | **Staging** | A área onde ficam os arquivos que vão entrar no próximo commit (`git add`) |
 | **HEAD** | O ponto onde você está agora no histórico |
@@ -1149,23 +1194,24 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Semanas | Etapa | Lado | Entrega |
 |---|---|---|---|
-| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) |
-| 🔄 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
-| ⬜ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
-| ⬜ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
-| ⬜ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
-| ⬜ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada |
-| ⬜ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Requisitos desejáveis |
+| ✅ 1 – 2 | Requisitos, modelagem de classes e arquitetura | — | [Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) |
+| ✅ 3 | Revisão da arquitetura; Javalin; projeto Svelte; build único; protocolo | ☕ 🌐 | Arquitetura revisada e esqueleto ponta a ponta |
+| ✅ 3 – 4 | Modelo: peças, materiais, tabuleiro e colisão, com testes | ☕ | Núcleo testado, sem interface |
+| ✅ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
+| ✅ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
+| ✅ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada, e o jogo [no ar](https://canteiro.digitalcodexa.com) |
+| 🔄 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Persistência e ranking prontos (#24, #31); falta o backend dos desejáveis: configurações (#71), relatório (#70), modo treino (#37) e replay (#35) |
 | ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ 🌐 | **Entrega final** |
 
 ### Entregáveis
 
 - 📦 **Código-fonte**: o repositório completo, com `backend/`, `frontend/`, testes e arquivos de dados de exemplo
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
+- 🌐 **Versão online**: o mesmo jogo em [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com), publicado a cada merge na `develop`
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. O principal desvio até aqui é a troca da interface em Swing por uma interface no navegador
-- 🗂️ **[Proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
-- 🎬 **[Apresentação](docs/Apresentacao_Canteiro.pdf)**: 15 slides em linguagem simples, para gravar a tela narrando
+- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios até aqui são a troca da interface em Swing por uma interface no navegador e a versão online, que escuta fora do `127.0.0.1` dentro do contêiner
+- 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
+- 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 
 ---
 
@@ -1176,11 +1222,12 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Integrante | GitHub | Responsabilidades |
 |---|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · 🌐 tela de partida · build e integração contínua |
-| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Estruturas de dados · persistência · 🌐 telas de apoio (menu, ranking, repetições, relatório, configurações) |
-| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes e validação com jogadores · ♿ usabilidade e acessibilidade · 📝 documentação e apresentações |
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua |
+| Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino |
+| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes (roteiros, com o Alisson) · ♿ usabilidade e acessibilidade · 📝 manual da equipe e relatório |
+| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Execução dos testes a cada entrega · validação com jogadores · 📝 apoio na documentação · 🎬 apresentação do projeto |
 
-Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão completa está na [proposta do projeto](docs/Proposta_Projeto_Canteiro.pdf) (seção 16).
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista, já com o Alisson, está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16); as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus. A tabela acima é a que vale hoje.
 
 ---
 

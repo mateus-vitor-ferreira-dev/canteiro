@@ -36,7 +36,16 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
                 ],
             },
         ],
-        placar: { pontuacao: 1234, linhas: 7, nivel: 2, colapsos: 1, tempoSegundos: 60 },
+        reservada: null,
+        podeReservar: true,
+        placar: {
+            pontuacao: 1234,
+            linhas: 7,
+            nivel: 2,
+            colapsos: 1,
+            tempoSegundos: 60,
+            sequencia: 0,
+        },
         estabilidade: {
             indice: 0.68,
             desvio: 1.4,
@@ -44,6 +53,13 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
             centroDeMassa: 3.6,
             eixo: 5,
             alerta: false,
+            previa: null,
+        },
+        meta: {
+            descricao: "Elimine 3 linhas ou mais de uma vez",
+            progresso: 0,
+            alvo: 1,
+            cumprida: false,
         },
         ...parcial,
     };

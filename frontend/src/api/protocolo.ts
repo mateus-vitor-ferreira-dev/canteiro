@@ -29,11 +29,77 @@ export type ErroDto = {
 /** Corpo de `POST /api/partidas`. Espelho de `NovaPartidaDto`. */
 export type NovaPartidaDto = {
     dificuldade: CodigoDificuldade;
+    /** Partida de treino: dá para desfazer a última jogada e ela não entra no ranking (RF26, RN15). */
+    modoTreino: boolean;
 };
 
 /** Resposta de `POST /api/partidas`: o id para conectar em `/ws/partidas/{id}`. Espelho de `PartidaCriadaDto`. */
 export type PartidaCriadaDto = {
     id: string;
+};
+
+/**
+ * Uma linha do ranking, como vem de `GET /api/ranking` (RF22). Espelho de
+ * `EntradaRankingDto`, que o backend cria na #31.
+ */
+export type EntradaRankingDto = {
+    nome: string;
+    pontuacao: number;
+    nivel: number;
+    linhas: number;
+    colapsos: number;
+    /** Dia em que a partida foi registrada, no formato ISO (`"2026-09-28"`). */
+    data: string;
+};
+
+/**
+ * Corpo de `POST /api/ranking` (RF21). A pontuação não vai aqui: o backend lê
+ * da partida, para ninguém mandar pontos inventados. Espelho de `RegistroRankingDto`.
+ */
+export type RegistroRankingDto = {
+    partidaId: string;
+    nome: string;
+};
+
+/**
+ * O relatório da partida, como vem de `GET /api/partidas/{id}/relatorio`
+ * (RF25). Espelho de `RelatorioDto`, que o backend cria na #70.
+ */
+export type RelatorioDto = {
+    /** Índice de estabilidade logo depois de cada peça fixada, de 1 (desvio nulo) a 0, na ordem. */
+    indices: number[];
+    /** Número de cada peça (a partir de 1) cuja fixação derrubou a estrutura. */
+    colapsos: number[];
+    /** Quantas peças de cada material foram fixadas, pelo código do material. */
+    materiais: Record<string, number>;
+};
+
+/**
+ * As configurações do jogador, em `GET` e `PUT /api/configuracoes` (RF27).
+ * Espelho de `ConfiguracoesDto`, que o backend cria na #71.
+ */
+export type ConfiguracoesDto = {
+    /**
+     * As teclas de cada ação (`ESQUERDA`, `RESERVAR`, `PAUSA`, `SOM`...), como
+     * valores de `KeyboardEvent.code`. Ação que não aparece fica com a padrão.
+     */
+    teclas: Record<string, string[]>;
+    /** Volume dos efeitos, de 0 a 100. */
+    volume: number;
+};
+
+/**
+ * Uma partida gravada, como vem de `GET /api/repeticoes` (RF24). Espelho de
+ * `RepeticaoDto`, que o backend cria na #35.
+ */
+export type RepeticaoDto = {
+    /** Identificador da gravação, usado em `POST /api/repeticoes/{id}/reproduzir`. */
+    id: string;
+    /** Quando a partida terminou, no horário local, em ISO (`"2026-09-28T14:32:05"`). */
+    data: string;
+    dificuldade: CodigoDificuldade;
+    /** Pontuação final da partida gravada. */
+    pontuacao: number;
 };
 
 /** Comandos que o jogador envia pelo WebSocket. Espelho do enum `Comando`. */
@@ -83,6 +149,8 @@ export type PlacarDto = {
     nivel: number;
     colapsos: number;
     tempoSegundos: number;
+    /** Quantas peças seguidas fecharam linha: cada uma soma 10 % aos pontos da próxima eliminação, até 100 %. */
+    sequencia: number;
 };
 
 /** Espelho de `EstadoDto.EstabilidadeDto`. */
@@ -94,6 +162,26 @@ export type EstabilidadeDto = {
     centroDeMassa: number;
     eixo: number;
     alerta: boolean;
+    /** Como a estrutura ficaria com a peça atual pousada na fantasma; `null` sem peça caindo. */
+    previa: PreviaDto | null;
+};
+
+/** A estabilidade prevista para a jogada da peça atual. Espelho de `EstadoDto.PreviaDto`. */
+export type PreviaDto = {
+    indice: number;
+    desvio: number;
+    centroDeMassa: number;
+    eixo: number;
+    /** Se a jogada passaria do limite e derrubaria a obra. */
+    derruba: boolean;
+};
+
+/** A meta do nível, com o progresso (RN19). Espelho de `EstadoDto.MetaDto`. */
+export type MetaDto = {
+    descricao: string;
+    progresso: number;
+    alvo: number;
+    cumprida: boolean;
 };
 
 /** O estado completo, enviado a cada mudança. Espelho de `EstadoDto`. */
@@ -106,13 +194,25 @@ export type EstadoDto = {
     pecaAtual: PecaDto | null;
     pecaFantasma: Posicao[];
     proximas: PecaDto[];
+    /** Peça guardada na reserva, com as células no quadrado da forma, ou `null` se não há. */
+    reservada: PecaDto | null;
+    /** Se a troca com a reserva está liberada nesta peça (RN05). */
+    podeReservar: boolean;
     placar: PlacarDto;
     estabilidade: EstabilidadeDto;
+    /** A meta do nível, ou `null` se não houver. */
+    meta: MetaDto | null;
 };
 
 /** Tipos de evento. Espelho de `EventoPartida.Tipo`, mais o `ERRO` do canal. */
 export type TipoEvento =
-    "PECA_FIXADA" | "LINHAS_ELIMINADAS" | "COLAPSO" | "NIVEL_SUBIU" | "FIM_DE_JOGO" | "ERRO";
+    | "PECA_FIXADA"
+    | "LINHAS_ELIMINADAS"
+    | "COLAPSO"
+    | "NIVEL_SUBIU"
+    | "META_CUMPRIDA"
+    | "FIM_DE_JOGO"
+    | "ERRO";
 
 /** Um bloco que caiu no colapso. Espelho de `EventoDto.QuedaDto`. */
 export type QuedaDto = {
@@ -127,6 +227,10 @@ export type EventoDto = {
     dados: {
         linhas?: number[];
         quedas?: QuedaDto[];
+        /** Quanto a pontuação mudou: o ganho da eliminação, ou o desconto (negativo) do colapso. */
+        pontos?: number;
+        /** As linhas foram fechadas com a estrutura perto de cair: valem 50 % a mais. */
+        ousada?: boolean;
         mensagem?: string;
     };
 };

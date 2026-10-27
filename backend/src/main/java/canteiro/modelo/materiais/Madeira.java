@@ -21,7 +21,18 @@ public final class Madeira extends Material {
      * Cria o material com os valores padrão do jogo.
      */
     public Madeira() {
-        super(CODIGO, "Madeira", DENSIDADE, COR);
+        this(DENSIDADE, COR);
+    }
+
+    /**
+     * Cria o material com densidade e cor lidas de arquivo (#24), no lugar das padrão.
+     *
+     * @param densidade densidade do material, positiva
+     * @param corRgb    cor no formato {@code 0xRRGGBB}
+     * @throws IllegalArgumentException se a densidade não for positiva ou a cor sair do intervalo RGB
+     */
+    public Madeira(double densidade, int corRgb) {
+        super(CODIGO, "Madeira", densidade, corRgb);
     }
 
     /**

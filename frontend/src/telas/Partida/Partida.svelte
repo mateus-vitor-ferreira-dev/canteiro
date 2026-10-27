@@ -1,29 +1,43 @@
 <!-- A partida: tabuleiro, placar, próximas peças e legendas. Teclado e toque viram comando pelo WebSocket. -->
 <script lang="ts">
-    import type { Comando } from "@/api/protocolo";
-    import LegendaMateriais from "@/componentes/LegendaMateriais.svelte";
+    import { untrack } from "svelte";
+    import type { Comando, PlacarDto } from "@/api/protocolo";
     import PainelEstabilidade from "@/componentes/PainelEstabilidade.svelte";
-    import Tabuleiro from "@/componentes/Tabuleiro.svelte";
-    import { tamanhoDaCelula } from "@/componentes/desenho";
+    import { celulaParaJanela } from "@/componentes/desenho";
     import { anuncioDoEvento } from "@/estado/anuncios";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
     import { PartidaAoVivo, type Conectar } from "@/estado/partida.svelte";
-    import { comandoDaTecla } from "@/estado/teclado";
-    import ControlesToque from "./ControlesToque.svelte";
-    import FilaProximas from "./FilaProximas.svelte";
-    import LegendaTeclas from "./LegendaTeclas.svelte";
+    import { Som } from "@/estado/som.svelte";
+    import { comandoDoEvento } from "@/estado/teclado";
+    import MesaDeJogo from "./MesaDeJogo.svelte";
+    import MetaDoNivel from "./MetaDoNivel.svelte";
+    import { vibrarNoEvento } from "@/util/vibracao";
+    import ColunaApoio from "./ColunaApoio.svelte";
     import Placar from "./Placar.svelte";
 
     let {
         id,
+        treino = false,
+        repeticao = false,
         aoSair,
+        aoTerminar,
         conectar,
+        som = new Som(),
     }: {
         /** Id da partida criada em `POST /api/partidas`. */
         id: string;
+        /** Partida de treino: o desfazer fica liberado e ela não entra no ranking (RF26, RN15). */
+        treino?: boolean;
+        /** Reprodução de uma partida gravada: o jogador só assiste e pausa (RF24). */
+        repeticao?: boolean;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
+        /** Chamado com o placar final, quando o jogador abre o resultado. */
+        aoTerminar: (placar: PlacarDto) => void;
         /** Troca a conexão nos testes. */
         conectar?: Conectar;
+        /** Troca os sons nos testes. */
+        som?: Som;
     } = $props();
 
     // A partida é criada uma vez, com o id recebido; trocar de partida é montar a tela de novo.
@@ -32,22 +46,22 @@
 
     $effect(() => () => partida.encerrar());
 
+    // Cada evento novo toca o seu som. Ligar o som não repete o último evento.
+    $effect(() => {
+        const evento = partida.ultimoEvento;
+        if (evento) {
+            untrack(() => {
+                som.tocar(evento, partida.estado?.placar.sequencia ?? 0);
+                vibrarNoEvento(evento);
+            });
+        }
+    });
+
     let larguraJanela = $state(1280);
     let alturaJanela = $state(800);
 
-    /**
-     * O tabuleiro cresce e encolhe com a janela. Desconta o que fica ao lado
-     * dele (colunas laterais) ou em cima e embaixo (cabeçalho, placar e botões).
-     */
-    const celula = $derived.by(() => {
-        if (larguraJanela >= 1100) {
-            return tamanhoDaCelula(larguraJanela - 700, alturaJanela - 190);
-        }
-        if (larguraJanela >= 768) {
-            return tamanhoDaCelula(larguraJanela - 400, alturaJanela - 260);
-        }
-        return tamanhoDaCelula(larguraJanela - 40, alturaJanela - 300);
-    });
+    /** O tabuleiro cresce e encolhe com a janela. */
+    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela, treino || repeticao));
 
     const anuncio = $derived(
         partida.ultimoEvento
@@ -55,15 +69,23 @@
             : "",
     );
 
+    /** Numa repetição, só a pausa chega ao backend: as jogadas são as gravadas. */
+    function aceita(comando: Comando): boolean {
+        const pausa = comando === "PAUSAR" || comando === "RETOMAR";
+        return !partida.encerrada && (!repeticao || pausa);
+    }
+
     function aoTocar(comando: Comando) {
-        if (!partida.encerrada) {
+        if (aceita(comando)) {
             partida.enviar(comando);
         }
     }
 
     function aoTeclar(evento: KeyboardEvent) {
-        const comando = comandoDaTecla(evento.code, evento.repeat, partida.pausada);
-        if (comando && !partida.encerrada) {
+        const comando = comandoDoEvento(evento, partida.pausada, configuracoes.tabela, treino);
+        if (comando === "SOM") {
+            som.alternar();
+        } else if (comando && aceita(comando)) {
             evento.preventDefault();
             partida.enviar(comando);
         }
@@ -91,79 +113,50 @@
         <div class="lateral">
             <Placar placar={partida.estado.placar} />
             <PainelEstabilidade estabilidade={partida.estado.estabilidade} />
+            {#if partida.estado.meta}
+                <MetaDoNivel meta={partida.estado.meta} />
+            {/if}
         </div>
     {:else}
         <p class="aviso">{partida.conectado ? "Preparando a obra…" : "Conectando…"}</p>
     {/if}
 
     <div class="jogo">
-        <div class="palco">
-            <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
-            {#if partida.perdida}
-                <div class="camada" role="alert">
-                    <h2>Partida perdida</h2>
-                    <p>O jogo foi reiniciado e esta partida não existe mais.</p>
-                    <button type="button" onclick={aoSair}>Começar outra</button>
-                </div>
-            {:else if partida.reconectando}
-                <div class="camada" role="status">
-                    <h2>Reconectando…</h2>
-                    <p>A partida está pausada e volta do mesmo ponto.</p>
-                </div>
-            {:else if partida.pausada}
-                <div class="camada" role="status">
-                    <h2>Pausado</h2>
-                    <p>Aperte <kbd>P</kbd> para continuar.</p>
-                </div>
-            {:else if partida.encerrada && partida.estado}
-                <div class="camada" role="status">
-                    <h2>Fim de jogo</h2>
-                    <p>{partida.estado.placar.pontuacao} pontos</p>
-                    <button type="button" onclick={aoSair}>Jogar de novo</button>
-                </div>
-            {/if}
-        </div>
-
-        <ControlesToque aoComando={aoTocar} pausada={partida.pausada} />
+        <MesaDeJogo {partida} {som} {celula} {treino} {repeticao} {aoTocar} {aoSair} {aoTerminar} />
     </div>
 
-    <aside>
-        {#if partida.estado}
-            <FilaProximas proximas={partida.estado.proximas} />
-        {/if}
-        <LegendaMateriais />
-        <LegendaTeclas />
-    </aside>
+    <ColunaApoio estado={partida.estado} {som} {treino} {repeticao} />
 </div>
 
 <style>
-    /* Celular: uma coluna, com o placar em cima e os botões embaixo do tabuleiro. */
+    /*
+     * Celular: tudo numa tela, sem rolar, só com a mesa de jogo. Placar, painel
+     * e legendas completos ficam para as telas maiores.
+     */
     .partida {
         display: grid;
-        grid-template-areas: "lateral" "jogo" "aside";
-        gap: 1rem;
+        grid-template-areas: "jogo";
         justify-items: center;
     }
-    .lateral {
-        grid-area: lateral;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        width: 100%;
+    .lateral,
+    .partida > :global(aside) {
+        display: none;
     }
-    /* O tabuleiro e os botões de toque ficam sempre juntos. */
     .jogo {
         grid-area: jogo;
-        display: grid;
-        gap: 1rem;
-        justify-items: center;
-    }
-    .palco {
-        position: relative;
-    }
-    aside {
-        grid-area: aside;
         width: 100%;
+    }
+    @media (min-width: 768px) {
+        .lateral {
+            grid-area: lateral;
+            display: grid;
+        }
+        .partida > :global(aside) {
+            display: block;
+        }
+        .jogo {
+            width: auto;
+        }
     }
     /* Tablet: o tabuleiro à esquerda e todo o resto numa coluna ao lado. */
     @media (min-width: 768px) {
@@ -189,35 +182,6 @@
             grid-template-rows: auto;
             gap: 1.5rem 2.5rem;
         }
-    }
-    .camada {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 1.5rem;
-        text-align: center;
-        color: #fff;
-        background: rgb(27 36 50 / 80%);
-        border-radius: 8px;
-    }
-    .camada h2 {
-        margin: 0;
-        font-size: clamp(1.4rem, 5vw, 2rem);
-    }
-    .camada button {
-        padding: 0.6rem 1.2rem;
-        font: inherit;
-        font-weight: 700;
-        min-height: 44px;
-        color: var(--cor-marinho);
-        background: var(--cor-ambar);
-        border: 0;
-        border-radius: 8px;
-        cursor: pointer;
     }
     .aviso {
         grid-area: lateral;

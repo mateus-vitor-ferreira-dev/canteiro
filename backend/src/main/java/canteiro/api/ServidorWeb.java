@@ -3,8 +3,12 @@ package canteiro.api;
 import canteiro.api.dto.ErroDto;
 import canteiro.api.rotas.RotasDificuldades;
 import canteiro.api.rotas.RotasPartidas;
+import canteiro.api.rotas.RotasRanking;
 import canteiro.api.ws.CanalPartida;
 import canteiro.controle.GerenciadorPartidas;
+import canteiro.persistencia.ArquivoConfiguracoes;
+import canteiro.persistencia.ArquivosDoJogo;
+import canteiro.persistencia.RankingArquivo;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.RoutesConfig;
@@ -19,8 +23,9 @@ import java.util.Objects;
 /**
  * Servidor HTTP do jogo: rotas da API e, no JAR final, os arquivos do frontend.
  *
- * <p>Escuta apenas em {@value #HOST}, nunca em todas as interfaces de rede,
- * para que outro computador da rede não alcance o jogo (RNF13). Toda exceção
+ * <p>Por padrão escuta apenas em {@value #HOST}, nunca em todas as interfaces
+ * de rede, para que outro computador da rede não alcance o jogo (RNF13). Só a
+ * hospedagem pública escolhe outro endereço, pela configuração. Toda exceção
  * que escapar de uma rota vira uma resposta {@link ErroDto}, sem derrubar o
  * servidor (RNF14).</p>
  *
@@ -29,7 +34,7 @@ import java.util.Objects;
  */
 public final class ServidorWeb {
 
-    /** Endereço de escuta: só a própria máquina (RNF13). */
+    /** Endereço de escuta padrão: só a própria máquina (RNF13). */
     public static final String HOST = "127.0.0.1";
 
     /** Porta usada pelo jogo e esperada pelo proxy do Vite. */
@@ -41,6 +46,8 @@ public final class ServidorWeb {
     private static final Logger LOG = LoggerFactory.getLogger(ServidorWeb.class);
 
     private final GerenciadorPartidas partidas;
+    private final ArquivoConfiguracoes configuracoes;
+    private final RankingArquivo ranking;
     private final boolean frontendEmbutido;
     private final Javalin javalin;
 
@@ -48,9 +55,12 @@ public final class ServidorWeb {
      * Configura o servidor e registra as rotas, sem começar a escutar.
      *
      * @param partidas onde as partidas ficam guardadas
+     * @param arquivos  os arquivos do jogador que as rotas leem e gravam
      */
-    public ServidorWeb(GerenciadorPartidas partidas) {
+    public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos) {
         this.partidas = Objects.requireNonNull(partidas, "partidas");
+        this.configuracoes = Objects.requireNonNull(arquivos, "arquivos").configuracoes();
+        this.ranking = arquivos.ranking();
         this.frontendEmbutido = ServidorWeb.class.getResource(PASTA_FRONTEND) != null;
         this.javalin = Javalin.create(this::configurar);
     }
@@ -63,7 +73,20 @@ public final class ServidorWeb {
      * @throws io.javalin.util.JavalinBindException se a porta já estiver em uso
      */
     public int iniciar(int porta) {
-        javalin.start(HOST, porta);
+        return iniciar(HOST, porta);
+    }
+
+    /**
+     * Começa a escutar no endereço e na porta indicados. Fora da máquina do
+     * jogador, como num contêiner, o endereço costuma ser {@code 0.0.0.0}.
+     *
+     * @param host  endereço de escuta
+     * @param porta porta desejada; {@code 0} escolhe uma porta livre qualquer
+     * @return a porta em que o servidor de fato ficou escutando
+     * @throws io.javalin.util.JavalinBindException se a porta já estiver em uso
+     */
+    public int iniciar(String host, int porta) {
+        javalin.start(Objects.requireNonNull(host, "host"), porta);
         return javalin.port();
     }
 
@@ -99,6 +122,9 @@ public final class ServidorWeb {
         RotasDificuldades.registrar(rotas);
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
+        new RotasRanking(partidas, ranking).registrar(rotas);
+        // #71: registre aqui a rota de configurações, com o arquivo já pronto:
+        // new RotasConfiguracoes(configuracoes).registrar(rotas);
 
         rotas.exception(Exception.class, (erro, ctx) -> {
             LOG.error("Erro inesperado em {} {}", ctx.method(), ctx.path(), erro);

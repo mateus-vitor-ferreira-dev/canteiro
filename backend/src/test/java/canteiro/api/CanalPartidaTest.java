@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -42,10 +44,13 @@ class CanalPartidaTest {
     private ServidorWeb servidor;
     private int porta;
 
+    @TempDir
+    Path pasta;
+
     @BeforeEach
     void subirServidor() {
         partidas = ServidoresDeTeste.gerenciador();
-        servidor = new ServidorWeb(partidas);
+        servidor = new ServidorWeb(partidas, ServidoresDeTeste.arquivos(pasta));
         porta = servidor.iniciar(PORTA_LIVRE);
     }
 
@@ -69,6 +74,15 @@ class CanalPartidaTest {
             assertEquals(400, resposta.statusCode(), corpo);
             assertEquals("DIFICULDADE_INVALIDA", json.readTree(resposta.body()).get("erro").asText());
         }
+    }
+
+    @Test
+    void modoTreinoERecusadoEnquantoOMotorNaoDesfaz() throws Exception {
+        HttpResponse<String> resposta = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
+        assertEquals(501, resposta.statusCode());
+        assertEquals("MODO_TREINO_INDISPONIVEL", json.readTree(resposta.body()).get("erro").asText());
+
+        assertEquals(201, post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}").statusCode());
     }
 
     @Test

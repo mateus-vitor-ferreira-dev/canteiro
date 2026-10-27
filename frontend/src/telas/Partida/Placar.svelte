@@ -1,10 +1,17 @@
-<!-- Pontos, nível, linhas e colapsos. -->
+<!-- Pontos, nível, linhas, colapsos e a sequência de linhas (RN18). -->
 <script lang="ts">
     import type { PlacarDto } from "@/api/protocolo";
 
     let { placar }: { placar: PlacarDto } = $props();
 
     const pontos = new Intl.NumberFormat("pt-BR");
+    const multiplicador = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+    });
+
+    /** O multiplicador que a sequência dá à próxima eliminação: 10 % por peça, até o dobro. */
+    const bonus = $derived(1 + 0.1 * Math.min(placar.sequencia, 10));
 </script>
 
 <section class="placar" aria-label="Placar">
@@ -17,6 +24,12 @@
         <dd>{placar.linhas}</dd>
         <dt>Colapsos</dt>
         <dd>{placar.colapsos}</dd>
+        {#if placar.sequencia > 0}
+            <dt>Sequência</dt>
+            <dd class="sequencia" title="Pontos da próxima linha">
+                ×{multiplicador.format(bonus)}
+            </dd>
+        {/if}
     </dl>
 </section>
 
@@ -33,6 +46,9 @@
         font-size: 2rem;
         font-weight: 800;
         color: var(--cor-marinho);
+    }
+    .sequencia {
+        color: var(--cor-rotulo);
     }
     dl {
         display: grid;

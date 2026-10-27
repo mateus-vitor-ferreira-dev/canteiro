@@ -12,10 +12,15 @@ export function anuncioDoEvento(evento: EventoDto, nivel?: number): string | nul
     switch (evento.evento) {
         case "LINHAS_ELIMINADAS": {
             const n = evento.dados.linhas?.length ?? 0;
-            return n === 1 ? "1 linha eliminada" : `${n} linhas eliminadas`;
+            const linhas = n === 1 ? "1 linha eliminada" : `${n} linhas eliminadas`;
+            return evento.dados.ousada ? `${linhas}. Obra ousada!` : linhas;
         }
         case "COLAPSO":
             return "A estrutura desabou!";
+        case "META_CUMPRIDA":
+            return evento.dados.pontos
+                ? `Meta cumprida! Mais ${evento.dados.pontos} pontos`
+                : "Meta cumprida!";
         case "NIVEL_SUBIU":
             return nivel ? `Subiu para o nível ${nivel}` : "Subiu de nível";
         case "FIM_DE_JOGO":

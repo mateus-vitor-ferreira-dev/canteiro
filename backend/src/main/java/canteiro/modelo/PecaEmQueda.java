@@ -106,6 +106,15 @@ public final class PecaEmQueda {
         linha = linhaDePouso();
     }
 
+    /**
+     * Informa se a peça está encostada: não dá para descer nem uma linha.
+     *
+     * @return {@code true} se ela está sobre o fundo ou sobre um bloco
+     */
+    public boolean apoiada() {
+        return tabuleiro.colide(peca, linha + 1, coluna);
+    }
+
     private int linhaDePouso() {
         int pouso = linha;
         while (!tabuleiro.colide(peca, pouso + 1, coluna)) {

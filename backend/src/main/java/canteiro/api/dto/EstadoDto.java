@@ -7,6 +7,7 @@ import canteiro.modelo.Placar;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.fisica.Estabilidade;
+import canteiro.modelo.metas.Meta;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.ArrayList;
@@ -25,14 +26,17 @@ import java.util.List;
  * @param pecaAtual    peça caindo, ou {@code null}
  * @param pecaFantasma onde a peça atual vai pousar, como pares [linha, coluna]
  * @param proximas     as três próximas peças, com as células da forma relativas ao quadrado dela
+ * @param reservada    peça guardada na reserva, com as células da forma, ou {@code null} se não há
+ * @param podeReservar se a troca com a reserva está liberada nesta peça
  * @param placar       pontuação, linhas, nível, colapsos e tempo
  * @param estabilidade índice, desvio, limite, centro de massa, eixo e alerta
+ * @param meta         a meta do nível, com o progresso, ou {@code null} se não houver
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
 public record EstadoDto(String tipo, long ciclo, String estado, List<List<String>> tabuleiro, PecaDto pecaAtual,
-                        List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PlacarDto placar,
-                        EstabilidadeDto estabilidade) {
+                        List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PecaDto reservada,
+                        boolean podeReservar, PlacarDto placar, EstabilidadeDto estabilidade, MetaDto meta) {
 
     /** Valor de {@code tipo}. */
     public static final String TIPO = "ESTADO";
@@ -48,11 +52,15 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      */
     public static EstadoDto de(MotorJogo motor) {
         Peca atual = motor.pecaAtual();
+        Peca reservada = motor.pecaReservada();
         return new EstadoDto(TIPO, motor.ciclo(), motor.estado().name(), grade(motor),
                 atual == null ? null : PecaDto.de(atual, motor.celulasPecaAtual()),
                 pares(motor.celulasFantasma()),
                 motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
-                PlacarDto.de(motor.placar(), motor.ciclo()), EstabilidadeDto.de(motor.estabilidade()));
+                reservada == null ? null : PecaDto.de(reservada, reservada.celulas()), motor.podeReservar(),
+                PlacarDto.de(motor.placar(), motor.ciclo()),
+                EstabilidadeDto.de(motor.estabilidade(), motor.previa()),
+                motor.meta() == null ? null : MetaDto.de(motor.meta()));
     }
 
     private static List<List<String>> grade(MotorJogo motor) {
@@ -95,12 +103,13 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      * @param nivel         nível atual
      * @param colapsos      quantos colapsos houve
      * @param tempoSegundos tempo de jogo, sem contar as pausas
+     * @param sequencia     quantas peças seguidas fecharam linha (RN18)
      */
-    public record PlacarDto(int pontuacao, int linhas, int nivel, int colapsos, long tempoSegundos) {
+    public record PlacarDto(int pontuacao, int linhas, int nivel, int colapsos, long tempoSegundos, int sequencia) {
 
         static PlacarDto de(Placar placar, long ciclo) {
             return new PlacarDto(placar.pontuacao(), placar.linhas(), placar.nivel(), placar.colapsos(),
-                    ciclo / Tempo.CICLOS_POR_SEGUNDO);
+                    ciclo / Tempo.CICLOS_POR_SEGUNDO, placar.sequencia());
         }
     }
 
@@ -113,12 +122,46 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      * @param centroDeMassa em colunas a partir da borda esquerda
      * @param eixo          meio da base de apoio, em colunas
      * @param alerta        se está perto de desabar
+     * @param previa        como a estrutura ficaria com a peça atual pousada na posição da peça
+     *                      fantasma, ou {@code null} se não há peça caindo
      */
     public record EstabilidadeDto(double indice, double desvio, double limite, double centroDeMassa, double eixo,
-                                  boolean alerta) {
+                                  boolean alerta, PreviaDto previa) {
 
-        static EstabilidadeDto de(Estabilidade e) {
-            return new EstabilidadeDto(e.indice(), e.desvio(), e.limite(), e.centroDeMassa(), e.eixo(), e.alerta());
+        static EstabilidadeDto de(Estabilidade e, Estabilidade previa) {
+            return new EstabilidadeDto(e.indice(), e.desvio(), e.limite(), e.centroDeMassa(), e.eixo(), e.alerta(),
+                    previa == null ? null : PreviaDto.de(previa));
+        }
+    }
+
+    /**
+     * A estabilidade prevista para a jogada da peça atual.
+     *
+     * @param indice        de 1 a 0
+     * @param desvio        em colunas
+     * @param centroDeMassa em colunas a partir da borda esquerda
+     * @param eixo          meio da base de apoio, em colunas
+     * @param derruba       se a jogada passaria do limite e causaria colapso
+     */
+    public record PreviaDto(double indice, double desvio, double centroDeMassa, double eixo, boolean derruba) {
+
+        static PreviaDto de(Estabilidade e) {
+            return new PreviaDto(e.indice(), e.desvio(), e.centroDeMassa(), e.eixo(), e.passouDoLimite());
+        }
+    }
+
+    /**
+     * A meta do nível (RN19).
+     *
+     * @param descricao o que fazer, numa frase
+     * @param progresso quanto já foi feito
+     * @param alvo      quanto é preciso
+     * @param cumprida  se a meta já foi cumprida neste nível
+     */
+    public record MetaDto(String descricao, int progresso, int alvo, boolean cumprida) {
+
+        static MetaDto de(Meta meta) {
+            return new MetaDto(meta.descricao(), meta.progresso(), meta.alvo(), meta.cumprida());
         }
     }
 }
