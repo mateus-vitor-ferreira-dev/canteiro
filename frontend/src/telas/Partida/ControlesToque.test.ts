@@ -38,4 +38,26 @@ describe("ControlesToque", () => {
         await fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
         expect(aoComando).toHaveBeenCalledWith("RETOMAR");
     });
+
+    it("segurar mover repete o comando até soltar; o clique do dedo não manda de novo", async () => {
+        vi.useFakeTimers();
+        const aoComando = vi.fn();
+        render(ControlesToque, { aoComando, pausada: false });
+        const esquerda = screen.getByRole("button", { name: "Mover para a esquerda" });
+
+        await fireEvent.pointerDown(esquerda, { button: 0 });
+        expect(aoComando).toHaveBeenCalledTimes(1);
+        vi.advanceTimersByTime(170 + 55 * 3);
+        expect(aoComando).toHaveBeenCalledTimes(4);
+        await fireEvent.pointerUp(esquerda);
+        await fireEvent.click(esquerda, { detail: 1 });
+        vi.advanceTimersByTime(1000);
+        expect(aoComando).toHaveBeenCalledTimes(4);
+        vi.useRealTimers();
+    });
+
+    it("a queda instantânea ocupa duas colunas fora do treino", () => {
+        render(ControlesToque, { aoComando: vi.fn(), pausada: false });
+        expect(screen.getByRole("button", { name: "Queda instantânea" })).toHaveClass("largo");
+    });
 });

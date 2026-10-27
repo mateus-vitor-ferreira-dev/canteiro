@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
+import { fireEvent, render, screen, within } from "@testing-library/svelte";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushSync } from "svelte";
 import type { OuvinteConexao } from "@/api/conexao";
@@ -40,10 +40,21 @@ describe("Partida", () => {
     it("mostra o placar, a estabilidade e a legenda", () => {
         const { receber } = montar();
         receber(estadoDeTeste());
-        expect(screen.getByText("1.234")).toBeInTheDocument();
+        const placar = screen.getByRole("region", { name: "Placar" });
+        expect(within(placar).getByText("1.234")).toBeInTheDocument();
         expect(screen.getByText("68 %")).toBeInTheDocument();
         expect(screen.getByText("Queda instantânea")).toBeInTheDocument();
-        expect(screen.getByLabelText("Peça O de Aço")).toBeInTheDocument();
+        const [fila] = screen.getAllByRole("region", { name: "Próximas peças" });
+        expect(within(fila as HTMLElement).getByLabelText("Peça O de Aço")).toBeInTheDocument();
+    });
+
+    it("no celular, o resumo compacto traz pontos, estabilidade e a meta", () => {
+        const { receber } = montar();
+        receber(estadoDeTeste());
+        const resumo = screen.getByRole("region", { name: "Resumo da partida" });
+        expect(within(resumo).getByText("1.234")).toBeInTheDocument();
+        expect(within(resumo).getByText("68%")).toBeInTheDocument();
+        expect(within(resumo).getByText(/Elimine 3 linhas ou mais/)).toBeInTheDocument();
     });
 
     it("transforma teclas em comandos, sem repetir a tecla segurada", async () => {

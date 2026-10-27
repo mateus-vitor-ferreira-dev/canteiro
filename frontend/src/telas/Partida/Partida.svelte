@@ -12,6 +12,9 @@
     import { comandoDoEvento } from "@/estado/teclado";
     import FaixaModo from "./FaixaModo.svelte";
     import MetaDoNivel from "./MetaDoNivel.svelte";
+    import MiniaturasCompactas from "./MiniaturasCompactas.svelte";
+    import ResumoCompacto from "./ResumoCompacto.svelte";
+    import { vibrarNoEvento } from "@/util/vibracao";
     import CamadaPartida from "./CamadaPartida.svelte";
     import ColunaApoio from "./ColunaApoio.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -52,7 +55,10 @@
     $effect(() => {
         const evento = partida.ultimoEvento;
         if (evento) {
-            untrack(() => som.tocar(evento));
+            untrack(() => {
+                som.tocar(evento);
+                vibrarNoEvento(evento);
+            });
         }
     });
 
@@ -60,7 +66,7 @@
     let alturaJanela = $state(800);
 
     /** O tabuleiro cresce e encolhe com a janela. */
-    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela));
+    const celula = $derived(celulaParaJanela(larguraJanela, alturaJanela, treino || repeticao));
 
     const anuncio = $derived(
         partida.ultimoEvento
@@ -122,9 +128,26 @@
 
     <div class="jogo">
         <FaixaModo {treino} {repeticao} />
-        <div class="palco">
-            <Tabuleiro estado={partida.estado} evento={partida.ultimoEvento} {celula} />
-            <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
+        {#if partida.estado}
+            <div class="so-celular resumo">
+                <ResumoCompacto estado={partida.estado} {som} />
+            </div>
+        {/if}
+        <div class="mesa">
+            <div class="palco">
+                <Tabuleiro
+                    estado={partida.estado}
+                    evento={partida.ultimoEvento}
+                    {celula}
+                    aoComando={aoTocar}
+                />
+                <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
+            </div>
+            {#if partida.estado}
+                <div class="so-celular">
+                    <MiniaturasCompactas estado={partida.estado} />
+                </div>
+            {/if}
         </div>
 
         <ControlesToque
@@ -139,29 +162,54 @@
 </div>
 
 <style>
-    /* Celular: uma coluna, com o placar em cima e os botões embaixo do tabuleiro. */
+    /*
+     * Celular: tudo numa tela, sem rolar. O resumo em cima, o tabuleiro com as
+     * miniaturas ao lado e as duas linhas de botões embaixo. Placar, painel e
+     * legendas completos ficam para as telas maiores.
+     */
     .partida {
         display: grid;
-        grid-template-areas: "lateral" "jogo" "aside";
-        gap: 1rem;
+        grid-template-areas: "jogo";
         justify-items: center;
     }
-    .lateral {
-        grid-area: lateral;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        width: 100%;
+    .lateral,
+    .partida > :global(aside) {
+        display: none;
     }
     /* O tabuleiro e os botões de toque ficam sempre juntos. */
     .jogo {
         grid-area: jogo;
         display: grid;
-        gap: 1rem;
+        gap: 0.5rem;
         justify-items: center;
+        width: 100%;
+    }
+    .resumo {
+        width: 100%;
+    }
+    .mesa {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-start;
     }
     .palco {
         position: relative;
+    }
+    @media (min-width: 768px) {
+        .so-celular {
+            display: none;
+        }
+        .lateral {
+            grid-area: lateral;
+            display: grid;
+        }
+        .partida > :global(aside) {
+            display: block;
+        }
+        .jogo {
+            gap: 1rem;
+            width: auto;
+        }
     }
     /* Tablet: o tabuleiro à esquerda e todo o resto numa coluna ao lado. */
     @media (min-width: 768px) {
