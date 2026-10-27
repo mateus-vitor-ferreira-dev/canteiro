@@ -7,6 +7,7 @@ import canteiro.modelo.Placar;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.fisica.Estabilidade;
+import canteiro.modelo.metas.Meta;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.ArrayList;
@@ -29,12 +30,13 @@ import java.util.List;
  * @param podeReservar se a troca com a reserva está liberada nesta peça
  * @param placar       pontuação, linhas, nível, colapsos e tempo
  * @param estabilidade índice, desvio, limite, centro de massa, eixo e alerta
+ * @param meta         a meta do nível, com o progresso, ou {@code null} se não houver
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
 public record EstadoDto(String tipo, long ciclo, String estado, List<List<String>> tabuleiro, PecaDto pecaAtual,
                         List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PecaDto reservada,
-                        boolean podeReservar, PlacarDto placar, EstabilidadeDto estabilidade) {
+                        boolean podeReservar, PlacarDto placar, EstabilidadeDto estabilidade, MetaDto meta) {
 
     /** Valor de {@code tipo}. */
     public static final String TIPO = "ESTADO";
@@ -57,7 +59,8 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
                 motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
                 reservada == null ? null : PecaDto.de(reservada, reservada.celulas()), motor.podeReservar(),
                 PlacarDto.de(motor.placar(), motor.ciclo()),
-                EstabilidadeDto.de(motor.estabilidade(), motor.previa()));
+                EstabilidadeDto.de(motor.estabilidade(), motor.previa()),
+                motor.meta() == null ? null : MetaDto.de(motor.meta()));
     }
 
     private static List<List<String>> grade(MotorJogo motor) {
@@ -144,6 +147,21 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
 
         static PreviaDto de(Estabilidade e) {
             return new PreviaDto(e.indice(), e.desvio(), e.centroDeMassa(), e.eixo(), e.passouDoLimite());
+        }
+    }
+
+    /**
+     * A meta do nível (RN19).
+     *
+     * @param descricao o que fazer, numa frase
+     * @param progresso quanto já foi feito
+     * @param alvo      quanto é preciso
+     * @param cumprida  se a meta já foi cumprida neste nível
+     */
+    public record MetaDto(String descricao, int progresso, int alvo, boolean cumprida) {
+
+        static MetaDto de(Meta meta) {
+            return new MetaDto(meta.descricao(), meta.progresso(), meta.alvo(), meta.cumprida());
         }
     }
 }

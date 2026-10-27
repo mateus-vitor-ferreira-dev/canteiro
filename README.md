@@ -103,6 +103,7 @@ Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e
 | ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente. Um anel no tabuleiro mostra **onde o centro de massa vai parar** com a jogada da peça atual |
 | 🎯 **Obra ousada** | Fechar linha com a estabilidade abaixo de **25 %** vale **50 % a mais**: arriscar compensa |
 | 🔗 **Sequência** | Cada peça seguida que fecha linha soma **10 %** aos pontos da próxima eliminação, até o dobro |
+| 🏅 **Meta do nível** | Cada nível sorteia um objetivo curto, como "elimine 3 linhas de uma vez". Cumprir vale **500 × nível** pontos |
 | 💥 **Colapso** | Desvio acima do limite: os blocos acima da linha crítica caem, a pontuação perde o equivalente a **2 linhas** e o contador de colapsos sobe |
 | 📈 **Nível** | Sobe a cada **10 linhas**. A queda acelera e o desvio tolerado diminui |
 | 🏁 **Fim** | Quando uma peça nasce já colidindo, ou quando há um colapso com a pilha acima de **18 linhas** |
@@ -204,7 +205,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ### Regras de negócio
 
 <details>
-<summary><strong>RN01 – RN18</strong>: as regras do jogo, todas no backend</summary>
+<summary><strong>RN01 – RN19</strong>: as regras do jogo, todas no backend</summary>
 
 | Código | Regra |
 |---|---|
@@ -226,6 +227,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RN16 | O elemento que a gravidade encosta no apoio espera 500 ms antes de ser fixado. Mover ou girar nesse tempo recomeça a espera, até 15 vezes por elemento. Descer à mão sobre o apoio e a queda instantânea fixam na hora |
 | RN17 | Eliminar linhas com o índice de estabilidade abaixo de 25 %, medido depois de o elemento assentar e antes de as linhas sumirem, é uma obra ousada e vale 50 % a mais |
 | RN18 | Cada elemento seguido que elimina linha soma 10 % aos pontos da eliminação seguinte, até 100 %. Um elemento que não elimina linha ou um colapso zera a sequência |
+| RN19 | Cada nível tem uma meta, sorteada pela semente da partida entre: eliminar 2 linhas com o material mais pesado do nível predominando, eliminar 3 linhas ou mais de uma vez, eliminar 4 linhas sem o índice cair abaixo de 50 % ou fechar uma linha numa obra ousada. Cumprir a meta soma 500 × nível pontos, uma vez por nível; a meta não cumprida é trocada no nível seguinte, sem desconto |
 
 </details>
 
@@ -431,6 +433,7 @@ canteiro/
 │   │   │   │   │   ├── materiais/   Material + os 4 materiais
 │   │   │   │   │   ├── estruturas/  sacola, fila, pilha, histórico
 │   │   │   │   │   ├── fisica/      centro de massa, estabilidade, colapso
+│   │   │   │   │   ├── metas/       a meta de cada nível e o sorteio
 │   │   │   │   │   └── constantes/  dimensões e limites do jogo
 │   │   │   │   └── persistencia/    ranking, materiais, repetições
 │   │   │   └── resources/
@@ -487,6 +490,7 @@ canteiro/
 | `modelo/materiais/` | `Material` (abstrata) e os 4 materiais | A segunda hierarquia, independente da primeira. A cor é um número RGB, não `java.awt.Color` | ❌ |
 | `modelo/estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
 | `modelo/fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
+| `modelo/metas/` | `Meta` (interface), um tipo de meta por classe e o `QuadroMetas`, que sorteia a do nível | Uma meta nova é uma classe nova, sem mexer no motor | ❌ |
 | `modelo/constantes/` | `COLUNAS = 10`, `LINHAS = 20`... | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 | `persistencia/` | Catálogo de materiais, configurações, ranking, repetições | Arquivo tem outro tipo de erro (sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
 

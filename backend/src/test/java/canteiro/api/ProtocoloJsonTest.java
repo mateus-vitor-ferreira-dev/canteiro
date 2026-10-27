@@ -60,7 +60,8 @@ class ProtocoloJsonTest {
         JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motorComUmaPeca())));
 
         assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
-                "reservada", "podeReservar", "placar", "estabilidade"), campos(estado));
+                "reservada", "podeReservar", "placar", "estabilidade", "meta"), campos(estado));
+        assertEquals(List.of("descricao", "progresso", "alvo", "cumprida"), campos(estado.get("meta")));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
         assertEquals(List.of("pontuacao", "linhas", "nivel", "colapsos", "tempoSegundos", "sequencia"),
                 campos(estado.get("placar")));

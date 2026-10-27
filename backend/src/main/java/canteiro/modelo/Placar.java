@@ -72,6 +72,19 @@ public final class Placar {
     }
 
     /**
+     * Soma um bônus, como o da meta cumprida (RN19).
+     *
+     * @param pontos pontos a somar, não negativos
+     * @throws IllegalArgumentException se os pontos forem negativos
+     */
+    public void registrarBonus(int pontos) {
+        if (pontos < 0) {
+            throw new IllegalArgumentException("bônus negativo: " + pontos);
+        }
+        pontuacao += pontos;
+    }
+
+    /**
      * Uma peça assentou sem fechar linha: a sequência zera (RN18).
      */
     public void quebrarSequencia() {

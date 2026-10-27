@@ -17,6 +17,10 @@ export function anuncioDoEvento(evento: EventoDto, nivel?: number): string | nul
         }
         case "COLAPSO":
             return "A estrutura desabou!";
+        case "META_CUMPRIDA":
+            return evento.dados.pontos
+                ? `Meta cumprida! Mais ${evento.dados.pontos} pontos`
+                : "Meta cumprida!";
         case "NIVEL_SUBIU":
             return nivel ? `Subiu para o nível ${nivel}` : "Subiu de nível";
         case "FIM_DE_JOGO":

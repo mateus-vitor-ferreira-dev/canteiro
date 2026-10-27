@@ -6,6 +6,9 @@ import canteiro.modelo.fisica.AnalisadorEstrutural;
 import canteiro.modelo.fisica.Colapso;
 import canteiro.modelo.fisica.Estabilidade;
 import canteiro.modelo.materiais.Material;
+import canteiro.modelo.metas.Lance;
+import canteiro.modelo.metas.Meta;
+import canteiro.modelo.metas.QuadroMetas;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -13,7 +16,8 @@ import java.util.function.Consumer;
 /**
  * O que acontece depois que a peça assenta: ela entra na conta da massa, as
  * linhas completas somem e pontuam, o nível sobe e, se a estrutura perdeu o
- * equilíbrio, ela desaba (RF11 a RF18).
+ * equilíbrio, ela desaba (RF11 a RF18). No fim, o lance conta na meta do
+ * nível (RN19).
  *
  * <p>Fica fora do {@link MotorJogo} para ele continuar só coordenando: o motor
  * decide <em>quando</em> a peça assenta; esta classe, <em>o que vem depois</em>.</p>
@@ -29,6 +33,9 @@ final class Assentamento {
     private final FontePecas fonte;
     private final Consumer<EventoPartida> emitir;
     private final Consumer<EstadoPartida> passarPor;
+    private final QuadroMetas metas;
+    private Material predominante;
+    private boolean subiu;
 
     /**
      * @param tabuleiro  onde a peça assenta
@@ -46,6 +53,8 @@ final class Assentamento {
         this.fonte = fonte;
         this.emitir = emitir;
         this.passarPor = passarPor;
+        this.metas = new QuadroMetas(fonte.semente(), Pontuacao.LIMIAR_OUSADIA);
+        comecarNivel();
     }
 
     /**
@@ -61,10 +70,46 @@ final class Assentamento {
         }
         emitir.accept(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
         boolean ousada = Pontuacao.ousada(estabilidade().indice());
-        if (!eliminarLinhas(ousada)) {
+        int nivel = placar.nivel();
+        predominante = null;
+        subiu = false;
+        int linhas = eliminarLinhas(ousada);
+        if (linhas == 0) {
             placar.quebrarSequencia();
         }
-        return estabilidade().passouDoLimite() && desabou();
+        boolean desaba = estabilidade().passouDoLimite();
+        boolean acabou = desaba && desabou();
+        if (!acabou) {
+            contarNaMeta(new Lance(linhas, predominante == null ? null : predominante.codigo(), ousada && linhas > 0,
+                    estabilidade().indice(), desaba), nivel);
+        }
+        return acabou;
+    }
+
+    /**
+     * A meta do nível atual (RN19).
+     *
+     * @return a meta
+     */
+    Meta meta() {
+        return metas.atual();
+    }
+
+    /** Conta o lance na meta do nível em que ele foi feito; se o nível subiu, sorteia a meta nova. */
+    private void contarNaMeta(Lance lance, int nivel) {
+        if (metas.registrar(lance)) {
+            int bonus = QuadroMetas.bonus(nivel);
+            placar.registrarBonus(bonus);
+            emitir.accept(new EventoPartida(EventoPartida.Tipo.META_CUMPRIDA, List.of(), List.of(), bonus, false));
+        }
+        if (subiu) {
+            comecarNivel();
+        }
+    }
+
+    private void comecarNivel() {
+        List<String> liberados = Progressao.materiaisLiberados(placar.nivel());
+        metas.comecarNivel(placar.nivel(), liberados.get(liberados.size() - 1));
     }
 
     /**
@@ -80,15 +125,15 @@ final class Assentamento {
      * Elimina as linhas completas e soma os pontos.
      *
      * @param ousada se a estrutura estava perto de cair ao fechar as linhas (RN17)
-     * @return {@code true} se alguma linha foi eliminada
+     * @return quantas linhas foram eliminadas
      */
-    private boolean eliminarLinhas(boolean ousada) {
+    private int eliminarLinhas(boolean ousada) {
         List<Integer> completas = tabuleiro.linhasCompletas();
         if (completas.isEmpty()) {
-            return false;
+            return 0;
         }
         passarPor.accept(EstadoPartida.ELIMINANDO_LINHAS);
-        Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
+        predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
         for (int linhaCompleta : completas) {
             for (int c = 0; c < Dimensoes.COLUNAS; c++) {
                 analisador.remover(new Celula(linhaCompleta, c), tabuleiro.bloco(linhaCompleta, c).material());
@@ -96,14 +141,14 @@ final class Assentamento {
         }
         tabuleiro.eliminarLinhasCompletas();
         int antes = placar.pontuacao();
-        boolean subiu = placar.registrarLinhas(completas.size(), predominante, ousada);
+        subiu = placar.registrarLinhas(completas.size(), predominante, ousada);
         emitir.accept(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas, List.of(),
                 placar.pontuacao() - antes, ousada));
         if (subiu) {
             fonte.nivelMudou(placar.nivel());
             emitir.accept(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
         }
-        return true;
+        return completas.size();
     }
 
     /**

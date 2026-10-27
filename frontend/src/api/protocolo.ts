@@ -176,6 +176,14 @@ export type PreviaDto = {
     derruba: boolean;
 };
 
+/** A meta do nível, com o progresso (RN19). Espelho de `EstadoDto.MetaDto`. */
+export type MetaDto = {
+    descricao: string;
+    progresso: number;
+    alvo: number;
+    cumprida: boolean;
+};
+
 /** O estado completo, enviado a cada mudança. Espelho de `EstadoDto`. */
 export type EstadoDto = {
     tipo: "ESTADO";
@@ -192,11 +200,19 @@ export type EstadoDto = {
     podeReservar: boolean;
     placar: PlacarDto;
     estabilidade: EstabilidadeDto;
+    /** A meta do nível, ou `null` se não houver. */
+    meta: MetaDto | null;
 };
 
 /** Tipos de evento. Espelho de `EventoPartida.Tipo`, mais o `ERRO` do canal. */
 export type TipoEvento =
-    "PECA_FIXADA" | "LINHAS_ELIMINADAS" | "COLAPSO" | "NIVEL_SUBIU" | "FIM_DE_JOGO" | "ERRO";
+    | "PECA_FIXADA"
+    | "LINHAS_ELIMINADAS"
+    | "COLAPSO"
+    | "NIVEL_SUBIU"
+    | "META_CUMPRIDA"
+    | "FIM_DE_JOGO"
+    | "ERRO";
 
 /** Um bloco que caiu no colapso. Espelho de `EventoDto.QuedaDto`. */
 export type QuedaDto = {

@@ -7,6 +7,7 @@ import canteiro.modelo.estruturas.Jogada;
 import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
 import canteiro.modelo.fisica.Estabilidade;
+import canteiro.modelo.metas.Meta;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.List;
@@ -324,6 +325,15 @@ public final class MotorJogo {
      */
     public Estabilidade estabilidade() {
         return assentamento.estabilidade();
+    }
+
+    /**
+     * A meta do nível atual, com o progresso (RN19).
+     *
+     * @return a meta
+     */
+    public Meta meta() {
+        return assentamento.meta();
     }
 
     /**

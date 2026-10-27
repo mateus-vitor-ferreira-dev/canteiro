@@ -74,9 +74,21 @@ const COLAPSO: readonly Nota[] = [
     },
 ];
 
+/** Meta cumprida: o arpejo inteiro, rápido, e o dó de cima sustentado. */
+const META: readonly Nota[] = [
+    ...ARPEJO_HZ.map((frequencia, i): Nota => ({
+        onda: "square",
+        inicio: i * 0.05,
+        duracao: 0.1,
+        frequencia,
+        ganho: 0.12,
+    })),
+    { onda: "triangle", inicio: 0.2, duracao: 0.6, frequencia: 1046.5, ganho: 0.3 },
+];
+
 /**
- * O que tocar para cada evento da partida (RF28): fixação, linhas eliminadas
- * e colapso. Os outros eventos não têm som.
+ * O que tocar para cada evento da partida (RF28): fixação, linhas eliminadas,
+ * colapso e meta cumprida. Os outros eventos não têm som.
  *
  * @returns as notas, ou lista vazia se o evento é silencioso
  */
@@ -88,6 +100,8 @@ export function receitaDoEvento(evento: EventoDto): readonly Nota[] {
             return arpejo(evento.dados.linhas?.length ?? 1);
         case "COLAPSO":
             return COLAPSO;
+        case "META_CUMPRIDA":
+            return META;
         default:
             return [];
     }
