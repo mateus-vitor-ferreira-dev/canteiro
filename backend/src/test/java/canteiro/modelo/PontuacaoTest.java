@@ -67,4 +67,32 @@ class PontuacaoTest {
         assertThrows(IllegalArgumentException.class, () -> Pontuacao.pontos(1, 0, madeira));
         assertThrows(IllegalArgumentException.class, () -> Pontuacao.predominante(List.of()));
     }
+
+    @Test
+    void obraOusadaVale50PorCentoAMais() {
+        assertEquals(165, Pontuacao.pontos(1, 1, madeira, true, 0));
+        assertTrue(Pontuacao.ousada(0.24));
+        assertTrue(Pontuacao.ousada(0));
+        assertTrue(!Pontuacao.ousada(0.25));
+    }
+
+    @Test
+    void sequenciaSoma10PorCentoPorPecaAte100() {
+        assertEquals(1.0, Pontuacao.bonusSequencia(0), 1e-9);
+        assertEquals(1.3, Pontuacao.bonusSequencia(3), 1e-9);
+        assertEquals(2.0, Pontuacao.bonusSequencia(10), 1e-9);
+        assertEquals(2.0, Pontuacao.bonusSequencia(25), 1e-9);
+        assertEquals(143, Pontuacao.pontos(1, 1, madeira, false, 3));
+    }
+
+    @Test
+    void bonusSeMultiplicam() {
+        // 800 × nível 2 × aço 1,4 × ousada 1,5 × sequência 2
+        assertEquals(6720, Pontuacao.pontos(4, 2, aco, true, 10));
+    }
+
+    @Test
+    void sequenciaNegativaEhRecusada() {
+        assertThrows(IllegalArgumentException.class, () -> Pontuacao.pontos(1, 1, madeira, false, -1));
+    }
 }

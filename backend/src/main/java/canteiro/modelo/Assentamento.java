@@ -60,7 +60,10 @@ final class Assentamento {
             analisador.registrar(celula, peca.peca().material());
         }
         emitir.accept(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
-        eliminarLinhas();
+        boolean ousada = Pontuacao.ousada(estabilidade().indice());
+        if (!eliminarLinhas(ousada)) {
+            placar.quebrarSequencia();
+        }
         return estabilidade().passouDoLimite() && desabou();
     }
 
@@ -73,10 +76,16 @@ final class Assentamento {
         return analisador.estabilidade(tabuleiro, Progressao.limiteDesvio(placar.nivel()));
     }
 
-    private void eliminarLinhas() {
+    /**
+     * Elimina as linhas completas e soma os pontos.
+     *
+     * @param ousada se a estrutura estava perto de cair ao fechar as linhas (RN17)
+     * @return {@code true} se alguma linha foi eliminada
+     */
+    private boolean eliminarLinhas(boolean ousada) {
         List<Integer> completas = tabuleiro.linhasCompletas();
         if (completas.isEmpty()) {
-            return;
+            return false;
         }
         passarPor.accept(EstadoPartida.ELIMINANDO_LINHAS);
         Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
@@ -86,11 +95,15 @@ final class Assentamento {
             }
         }
         tabuleiro.eliminarLinhasCompletas();
-        emitir.accept(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
-        if (placar.registrarLinhas(completas.size(), predominante)) {
+        int antes = placar.pontuacao();
+        boolean subiu = placar.registrarLinhas(completas.size(), predominante, ousada);
+        emitir.accept(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas, List.of(),
+                placar.pontuacao() - antes, ousada));
+        if (subiu) {
             fonte.nivelMudou(placar.nivel());
             emitir.accept(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
         }
+        return true;
     }
 
     /**
@@ -103,8 +116,10 @@ final class Assentamento {
         passarPor.accept(EstadoPartida.COLAPSO);
         boolean altaDemais = tabuleiro.alturaPilha() > Dimensoes.ALTURA_LIMITE_COLAPSO;
         List<Queda> quedas = Colapso.executar(tabuleiro);
+        int antes = placar.pontuacao();
         placar.registrarColapso();
-        emitir.accept(new EventoPartida(EventoPartida.Tipo.COLAPSO, List.of(), quedas));
+        emitir.accept(new EventoPartida(EventoPartida.Tipo.COLAPSO, List.of(), quedas, placar.pontuacao() - antes,
+                false));
         if (altaDemais) {
             passarPor.accept(EstadoPartida.FIM_DE_JOGO);
             emitir.accept(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO));

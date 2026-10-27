@@ -12,7 +12,8 @@ export function anuncioDoEvento(evento: EventoDto, nivel?: number): string | nul
     switch (evento.evento) {
         case "LINHAS_ELIMINADAS": {
             const n = evento.dados.linhas?.length ?? 0;
-            return n === 1 ? "1 linha eliminada" : `${n} linhas eliminadas`;
+            const linhas = n === 1 ? "1 linha eliminada" : `${n} linhas eliminadas`;
+            return evento.dados.ousada ? `${linhas}. Obra ousada!` : linhas;
         }
         case "COLAPSO":
             return "A estrutura desabou!";

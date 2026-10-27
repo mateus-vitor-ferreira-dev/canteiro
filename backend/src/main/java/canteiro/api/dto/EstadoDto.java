@@ -100,12 +100,13 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      * @param nivel         nível atual
      * @param colapsos      quantos colapsos houve
      * @param tempoSegundos tempo de jogo, sem contar as pausas
+     * @param sequencia     quantas peças seguidas fecharam linha (RN18)
      */
-    public record PlacarDto(int pontuacao, int linhas, int nivel, int colapsos, long tempoSegundos) {
+    public record PlacarDto(int pontuacao, int linhas, int nivel, int colapsos, long tempoSegundos, int sequencia) {
 
         static PlacarDto de(Placar placar, long ciclo) {
             return new PlacarDto(placar.pontuacao(), placar.linhas(), placar.nivel(), placar.colapsos(),
-                    ciclo / Tempo.CICLOS_POR_SEGUNDO);
+                    ciclo / Tempo.CICLOS_POR_SEGUNDO, placar.sequencia());
         }
     }
 

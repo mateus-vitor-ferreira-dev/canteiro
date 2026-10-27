@@ -16,6 +16,14 @@ describe("anuncioDoEvento", () => {
         );
     });
 
+    it("anuncia a obra ousada", () => {
+        expect(
+            anuncioDoEvento(
+                evento("LINHAS_ELIMINADAS", { linhas: [21], pontos: 165, ousada: true }),
+            ),
+        ).toBe("1 linha eliminada. Obra ousada!");
+    });
+
     it("avisa o colapso, a subida de nível e o fim de jogo", () => {
         expect(anuncioDoEvento(evento("COLAPSO"))).toBe("A estrutura desabou!");
         expect(anuncioDoEvento(evento("NIVEL_SUBIU"), 4)).toBe("Subiu para o nível 4");

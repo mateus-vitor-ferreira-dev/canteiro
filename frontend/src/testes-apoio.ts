@@ -38,7 +38,14 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
         ],
         reservada: null,
         podeReservar: true,
-        placar: { pontuacao: 1234, linhas: 7, nivel: 2, colapsos: 1, tempoSegundos: 60 },
+        placar: {
+            pontuacao: 1234,
+            linhas: 7,
+            nivel: 2,
+            colapsos: 1,
+            tempoSegundos: 60,
+            sequencia: 0,
+        },
         estabilidade: {
             indice: 0.68,
             desvio: 1.4,

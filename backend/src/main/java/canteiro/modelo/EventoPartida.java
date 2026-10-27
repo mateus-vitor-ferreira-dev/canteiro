@@ -9,10 +9,13 @@ import java.util.List;
  * @param tipo   o que aconteceu
  * @param linhas linhas envolvidas, como as eliminadas; vazia quando não se aplica
  * @param quedas blocos que caíram no colapso, com origem e destino; vazia quando não se aplica
+ * @param pontos quanto a pontuação mudou: o ganho de uma eliminação, ou o desconto (negativo) de um
+ *               colapso; zero quando não se aplica
+ * @param ousada se as linhas foram fechadas com a estrutura perto de cair (RN17)
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
-public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas) {
+public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas, int pontos, boolean ousada) {
 
     /**
      * Cria o evento com cópias imutáveis das listas.
@@ -20,10 +23,23 @@ public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas)
      * @param tipo   o que aconteceu
      * @param linhas linhas envolvidas
      * @param quedas blocos que caíram
+     * @param pontos quanto a pontuação mudou
+     * @param ousada se foi uma obra ousada
      */
     public EventoPartida {
         linhas = List.copyOf(linhas);
         quedas = List.copyOf(quedas);
+    }
+
+    /**
+     * Cria um evento sem mudança de pontos.
+     *
+     * @param tipo   o que aconteceu
+     * @param linhas linhas envolvidas
+     * @param quedas blocos que caíram
+     */
+    public EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas) {
+        this(tipo, linhas, quedas, 0, false);
     }
 
     /**

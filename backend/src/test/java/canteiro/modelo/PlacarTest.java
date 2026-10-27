@@ -42,6 +42,7 @@ class PlacarTest {
         Placar placar = new Placar(1);
         placar.registrarLinhas(4, madeira);
         placar.registrarLinhas(4, madeira);
+        placar.quebrarSequencia();
         int antes = placar.pontuacao();
         placar.registrarLinhas(4, madeira);
         assertEquals(Pontuacao.pontos(4, 1, madeira), placar.pontuacao() - antes);
@@ -52,6 +53,7 @@ class PlacarTest {
     void acumulaOsPontos() {
         Placar placar = new Placar(2);
         placar.registrarLinhas(1, madeira);
+        placar.quebrarSequencia();
         placar.registrarLinhas(3, madeira);
         assertEquals(Pontuacao.pontos(1, 2, madeira) + Pontuacao.pontos(3, 2, madeira), placar.pontuacao());
     }
@@ -59,5 +61,27 @@ class PlacarTest {
     @Test
     void nivelInicialInvalidoEErro() {
         assertThrows(IllegalArgumentException.class, () -> new Placar(0));
+    }
+
+    @Test
+    void sequenciaCresceAQuebraEOColapsoZeram() {
+        Placar placar = new Placar(1);
+        placar.registrarLinhas(1, madeira);
+        placar.registrarLinhas(1, madeira);
+        assertEquals(2, placar.sequencia());
+        assertEquals(110 + 121, placar.pontuacao(), "a segunda vale 10 % a mais");
+
+        placar.quebrarSequencia();
+        assertEquals(0, placar.sequencia());
+        placar.registrarLinhas(1, madeira);
+        placar.registrarColapso();
+        assertEquals(0, placar.sequencia());
+    }
+
+    @Test
+    void obraOusadaEntraNosPontos() {
+        Placar placar = new Placar(1);
+        placar.registrarLinhas(1, madeira, true);
+        assertEquals(165, placar.pontuacao());
     }
 }

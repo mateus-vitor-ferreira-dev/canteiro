@@ -17,7 +17,11 @@ import java.util.Map;
  *   separadas;</li>
  *   <li>o material predominante nas linhas eliminadas multiplica os pontos
  *   pelo seu bônus: a madeira dá 10 % a mais, o aço 40 % (RN03);</li>
- *   <li>o nível multiplica tudo.</li>
+ *   <li>o nível multiplica tudo;</li>
+ *   <li>a <strong>obra ousada</strong>, a eliminação feita com o índice de
+ *   estabilidade abaixo de 25 %, vale 50 % a mais (RN17);</li>
+ *   <li>a <strong>sequência</strong>, cada peça seguida que fecha linha, soma
+ *   10 % por peça, até 100 % (RN18).</li>
  * </ul>
  *
  * @author Mateus Vitor Ferreira
@@ -27,6 +31,18 @@ public final class Pontuacao {
 
     /** Mais linhas que dá para eliminar de uma vez: a altura da peça I. */
     public static final int MAXIMO_LINHAS = 4;
+
+    /** Abaixo deste índice de estabilidade, fechar linha é uma obra ousada (RN17). */
+    public static final double LIMIAR_OUSADIA = 0.25;
+
+    /** Quanto a obra ousada soma ao multiplicador (RN17). */
+    public static final double BONUS_OUSADIA = 0.5;
+
+    /** Quanto cada peça da sequência soma ao multiplicador (RN18). */
+    public static final double BONUS_POR_SEQUENCIA = 0.1;
+
+    /** Sequência a partir da qual o bônus para de crescer: 10 peças, 100 % (RN18). */
+    public static final int SEQUENCIA_MAXIMA = 10;
 
     private static final int[] BASE = {0, 100, 300, 500, 800};
     private static final double PERCENTUAL = 100.0;
@@ -44,14 +60,54 @@ public final class Pontuacao {
      * @throws IllegalArgumentException se as linhas ou o nível estiverem fora do intervalo
      */
     public static int pontos(int linhas, int nivel, Material predominante) {
+        return pontos(linhas, nivel, predominante, false, 0);
+    }
+
+    /**
+     * Pontos de uma eliminação, com os bônus de risco.
+     *
+     * @param linhas       quantas linhas foram eliminadas de uma vez, de 1 a 4
+     * @param nivel        nível atual, a partir de 1
+     * @param predominante material com mais blocos nas linhas eliminadas
+     * @param ousada       se a estrutura estava abaixo do limiar de ousadia ao fechar as linhas (RN17)
+     * @param sequencia    quantas peças seguidas, antes desta, fecharam linha (RN18)
+     * @return pontos ganhos
+     * @throws IllegalArgumentException se as linhas, o nível ou a sequência estiverem fora do intervalo
+     */
+    public static int pontos(int linhas, int nivel, Material predominante, boolean ousada, int sequencia) {
         if (linhas < 1 || linhas > MAXIMO_LINHAS) {
             throw new IllegalArgumentException("linhas fora do intervalo: " + linhas);
         }
         if (nivel < Progressao.NIVEL_MINIMO) {
             throw new IllegalArgumentException("nível inválido: " + nivel);
         }
-        double multiplicador = 1 + predominante.bonusLinha() / PERCENTUAL;
+        if (sequencia < 0) {
+            throw new IllegalArgumentException("sequência negativa: " + sequencia);
+        }
+        double multiplicador = (1 + predominante.bonusLinha() / PERCENTUAL)
+                * (ousada ? 1 + BONUS_OUSADIA : 1)
+                * bonusSequencia(sequencia);
         return (int) Math.round(BASE[linhas] * nivel * multiplicador);
+    }
+
+    /**
+     * O multiplicador da sequência: 1 sem sequência, 2 com dez peças ou mais (RN18).
+     *
+     * @param sequencia quantas peças seguidas fecharam linha
+     * @return o multiplicador, de 1 a 2
+     */
+    public static double bonusSequencia(int sequencia) {
+        return 1 + BONUS_POR_SEQUENCIA * Math.min(sequencia, SEQUENCIA_MAXIMA);
+    }
+
+    /**
+     * Informa se fechar linha com este índice de estabilidade é uma obra ousada (RN17).
+     *
+     * @param indice índice de estabilidade logo depois de a peça assentar, antes de as linhas sumirem
+     * @return {@code true} abaixo do limiar de ousadia
+     */
+    public static boolean ousada(double indice) {
+        return indice < LIMIAR_OUSADIA;
     }
 
     /**

@@ -149,6 +149,8 @@ export type PlacarDto = {
     nivel: number;
     colapsos: number;
     tempoSegundos: number;
+    /** Quantas peças seguidas fecharam linha: cada uma soma 10 % aos pontos da próxima eliminação, até 100 %. */
+    sequencia: number;
 };
 
 /** Espelho de `EstadoDto.EstabilidadeDto`. */
@@ -209,6 +211,10 @@ export type EventoDto = {
     dados: {
         linhas?: number[];
         quedas?: QuedaDto[];
+        /** Quanto a pontuação mudou: o ganho da eliminação, ou o desconto (negativo) do colapso. */
+        pontos?: number;
+        /** As linhas foram fechadas com a estrutura perto de cair: valem 50 % a mais. */
+        ousada?: boolean;
         mensagem?: string;
     };
 };
