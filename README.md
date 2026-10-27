@@ -201,7 +201,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ### Regras de negócio
 
 <details>
-<summary><strong>RN01 – RN15</strong>: as regras do jogo, todas no backend</summary>
+<summary><strong>RN01 – RN16</strong>: as regras do jogo, todas no backend</summary>
 
 | Código | Regra |
 |---|---|
@@ -220,6 +220,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RN13 | A partida termina se um elemento recém-gerado colidir imediatamente com a estrutura, ou se houver colapso com a pilha ocupando mais de 18 linhas |
 | RN14 | O nível avança a cada 10 linhas eliminadas. A cada nível, o intervalo de queda diminui e o limite de desvio é reduzido |
 | RN15 | Só entram no ranking pontuações de partidas concluídas sem uso do desfazer |
+| RN16 | O elemento que a gravidade encosta no apoio espera 500 ms antes de ser fixado. Mover ou girar nesse tempo recomeça a espera, até 15 vezes por elemento. Descer à mão sobre o apoio e a queda instantânea fixam na hora |
 
 </details>
 
@@ -242,7 +243,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | ✅ | Peças no padrão SRS (#10) e rotação com deslocamento corretivo nos dois sentidos (#21) |
 | RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ✅ | Queda instantânea até o primeiro apoio, com peça fantasma (#20) |
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ✅ | Reserva em pilha, com uma troca por peça, e a peça guardada ao lado do tabuleiro (#13) |
-| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20) |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
 | RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22) |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |

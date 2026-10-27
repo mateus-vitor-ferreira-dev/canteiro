@@ -1,15 +1,12 @@
 package canteiro.modelo;
 
-import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.estruturas.FontePecas;
 import canteiro.modelo.estruturas.HistoricoJogadas;
 import canteiro.modelo.estruturas.Jogada;
 import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
-import canteiro.modelo.fisica.Colapso;
 import canteiro.modelo.fisica.Estabilidade;
-import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.Peca;
 
 import java.util.List;
@@ -23,8 +20,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * <p>O motor <strong>não implementa regra, só delega</strong>: pergunta ao
  * {@link Tabuleiro} se há colisão, pede a ele que fixe e elimine linhas, pede
- * ao {@link AnalisadorEstrutural} a estabilidade, ao {@link Colapso} o
- * desabamento e à {@link FontePecas} a próxima peça. A partida é uma máquina de
+ * ao {@link AnalisadorEstrutural} a estabilidade, à {@link FontePecas} a
+ * próxima peça e ao {@link Assentamento} o que vem depois que a peça assenta:
+ * linhas, pontos, nível e colapso. A partida é uma máquina de
  * estados ({@link EstadoPartida}) e avança em ciclos, não no relógio: a mesma
  * sequência de comandos sempre dá a mesma partida.</p>
  *
@@ -42,8 +40,9 @@ public final class MotorJogo {
     private final AnalisadorEstrutural analisador = new AnalisadorEstrutural();
     private final Reserva reserva = new Reserva();
     private final HistoricoJogadas historico = new HistoricoJogadas();
-    private int ciclosPorQueda;
+    private final AtrasoFixacao atraso = new AtrasoFixacao();
     private final List<ObservadorPartida> observadores = new CopyOnWriteArrayList<>();
+    private final Assentamento assentamento;
 
     private EstadoPartida estado = EstadoPartida.GERANDO_PECA;
     private PecaEmQueda emQueda;
@@ -61,12 +60,13 @@ public final class MotorJogo {
     public MotorJogo(Dificuldade dificuldade, FontePecas fonte) {
         this.fonte = Objects.requireNonNull(fonte, "fonte de peças");
         this.placar = new Placar(Objects.requireNonNull(dificuldade, "dificuldade").nivelInicial());
-        this.ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
+        this.assentamento = new Assentamento(tabuleiro, analisador, placar, fonte, this::emitir, e -> estado = e);
     }
 
     /**
      * Avança um ciclo: gera a peça se for a vez, e desce a atual quando o
-     * intervalo de queda se esgota. Pausada ou encerrada, a partida não anda.
+     * intervalo de queda se esgota. Apoiada, a peça espera o tempo de ajuste
+     * antes de ser fixada (RN16). Pausada ou encerrada, a partida não anda.
      */
     public void avancarCiclo() {
         if (estado == EstadoPartida.PAUSA || estado.encerrada()) {
@@ -75,8 +75,15 @@ public final class MotorJogo {
         ciclo++;
         if (estado == EstadoPartida.GERANDO_PECA) {
             gerarPeca();
-        } else if (++ciclosDesdeQueda >= ciclosPorQueda) {
-            descerOuFixar();
+        } else if (emQueda.apoiada()) {
+            if (atraso.contarCiclo()) {
+                assentar();
+            }
+        } else {
+            atraso.soltou();
+            if (++ciclosDesdeQueda >= ciclosPorQueda()) {
+                descer();
+            }
         }
         avisarSeMudou();
     }
@@ -109,19 +116,27 @@ public final class MotorJogo {
 
     private void aplicarNaPeca(Comando comando) {
         switch (comando) {
-            case ESQUERDA -> mudou |= emQueda.mover(0, -1);
-            case DIREITA -> mudou |= emQueda.mover(0, 1);
+            case ESQUERDA -> ajustou(emQueda.mover(0, -1));
+            case DIREITA -> ajustou(emQueda.mover(0, 1));
             case DESCER -> descerOuFixar();
             case QUEDA_INSTANTANEA -> {
                 emQueda.cairAtePouso();
                 assentar();
             }
-            case GIRAR_HORARIO -> mudou |= emQueda.girar(true);
-            case GIRAR_ANTI_HORARIO -> mudou |= emQueda.girar(false);
+            case GIRAR_HORARIO -> ajustou(emQueda.girar(true));
+            case GIRAR_ANTI_HORARIO -> ajustou(emQueda.girar(false));
             case RESERVAR -> reservar();
             default -> {
                 // DESFAZER depende do modo treino (#37)
             }
+        }
+    }
+
+    /** Um movimento que deu certo redesenha a peça e, se ela está apoiada, recomeça a espera. */
+    private void ajustou(boolean deuCerto) {
+        if (deuCerto) {
+            mudou = true;
+            atraso.movimentou();
         }
     }
 
@@ -143,6 +158,7 @@ public final class MotorJogo {
     private void entrar(Peca peca) {
         emQueda = PecaEmQueda.nascer(peca, tabuleiro);
         ciclosDesdeQueda = 0;
+        atraso.novaPeca();
         mudou = true;
         if (emQueda.colide()) {
             estado = EstadoPartida.FIM_DE_JOGO;
@@ -152,6 +168,13 @@ public final class MotorJogo {
         }
     }
 
+    /** A gravidade desce a peça uma linha. */
+    private void descer() {
+        ciclosDesdeQueda = 0;
+        mudou |= emQueda.mover(1, 0);
+    }
+
+    /** Descer à mão: sobre o apoio, fixa na hora, sem esperar o ajuste. */
     private void descerOuFixar() {
         ciclosDesdeQueda = 0;
         if (emQueda.mover(1, 0)) {
@@ -162,58 +185,12 @@ public final class MotorJogo {
     }
 
     private void assentar() {
-        estado = EstadoPartida.FIXANDO;
-        for (Celula celula : emQueda.fixar()) {
-            analisador.registrar(celula, emQueda.peca().material());
-        }
-        emitir(EventoPartida.de(EventoPartida.Tipo.PECA_FIXADA));
-        eliminarLinhas();
+        boolean acabou = assentamento.executar(emQueda);
         emQueda = null;
-        if (estabilidade().passouDoLimite() && desabou()) {
-            return;
+        if (!acabou) {
+            estado = EstadoPartida.GERANDO_PECA;
+            gerarPeca();
         }
-        estado = EstadoPartida.GERANDO_PECA;
-        gerarPeca();
-    }
-
-    private void eliminarLinhas() {
-        List<Integer> completas = tabuleiro.linhasCompletas();
-        if (completas.isEmpty()) {
-            return;
-        }
-        estado = EstadoPartida.ELIMINANDO_LINHAS;
-        Material predominante = Pontuacao.predominante(tabuleiro.materiaisDasLinhas(completas));
-        for (int linhaCompleta : completas) {
-            for (int c = 0; c < Dimensoes.COLUNAS; c++) {
-                analisador.remover(new Celula(linhaCompleta, c), tabuleiro.bloco(linhaCompleta, c).material());
-            }
-        }
-        tabuleiro.eliminarLinhasCompletas();
-        emitir(new EventoPartida(EventoPartida.Tipo.LINHAS_ELIMINADAS, completas));
-        if (placar.registrarLinhas(completas.size(), predominante)) {
-            ciclosPorQueda = Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
-            fonte.nivelMudou(placar.nivel());
-            emitir(EventoPartida.de(EventoPartida.Tipo.NIVEL_SUBIU));
-        }
-    }
-
-    /**
-     * Executa o colapso (RN11, RN12). Se a pilha estava acima do limite de
-     * altura, a partida acaba (RN13).
-     *
-     * @return {@code true} se a partida acabou
-     */
-    private boolean desabou() {
-        estado = EstadoPartida.COLAPSO;
-        boolean altaDemais = tabuleiro.alturaPilha() > Dimensoes.ALTURA_LIMITE_COLAPSO;
-        List<Queda> quedas = Colapso.executar(tabuleiro);
-        placar.registrarColapso();
-        emitir(new EventoPartida(EventoPartida.Tipo.COLAPSO, List.of(), quedas));
-        if (altaDemais) {
-            estado = EstadoPartida.FIM_DE_JOGO;
-            emitir(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO));
-        }
-        return altaDemais;
     }
 
     private void mudarEstadoSe(EstadoPartida esperado, EstadoPartida novo) {
@@ -346,7 +323,7 @@ public final class MotorJogo {
      * @return índice, desvio, centro de massa, eixo da base e alerta
      */
     public Estabilidade estabilidade() {
-        return analisador.estabilidade(tabuleiro, Progressao.limiteDesvio(placar.nivel()));
+        return assentamento.estabilidade();
     }
 
     /**
@@ -382,6 +359,6 @@ public final class MotorJogo {
      * @return intervalo de queda, em ciclos
      */
     public int ciclosPorQueda() {
-        return ciclosPorQueda;
+        return Tempo.ciclos(Progressao.intervaloQuedaMs(placar.nivel()));
     }
 }
