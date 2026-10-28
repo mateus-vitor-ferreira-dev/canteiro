@@ -1209,7 +1209,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 🌐 **Versão online**: o mesmo jogo em [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com), publicado a cada merge na `develop`
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios até aqui são a troca da interface em Swing por uma interface no navegador e a versão online, que escuta fora do `127.0.0.1` dentro do contêiner
+- 📝 **[Relatório de plataforma e desvios](docs/Relatorio_Plataforma_e_Desvios.md)**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios são a troca da interface em Swing por uma interface no navegador, a versão online, que escuta fora do `127.0.0.1` dentro do contêiner, a partida no celular e as regras novas RN16 a RN19
 - 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
 - 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 
