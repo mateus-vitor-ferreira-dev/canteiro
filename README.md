@@ -398,10 +398,9 @@ E cada passo tem o seu teste: [`DificuldadeTest`](backend/src/test/java/canteiro
 
 | Quem | Onde vai trabalhar na maior parte do tempo |
 |---|---|
-| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket) e todo o `frontend/src/` (a tela de partida e as telas de apoio) |
+| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket), todo o `frontend/src/` (a tela de partida e as telas de apoio), a seção de requisitos deste README e o relatório de plataforma e desvios em `docs/` |
 | **Marcelo** | `backend/.../persistencia/` (materiais, configurações, ranking e repetições em arquivo) e o que usa esses arquivos em `backend/.../api/rotas/` e `controle/` (ranking, configurações, relatório, replay e modo treino) |
-| **Wanessa** | `docs/` (manual da equipe, relatório e apresentação), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`** |
-| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores) e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
+| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores), `docs/apresentacao/` e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
 
 ### O que ninguém edita à mão
 
@@ -1222,12 +1221,11 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Integrante | GitHub | Responsabilidades |
 |---|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua |
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua · 📋 requisitos · 📝 manual da equipe e relatório de plataforma e desvios |
 | Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino |
-| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes (roteiros, com o Alisson) · ♿ usabilidade e acessibilidade · 📝 manual da equipe e relatório |
-| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Execução dos testes a cada entrega · validação com jogadores · 📝 apoio na documentação · 🎬 apresentação do projeto |
+| Alisson Antônio Oliveira Santos | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Plano de testes: roteiros e execução a cada entrega · validação com jogadores · ♿ usabilidade e acessibilidade · 📝 revisão da documentação · 🎬 apresentação do projeto |
 
-Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista, já com o Alisson, está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16); as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus. A tabela acima é a que vale hoje.
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16). Desde então, as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus, e a equipe passou a ter três integrantes: os requisitos, o manual e o relatório de plataforma e desvios ficaram com o Mateus, e os roteiros de teste, a usabilidade e a apresentação, com o Alisson. A tabela acima é a que vale hoje.
 
 ---
 
