@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { EventoDto, TipoEvento } from "@/api/protocolo";
-import { anuncioDoEvento } from "./anuncios";
+import type { EventoDto, PreviaDto, TipoEvento } from "@/api/protocolo";
+import { anuncioDoEvento, avisoDaPrevia } from "./anuncios";
 
 function evento(tipo: TipoEvento, dados: EventoDto["dados"] = {}): EventoDto {
     return { tipo: "EVENTO", evento: tipo, dados };
@@ -44,5 +44,49 @@ describe("anuncioDoEvento", () => {
 
     it("não anuncia peça fixada", () => {
         expect(anuncioDoEvento(evento("PECA_FIXADA"))).toBeNull();
+    });
+});
+
+describe("balanço e esmagamento", () => {
+    it("anuncia o balanço que se soltou e os blocos esmagados", () => {
+        expect(anuncioDoEvento(evento("QUEBRA"))).toBe("A parte em balanço se soltou!");
+        expect(anuncioDoEvento(evento("ESMAGAMENTO", { celulas: [[21, 0]] }))).toBe(
+            "Um bloco foi esmagado!",
+        );
+        expect(
+            anuncioDoEvento(
+                evento("ESMAGAMENTO", {
+                    celulas: [
+                        [21, 0],
+                        [20, 3],
+                    ],
+                }),
+            ),
+        ).toBe("2 blocos foram esmagados!");
+    });
+
+    it("avisa o que a jogada quebraria, ou nada", () => {
+        const previa: PreviaDto = {
+            indice: 1,
+            desvio: 0,
+            centroDeMassa: 5,
+            eixo: 5,
+            derruba: false,
+            quebras: [],
+            esmagados: [],
+        };
+        expect(avisoDaPrevia(previa)).toBeNull();
+        expect(
+            avisoDaPrevia({
+                ...previa,
+                quebras: [
+                    [20, 1],
+                    [20, 2],
+                ],
+            }),
+        ).toBe("Esta jogada solta 2 blocos!");
+        expect(avisoDaPrevia({ ...previa, quebras: [[20, 1]], esmagados: [[21, 0]] })).toBe(
+            "Esta jogada solta 1 bloco e esmaga 1 bloco!",
+        );
     });
 });

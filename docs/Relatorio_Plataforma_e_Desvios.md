@@ -16,7 +16,7 @@ As linhas marcadas com [a preencher] esperam os testes em máquina real (#27 e #
 
 O CANTEIRO foi planejado como um aplicativo desktop em Swing (especificação 1.0). Ele foi entregue como um jogo no navegador, com as regras num backend em Java e a tela num frontend em Svelte. O jogador continua precisando só do Java 17 e de um navegador, e o jogo continua sendo um JAR que abre com dois cliques.
 
-Durante o desenvolvimento, quatro coisas mudaram em relação à especificação 2.x: o jogo ganhou uma **versão online**, passou a ser **jogável no celular**, ganhou **quatro regras novas** de pontuação e controle (RN16 a RN19) e teve **pequenos ajustes de código** em relação ao modelo de classes. Cada mudança está abaixo, com a fonte e o porquê.
+Durante o desenvolvimento, quatro coisas mudaram em relação à especificação 2.x: o jogo ganhou uma **versão online**, passou a ser **jogável no celular**, ganhou **sete regras novas** de controle, pontuação e física (RN16 a RN22) e teve **pequenos ajustes de código** em relação ao modelo de classes. Cada mudança está abaixo, com a fonte e o porquê.
 
 ## 2. Ambiente usado
 
@@ -118,9 +118,9 @@ A versão 1.0 previa um aplicativo desktop em Swing. A versão 2.0 dividiu o jog
 | **Por quê** | No celular, a partida era quase injogável: os botões ficavam empilhados numa coluna só, e placar, estabilidade e botões passavam da altura da tela, então o jogador rolava a página e perdia o tabuleiro de vista (#95) |
 | **Requisito afetado** | RNF05 (comandos aprendidos sem manual): na pausa, quem joga pelo toque lê como jogar com os gestos. No computador, nada mudou: teclado, legenda e telas são os mesmos |
 
-### 4.4. Regras novas: RN16 a RN19
+### 4.4. Regras novas: RN16 a RN22
 
-A especificação tem 15 regras de negócio. Quatro entraram na reta final, todas no backend, com testes, e registradas no README.
+A especificação tem 15 regras de negócio. Sete entraram na reta final, todas no backend, com testes, e registradas no README.
 
 | Regra | O que faz | Por quê | Fonte |
 |---|---|---|---|
@@ -128,8 +128,11 @@ A especificação tem 15 regras de negócio. Quatro entraram na reta final, toda
 | RN17 | Fechar linha com o índice de estabilidade abaixo de 25 % vale 50 % a mais (obra ousada) | O equilíbrio só castigava. Agora arriscar também rende pontos | #103 |
 | RN18 | Cada peça seguida que fecha linha soma 10 % à próxima eliminação, até 100 % | Também recompensa o risco: manter a sequência exige fechar linha com toda peça | #103 |
 | RN19 | Cada nível tem uma meta curta, sorteada pela semente da partida; cumprir soma 500 × nível | Dá um objetivo além de sobreviver, sem quebrar a repetição da partida, porque o sorteio usa a mesma semente | #104 |
+| RN20 | Balanço: a parte da peça sem nada embaixo se solta e cai se a peça for mais densa que o material em que se apoia | Jogando, o CANTEIRO não se diferenciava de um encaixe de blocos comum: a única física era o centro de massa da pilha inteira, e uma peça pesada apoiada pela ponta num bloco leve ficava parada no ar. Agora o material de baixo importa | #117 |
+| RN21 | Esmagamento: cada material aguenta um peso máximo em cima, na mesma coluna; perto do limite o bloco racha, e passando ele vira um buraco | Obriga a construir como numa obra, pesado embaixo e leve em cima. O bloco esmagado deixa um buraco em vez de sumir com a coluna descendo, porque descer limitava a altura da pilha e deixava o jogo mais fácil | #118 |
+| RN22 | O colapso confere também a parte de cima da pilha, sobre a faixa em que ela encosta na linha crítica; e cada dificuldade multiplica o limite de desvio e a resistência dos materiais | As linhas quase cheias puxavam o centro de massa para o meio, e o colapso quase nunca acontecia, nem no difícil | #119 |
 
-Junto com elas veio a **prévia do centro de massa** (#107): o jogador vê, antes de soltar a peça, onde o centro de massa vai parar e se a jogada derruba a obra. A prévia não muda nenhuma regra, mas continua O(1) por peça (RNF02).
+Junto com elas veio a **prévia do centro de massa** (#107): o jogador vê, antes de soltar a peça, onde o centro de massa vai parar e se a jogada derruba a obra. Desde a RN20, a prévia roda a jogada inteira numa cópia da grade, e por isso também marca os blocos que se soltariam ou seriam esmagados. Ela só é recalculada quando o pouso da peça muda; o centro de massa da partida continua incremental (RNF02).
 
 ### 4.5. Ajustes de código em relação ao modelo de classes
 

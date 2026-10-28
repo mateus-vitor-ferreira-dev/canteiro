@@ -12,10 +12,12 @@ import java.util.List;
  * @param pontos quanto a pontuação mudou: o ganho de uma eliminação, ou o desconto (negativo) de um
  *               colapso; zero quando não se aplica
  * @param ousada se as linhas foram fechadas com a estrutura perto de cair (RN17)
+ * @param celulas células envolvidas, como as dos blocos esmagados (RN21); vazia quando não se aplica
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
-public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas, int pontos, boolean ousada) {
+public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas, int pontos, boolean ousada,
+                            List<Celula> celulas) {
 
     /**
      * Cria o evento com cópias imutáveis das listas.
@@ -25,10 +27,25 @@ public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas,
      * @param quedas blocos que caíram
      * @param pontos quanto a pontuação mudou
      * @param ousada se foi uma obra ousada
+     * @param celulas células envolvidas
      */
     public EventoPartida {
         linhas = List.copyOf(linhas);
         quedas = List.copyOf(quedas);
+        celulas = List.copyOf(celulas);
+    }
+
+    /**
+     * Cria um evento sem células.
+     *
+     * @param tipo   o que aconteceu
+     * @param linhas linhas envolvidas
+     * @param quedas blocos que caíram
+     * @param pontos quanto a pontuação mudou
+     * @param ousada se foi uma obra ousada
+     */
+    public EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas, int pontos, boolean ousada) {
+        this(tipo, linhas, quedas, pontos, ousada, List.of());
     }
 
     /**
@@ -72,6 +89,10 @@ public record EventoPartida(Tipo tipo, List<Integer> linhas, List<Queda> quedas,
         LINHAS_ELIMINADAS,
         /** A estrutura passou do limite e desabou; traz as quedas. */
         COLAPSO,
+        /** A parte da peça em balanço se soltou do apoio mais leve; traz as quedas (RN20). */
+        QUEBRA,
+        /** Blocos foram esmagados pelo peso de cima e viraram buracos; traz as células (RN21). */
+        ESMAGAMENTO,
         /** O jogador subiu de nível. */
         NIVEL_SUBIU,
         /** O jogador cumpriu a meta do nível e ganhou o bônus; traz os pontos (RN19). */

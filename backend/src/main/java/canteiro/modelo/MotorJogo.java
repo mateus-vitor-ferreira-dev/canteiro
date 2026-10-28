@@ -6,6 +6,7 @@ import canteiro.modelo.estruturas.HistoricoJogadas;
 import canteiro.modelo.estruturas.Jogada;
 import canteiro.modelo.estruturas.Reserva;
 import canteiro.modelo.fisica.AnalisadorEstrutural;
+import canteiro.modelo.fisica.Esmagamento;
 import canteiro.modelo.fisica.Estabilidade;
 import canteiro.modelo.metas.Meta;
 import canteiro.modelo.pecas.Peca;
@@ -61,7 +62,8 @@ public final class MotorJogo {
     public MotorJogo(Dificuldade dificuldade, FontePecas fonte) {
         this.fonte = Objects.requireNonNull(fonte, "fonte de peças");
         this.placar = new Placar(Objects.requireNonNull(dificuldade, "dificuldade").nivelInicial());
-        this.assentamento = new Assentamento(tabuleiro, analisador, placar, fonte, this::emitir, e -> estado = e);
+        this.assentamento = new Assentamento(tabuleiro, analisador, dificuldade, placar, fonte, this::emitir,
+                e -> estado = e);
     }
 
     /**
@@ -337,18 +339,25 @@ public final class MotorJogo {
     }
 
     /**
-     * A estabilidade que a estrutura teria se a peça atual pousasse onde está
-     * a peça fantasma, já sem as linhas que ela completaria. Deixa o jogador
-     * planejar o equilíbrio antes de soltar a peça.
+     * O que aconteceria se a peça atual pousasse na fantasma: a estabilidade,
+     * sem as linhas que ela completaria, e os blocos que quebrariam.
      *
-     * @return a estabilidade prevista, ou {@code null} se não houver peça caindo
+     * @return a prévia da jogada, ou {@code null} se não houver peça caindo
      */
-    public Estabilidade previa() {
+    public Previa previa() {
         if (emQueda == null) {
             return null;
         }
-        return analisador.previa(tabuleiro, emQueda.celulasNoPouso(), emQueda.peca().material(),
-                Progressao.limiteDesvio(placar.nivel()));
+        return assentamento.previa(emQueda.celulasNoPouso(), emQueda.peca().material());
+    }
+
+    /**
+     * Os blocos rachando sob o peso de cima, com o nível de cada um (RN21).
+     *
+     * @return as rachaduras; vazia se nenhum bloco está carregado perto do limite
+     */
+    public List<Esmagamento.Rachadura> rachaduras() {
+        return assentamento.rachaduras();
     }
 
     /**

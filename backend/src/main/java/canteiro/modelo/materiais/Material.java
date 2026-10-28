@@ -67,6 +67,15 @@ public abstract class Material {
     public abstract int bonusLinha();
 
     /**
+     * A maior massa que um bloco deste material aguenta em cima dele, na mesma
+     * coluna, antes de ser esmagado (RN21). A massa é a dos blocos colados logo
+     * acima, até o primeiro espaço vazio.
+     *
+     * @return carga máxima, na mesma unidade da massa dos blocos
+     */
+    public abstract double cargaMaxima();
+
+    /**
      * Reação do material no instante em que a peça é assentada. Por padrão,
      * nada acontece; o material que tiver um efeito sobrescreve este método,
      * como o aço, que consolida os blocos logo abaixo. O tabuleiro chama isto

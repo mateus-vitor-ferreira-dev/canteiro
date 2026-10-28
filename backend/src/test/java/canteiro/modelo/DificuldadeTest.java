@@ -26,8 +26,16 @@ class DificuldadeTest {
         assertEquals(5, Dificuldade.DIFICIL.nivelInicial());
         for (Dificuldade dificuldade : Dificuldade.values()) {
             assertEquals(Progressao.intervaloQuedaMs(dificuldade.nivelInicial()), dificuldade.intervaloQuedaMs());
-            assertEquals(Progressao.limiteDesvio(dificuldade.nivelInicial()), dificuldade.limiteDesvio());
+            assertEquals(dificuldade.limiteDesvio(dificuldade.nivelInicial()), dificuldade.limiteDesvio());
         }
+    }
+
+    @Test
+    void dificilApertaOLimiteEEnfraqueceOsMateriais() {
+        assertEquals(Progressao.limiteDesvio(5) * 0.8, Dificuldade.DIFICIL.limiteDesvio(5), 1e-9);
+        assertEquals(Progressao.limiteDesvio(5), Dificuldade.NORMAL.limiteDesvio(5), 1e-9);
+        assertTrue(Dificuldade.FACIL.fatorResistencia() > Dificuldade.NORMAL.fatorResistencia());
+        assertTrue(Dificuldade.DIFICIL.fatorResistencia() < Dificuldade.NORMAL.fatorResistencia());
     }
 
     @Test

@@ -8,6 +8,7 @@ export function estadoDeTeste(parcial: Partial<EstadoDto> = {}): EstadoDto {
         ciclo: 1,
         estado: "PECA_CAINDO",
         tabuleiro,
+        rachaduras: [],
         pecaAtual: {
             forma: "T",
             material: "MADEIRA",

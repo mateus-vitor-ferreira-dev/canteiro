@@ -30,6 +30,8 @@ public final class Progressao {
     private static final List<String> TODOS = List.of("MADEIRA", "ALVENARIA", "CONCRETO", "ACO");
     private static final int NIVEL_CONCRETO = 3;
     private static final int NIVEL_ACO = 5;
+    private static final int NIVEL_ACO_FREQUENTE = 9;
+    private static final List<String> COM_ACO_EM_DOBRO = List.of("MADEIRA", "ALVENARIA", "CONCRETO", "ACO", "ACO");
 
     private Progressao() {
     }
@@ -54,6 +56,19 @@ public final class Progressao {
      */
     public static double limiteDesvio(int nivel) {
         return LIMITE_DESVIO[faixa(nivel)];
+    }
+
+    /**
+     * Os materiais de que cada peça é sorteada, com repetição para os mais
+     * frequentes: a partir do nível 9, o aço entra duas vezes e sai com o
+     * dobro da chance dos outros.
+     *
+     * @param nivel nível atual, a partir de 1
+     * @return lista imutável de códigos, com repetições
+     * @throws IllegalArgumentException se o nível for menor que 1
+     */
+    public static List<String> sorteioDeMateriais(int nivel) {
+        return nivel >= NIVEL_ACO_FREQUENTE ? COM_ACO_EM_DOBRO : materiaisLiberados(nivel);
     }
 
     /**

@@ -174,6 +174,10 @@ export type PreviaDto = {
     eixo: number;
     /** Se a jogada passaria do limite e derrubaria a obra. */
     derruba: boolean;
+    /** Os blocos da peça que se soltariam do apoio mais leve (RN20). */
+    quebras: Posicao[];
+    /** Os blocos que seriam esmagados pelo peso de cima (RN21). */
+    esmagados: Posicao[];
 };
 
 /** A meta do nível, com o progresso (RN19). Espelho de `EstadoDto.MetaDto`. */
@@ -191,6 +195,8 @@ export type EstadoDto = {
     estado: EstadoPartida;
     /** 22 linhas × 10 colunas, com o código do material ou `null` onde está vazio. */
     tabuleiro: (string | null)[][];
+    /** Os blocos rachando sob o peso de cima: `[linha, coluna, nível de 1 a 3]` (RN21). */
+    rachaduras: [number, number, number][];
     pecaAtual: PecaDto | null;
     pecaFantasma: Posicao[];
     proximas: PecaDto[];
@@ -209,12 +215,14 @@ export type TipoEvento =
     | "PECA_FIXADA"
     | "LINHAS_ELIMINADAS"
     | "COLAPSO"
+    | "QUEBRA"
+    | "ESMAGAMENTO"
     | "NIVEL_SUBIU"
     | "META_CUMPRIDA"
     | "FIM_DE_JOGO"
     | "ERRO";
 
-/** Um bloco que caiu no colapso. Espelho de `EventoDto.QuedaDto`. */
+/** Um bloco que caiu no colapso ou no balanço. Espelho de `EventoDto.QuedaDto`. */
 export type QuedaDto = {
     origem: Posicao;
     destino: Posicao;
@@ -231,6 +239,8 @@ export type EventoDto = {
         pontos?: number;
         /** As linhas foram fechadas com a estrutura perto de cair: valem 50 % a mais. */
         ousada?: boolean;
+        /** Os blocos esmagados, que viraram buracos (RN21). */
+        celulas?: Posicao[];
         mensagem?: string;
     };
 };

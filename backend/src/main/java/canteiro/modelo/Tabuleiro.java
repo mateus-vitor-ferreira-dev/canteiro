@@ -57,11 +57,62 @@ public final class Tabuleiro {
             throw new IllegalStateException("não dá para fixar " + peca + " em (" + linha + ", " + coluna + ")");
         }
         List<Celula> ocupadas = posicoes(peca, linha, coluna);
-        for (Celula celula : ocupadas) {
-            grade[celula.linha()][celula.coluna()] = new Bloco(peca.material());
-        }
-        peca.material().aoFixar(this, ocupadas);
+        fixar(ocupadas, peca.material());
         return ocupadas;
+    }
+
+    /**
+     * Fixa um bloco do material em cada célula e deixa o material reagir
+     * ({@code aoFixar}). É o que {@link #fixar(Peca, int, int)} faz depois de
+     * achar as células; a prévia da jogada usa direto, numa cópia da grade.
+     *
+     * @param celulas  células livres e dentro da grade
+     * @param material material dos blocos
+     * @throws IllegalStateException se alguma célula estiver fora da grade ou ocupada
+     */
+    public void fixar(List<Celula> celulas, Material material) {
+        for (Celula celula : celulas) {
+            if (!dentro(celula) || grade[celula.linha()][celula.coluna()] != null) {
+                throw new IllegalStateException("não dá para fixar um bloco em " + celula);
+            }
+        }
+        for (Celula celula : celulas) {
+            grade[celula.linha()][celula.coluna()] = new Bloco(material);
+        }
+        material.aoFixar(this, celulas);
+    }
+
+    /**
+     * Uma cópia independente da grade, com blocos novos: mexer nela não muda
+     * esta. Serve para simular uma jogada sem tocar na partida.
+     *
+     * @return a cópia
+     */
+    public Tabuleiro copia() {
+        Tabuleiro copia = new Tabuleiro();
+        for (int linha = 0; linha < Dimensoes.LINHAS; linha++) {
+            for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+                Bloco bloco = grade[linha][coluna];
+                copia.grade[linha][coluna] = bloco == null ? null : bloco.copia();
+            }
+        }
+        return copia;
+    }
+
+    /**
+     * Tira o bloco da célula, que fica vazia.
+     *
+     * @param celula célula ocupada
+     * @return o bloco tirado
+     * @throws IllegalStateException se a célula estiver vazia
+     */
+    public Bloco remover(Celula celula) {
+        Bloco bloco = bloco(celula.linha(), celula.coluna());
+        if (bloco == null) {
+            throw new IllegalStateException("não há bloco em " + celula);
+        }
+        grade[celula.linha()][celula.coluna()] = null;
+        return bloco;
     }
 
     /**

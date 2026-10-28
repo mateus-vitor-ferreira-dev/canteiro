@@ -1,5 +1,5 @@
 import type { EstadoDto, Posicao, PreviaDto, QuedaDto } from "@/api/protocolo";
-import { desenharBloco } from "@/estilos/materiais";
+import { desenharBloco, desenharRachadura } from "@/estilos/materiais";
 
 /** Linhas ocultas no topo da grade: o backend manda, mas a tela não mostra (RN01). */
 export const LINHAS_OCULTAS = 2;
@@ -12,6 +12,9 @@ export const CELULA_MAXIMA = 32;
 
 /** Quanto dura a animação do colapso, em milissegundos ("aproximadamente um segundo"). */
 export const DURACAO_COLAPSO_MS = 1000;
+
+/** Quanto dura a queda do balanço que se soltou (RN20), em milissegundos. */
+export const DURACAO_QUEBRA_MS = 450;
 
 const COR_FUNDO = "#1b2432";
 const COR_GRADE = "#263041";
@@ -103,8 +106,13 @@ export function desenharTabuleiro(
             }
         }),
     );
+    desenharRachaduras(ctx, estado, celula);
     for (const posicao of estado.pecaFantasma) {
         contornar(ctx, posicao, celula);
+    }
+    const previa = estado.estabilidade.previa;
+    for (const posicao of [...(previa?.quebras ?? []), ...(previa?.esmagados ?? [])]) {
+        marcarQuebra(ctx, posicao, celula);
     }
     if (estado.pecaAtual) {
         const material = estado.pecaAtual.material;
@@ -129,6 +137,44 @@ function pintar(
     if (ponto) {
         desenharBloco(ctx, ponto.x + FOLGA, ponto.y + FOLGA, celula - 2 * FOLGA, material);
     }
+}
+
+/** As trincas dos blocos carregados perto do limite (RN21). */
+function desenharRachaduras(
+    ctx: CanvasRenderingContext2D,
+    estado: EstadoDto,
+    celula: number,
+): void {
+    for (const [linha, coluna, nivel] of estado.rachaduras) {
+        const ponto = naTela([linha, coluna], celula);
+        if (ponto) {
+            desenharRachadura(ctx, ponto.x + FOLGA, ponto.y + FOLGA, celula - 2 * FOLGA, nivel);
+        }
+    }
+}
+
+/**
+ * Um X vermelho tracejado no bloco que a jogada quebraria: a parte da peça
+ * que se soltaria (RN20) ou o bloco que seria esmagado (RN21). O X é forma,
+ * não só cor, para aparecer em escala de cinza.
+ */
+function marcarQuebra(ctx: CanvasRenderingContext2D, posicao: Posicao, celula: number): void {
+    const ponto = naTela(posicao, celula);
+    if (!ponto) {
+        return;
+    }
+    const margem = celula * 0.22;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = COR_CENTRO;
+    ctx.setLineDash([3, 2]);
+    ctx.strokeRect(ponto.x + 2, ponto.y + 2, celula - 4, celula - 4);
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(ponto.x + margem, ponto.y + margem);
+    ctx.lineTo(ponto.x + celula - margem, ponto.y + celula - margem);
+    ctx.moveTo(ponto.x + celula - margem, ponto.y + margem);
+    ctx.lineTo(ponto.x + margem, ponto.y + celula - margem);
+    ctx.stroke();
 }
 
 function contornar(ctx: CanvasRenderingContext2D, posicao: Posicao, celula: number): void {
@@ -228,11 +274,28 @@ export function posicaoNaQueda(
 }
 
 /**
- * Desenha o colapso por cima do tabuleiro já desenhado: cada bloco que caiu
- * sai do destino (onde o estado novo já o colocou) e aparece a caminho, da
- * origem ao destino. Um clarão vermelho vai sumindo junto.
+ * Desenha o colapso por cima do tabuleiro já desenhado: os blocos caindo e um
+ * clarão vermelho que vai sumindo junto.
  */
 export function desenharColapso(
+    ctx: CanvasRenderingContext2D,
+    estado: EstadoDto,
+    quedas: QuedaDto[],
+    progresso: number,
+    celula: number,
+): void {
+    desenharQuedas(ctx, estado, quedas, progresso, celula);
+    const opacidade = OPACIDADE_CLARAO * (1 - Math.min(1, Math.max(0, progresso)));
+    ctx.fillStyle = `rgba(${COR_CLARAO}, ${opacidade})`;
+    ctx.fillRect(0, 0, COLUNAS * celula, LINHAS_VISIVEIS * celula);
+}
+
+/**
+ * Desenha blocos caindo por cima do tabuleiro já desenhado: cada um sai do
+ * destino (onde o estado novo já o colocou) e aparece a caminho, da origem ao
+ * destino. Serve ao colapso e ao balanço que se soltou (RN20).
+ */
+export function desenharQuedas(
     ctx: CanvasRenderingContext2D,
     estado: EstadoDto,
     quedas: QuedaDto[],
@@ -253,7 +316,4 @@ export function desenharColapso(
             pintar(ctx, [linha, coluna], material, celula);
         }
     }
-    const opacidade = OPACIDADE_CLARAO * (1 - Math.min(1, Math.max(0, progresso)));
-    ctx.fillStyle = `rgba(${COR_CLARAO}, ${opacidade})`;
-    ctx.fillRect(0, 0, COLUNAS * celula, LINHAS_VISIVEIS * celula);
 }

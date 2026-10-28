@@ -69,7 +69,15 @@ describe("PainelEstabilidade", () => {
     it("mostra o índice que a jogada da peça atual deixaria", () => {
         render(PainelEstabilidade, {
             estabilidade: estabilidade({
-                previa: { indice: 0.4, desvio: 1.2, centroDeMassa: 3.8, eixo: 5, derruba: false },
+                previa: {
+                    indice: 0.4,
+                    desvio: 1.2,
+                    centroDeMassa: 3.8,
+                    eixo: 5,
+                    derruba: false,
+                    quebras: [],
+                    esmagados: [],
+                },
             }),
         });
         expect(screen.getByText(/→ 40 %/)).toBeInTheDocument();
@@ -80,7 +88,15 @@ describe("PainelEstabilidade", () => {
         render(PainelEstabilidade, {
             estabilidade: estabilidade({
                 alerta: true,
-                previa: { indice: 0, desvio: 2.4, centroDeMassa: 2.6, eixo: 5, derruba: true },
+                previa: {
+                    indice: 0,
+                    desvio: 2.4,
+                    centroDeMassa: 2.6,
+                    eixo: 5,
+                    derruba: true,
+                    quebras: [],
+                    esmagados: [],
+                },
             }),
         });
         expect(screen.getByRole("alert")).toHaveTextContent("Esta jogada derruba a obra!");

@@ -15,6 +15,7 @@ public final class Concreto extends Material {
 
     private static final double DENSIDADE = 2.4;
     private static final int COR = 0x9EA7B1;
+    private static final double CARGA_MAXIMA = 40.0;
     private static final int BONUS_LINHA = 30;
 
     /**
@@ -41,5 +42,15 @@ public final class Concreto extends Material {
     @Override
     public int bonusLinha() {
         return BONUS_LINHA;
+    }
+
+    /**
+     * O concreto só cede sob seis blocos de aço ou mais.
+     *
+     * @return a carga máxima (RN21)
+     */
+    @Override
+    public double cargaMaxima() {
+        return CARGA_MAXIMA;
     }
 }
