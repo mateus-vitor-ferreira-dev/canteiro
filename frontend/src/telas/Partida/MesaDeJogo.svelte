@@ -6,6 +6,7 @@
     import type { Som } from "@/estado/som.svelte";
     import { LIMIAR_RANGIDO } from "@/componentes/efeitos";
     import { Musica } from "@/estado/musica.svelte";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
     import { intensidadeDoPerigo } from "@/sons/musica";
     import CamadaPartida from "./CamadaPartida.svelte";
     import Destaques from "./Destaques.svelte";
@@ -62,8 +63,8 @@
     });
 
     // A música acompanha o perigo: mais cheia e mais rápida quanto mais perto de perder.
-    // Para na pausa e no fim de jogo.
-    const musica = new Musica(() => som.ligado);
+    // Para na pausa e no fim de jogo, e fica calada com o som ou a música desligados.
+    const musica = new Musica(() => som.ligado && configuracoes.musica);
     const emJogo = $derived(
         partida.estado !== null &&
             partida.estado.estado !== "PAUSA" &&

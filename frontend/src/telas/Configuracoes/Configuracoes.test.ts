@@ -14,6 +14,7 @@ beforeEach(() => {
     localStorage.clear();
     configuracoes.teclas = {};
     configuracoes.volume = VOLUME_PADRAO;
+    configuracoes.musica = true;
     vi.mocked(salvarConfiguracoes).mockRejectedValue(new ErroApi("X", "erro 404", 404));
 });
 
@@ -67,7 +68,7 @@ describe("Configuracoes", () => {
         montar();
         const salvar = screen.getByRole("button", { name: "Salvar" });
         expect(salvar).toBeDisabled();
-        await fireEvent.input(screen.getByLabelText("Volume dos efeitos"), {
+        await fireEvent.input(screen.getByLabelText("Volume dos efeitos e da música"), {
             target: { value: "30" },
         });
         expect(salvar).toBeEnabled();
@@ -80,19 +81,31 @@ describe("Configuracoes", () => {
             new ErroApi("CONFIGURACAO_INVALIDA", "Volume fora de 0 a 100.", 400),
         );
         montar();
-        await fireEvent.input(screen.getByLabelText("Volume dos efeitos"), {
+        await fireEvent.input(screen.getByLabelText("Volume dos efeitos e da música"), {
             target: { value: "30" },
         });
         await fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
         expect(await screen.findByRole("alert")).toHaveTextContent("Volume fora de 0 a 100.");
     });
 
+    it("desligar a música acende o Salvar e vale para a partida", async () => {
+        montar();
+        expect(screen.getByRole("button", { name: "Salvar" })).toBeDisabled();
+        await fireEvent.click(screen.getByLabelText("Música de fundo"));
+        await fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+        await screen.findByText("Configurações salvas neste navegador.");
+        expect(configuracoes.musica).toBe(false);
+        expect(localStorage.getItem("canteiro.musica")).toBe("desligada");
+    });
+
     it("restaurar volta ao padrão, e volta ao menu", async () => {
         configuracoes.volume = 20;
         configuracoes.teclas = { ESQUERDA: ["KeyA"] };
         const { aoVoltar } = montar();
+        configuracoes.musica = false;
         await fireEvent.click(screen.getByRole("button", { name: "Restaurar padrão" }));
         expect(screen.getByText(`${VOLUME_PADRAO} %`)).toBeInTheDocument();
+        expect(screen.getByLabelText("Música de fundo")).toBeChecked();
         expect(screen.getByText("←")).toBeInTheDocument();
         await fireEvent.click(screen.getByRole("button", { name: "Voltar ao menu" }));
         expect(aoVoltar).toHaveBeenCalled();

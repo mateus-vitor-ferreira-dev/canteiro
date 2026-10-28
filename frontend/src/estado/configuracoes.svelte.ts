@@ -7,6 +7,8 @@ export const VOLUME_PADRAO = 60;
 const VOLUME_MAXIMO = 100;
 const NAO_ENCONTRADO = 404;
 const CHAVE = "canteiro.configuracoes";
+const CHAVE_MUSICA = "canteiro.musica";
+const MUSICA_DESLIGADA = "desligada";
 
 /** Onde as configurações ficaram guardadas. */
 export type Destino = "servidor" | "navegador";
@@ -20,17 +22,20 @@ export type ApiConfiguracoes = {
 const ACOES = new Set<string>(TECLAS.map((t) => t.comando));
 
 /**
- * As teclas e o volume do jogador (RF27), compartilhados pela partida, pela
- * legenda, pelos sons e pela tela de configurações.
+ * As teclas, o volume e a música do jogador (RF27, RF28), compartilhados pela
+ * partida, pela legenda, pelos sons e pela tela de configurações.
  *
- * Moram no servidor (#71). Enquanto ele não tem a rota, ficam no navegador,
- * e o jogo continua funcionando com os valores padrão se nada der certo (RNF11).
+ * Teclas e volume moram no servidor (#71). Enquanto ele não tem a rota, ficam
+ * no navegador, e o jogo continua funcionando com os valores padrão se nada
+ * der certo (RNF11). A música, como o botão Som, fica sempre no navegador.
  */
 export class Configuracoes {
     /** As teclas que o jogador trocou. */
     teclas = $state<TeclasPersonalizadas>({});
-    /** Volume dos efeitos, de 0 a 100. */
+    /** Volume dos efeitos e da música, de 0 a 100. */
     volume = $state(VOLUME_PADRAO);
+    /** Se a música de fundo toca na partida. */
+    musica = $state(true);
     /** A tabela de teclas em uso, já com as trocas. */
     readonly tabela = $derived(montarTeclas(this.teclas));
 
@@ -43,6 +48,7 @@ export class Configuracoes {
     ) {
         this.#api = api;
         this.#armazenamento = armazenamento;
+        this.musica = this.#lerMusica();
     }
 
     /** Busca no servidor; se ele não tiver, no navegador; se nada servir, fica o padrão. */
@@ -55,12 +61,18 @@ export class Configuracoes {
     }
 
     /**
-     * Salva e passa a usar. Sem a rota no servidor, salva no navegador.
+     * Salva e passa a usar. Sem a rota no servidor, salva no navegador. A
+     * música vai sempre para o navegador, junto com o resto.
      *
-     * @returns onde ficou guardado
+     * @param musica se a música de fundo toca; sem ela, fica como está
+     * @returns onde as teclas e o volume ficaram guardados
      * @throws ErroApi se o servidor recusar (tecla repetida, volume inválido) ou não responder
      */
-    async salvar(teclas: TeclasPersonalizadas, volume: number): Promise<Destino> {
+    async salvar(
+        teclas: TeclasPersonalizadas,
+        volume: number,
+        musica = this.musica,
+    ): Promise<Destino> {
         const dados = validarConfiguracoes({ teclas, volume }) ?? {
             teclas: {},
             volume: VOLUME_PADRAO,
@@ -68,6 +80,7 @@ export class Configuracoes {
         try {
             await this.#api.salvar(dados);
             this.#aplicar(dados);
+            this.#guardarMusica(musica);
             return "servidor";
         } catch (erro) {
             if (!(erro instanceof ErroApi && erro.status === NAO_ENCONTRADO)) {
@@ -75,6 +88,7 @@ export class Configuracoes {
             }
             this.#armazenamento?.setItem(CHAVE, JSON.stringify(dados));
             this.#aplicar(dados);
+            this.#guardarMusica(musica);
             return "navegador";
         }
     }
@@ -82,6 +96,23 @@ export class Configuracoes {
     #aplicar(dados: ConfiguracoesDto | null): void {
         this.teclas = (dados?.teclas ?? {}) as TeclasPersonalizadas;
         this.volume = dados?.volume ?? VOLUME_PADRAO;
+    }
+
+    #guardarMusica(musica: boolean): void {
+        this.musica = musica;
+        try {
+            this.#armazenamento?.setItem(CHAVE_MUSICA, musica ? "ligada" : MUSICA_DESLIGADA);
+        } catch {
+            // Sem armazenamento (aba anônima, bloqueio): vale só até fechar a aba.
+        }
+    }
+
+    #lerMusica(): boolean {
+        try {
+            return this.#armazenamento?.getItem(CHAVE_MUSICA) !== MUSICA_DESLIGADA;
+        } catch {
+            return true;
+        }
     }
 
     #lerDoNavegador(): ConfiguracoesDto | null {
