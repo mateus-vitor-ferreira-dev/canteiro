@@ -9,7 +9,7 @@ As linhas marcadas com [a preencher] esperam os testes em máquina real (#27 e #
 |---|---|
 | **Responsável** | Mateus Vitor Ferreira |
 | **Revisão** | Alisson Antônio Oliveira Santos |
-| **Versão do jogo** | 0.2.0 |
+| **Versão do jogo** | 0.2.1 |
 | **Última atualização** | 2026-10-28 |
 
 ## 1. Resumo
