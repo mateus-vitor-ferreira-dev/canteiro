@@ -59,7 +59,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
+> **Este README é a referência do projeto para a equipe.** O processo, da issue ao merge, está resumido no **[manual da equipe](docs/EQUIPE.md)**. A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
 
 ---
 
@@ -521,7 +521,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e, em breve, o manual da equipe (`EQUIPE.md`) |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e o [manual da equipe](docs/EQUIPE.md) |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
@@ -1138,7 +1138,7 @@ git push
 - ❌ **Trabalhar direto na `develop` ou na `main`.** Sempre crie um ramo. O GitHub vai recusar o push de qualquer jeito.
 - ❌ **`git push --force`** em ramo que outra pessoa também usa.
 - ❌ **Commitar arquivos gerados**, como `target/`, `node_modules/`, `dist/`, `*.class`, `.idea/` ou `.vscode/`. O `.gitignore` já barra esses arquivos.
-- ❌ **Fazer merge do seu próprio PR sem ninguém ter olhado**, a não ser que o grupo combine o contrário.
+- ❌ **Fazer merge com o CI vermelho.** O botão nem libera, mas não tente contornar: corrija no mesmo ramo.
 - ❌ **Passar dias sem dar push.** Se o computador der problema, o trabalho que não foi para o GitHub se perde.
 - ❌ **Apagar o conteúdo de um conflito sem entender o que ele é.**
 - ❌ **Usar uma conta do GitHub ou um e-mail que não são seus.** A contribuição fica registrada para outra pessoa.
