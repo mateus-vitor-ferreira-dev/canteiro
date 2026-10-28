@@ -33,7 +33,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <sub>Tela inicial do jogo, capturada da versão atual. A partida está completa; faltam o ranking gravado em arquivo e os recursos desejáveis.</sub>
 
-**▶️ Jogue agora: [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com)**, sem instalar nada. Na rede da UFLA, use [canteiro.onrender.com](https://canteiro.onrender.com).
+**▶️ Jogue agora: [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com)**, sem instalar nada. Na rede da UFLA, que bloqueia o domínio `digitalcodexa.com`, use [este endereço](https://ccsaafhnlgiwuhixo3eulcvk.49.12.249.23.sslip.io).
 
 </div>
 
@@ -165,7 +165,7 @@ Além do nível inicial, cada dificuldade multiplica o limite de desvio e o peso
 
 **Um JAR, dois cliques.** Na hora de empacotar, o Maven compila o Svelte com um Node próprio, baixado só para isso, e coloca o resultado dentro do JAR. O Javalin serve esses arquivos e a API na mesma porta. **O jogador não precisa de Node, de npm nem de internet** (RNF16).
 
-**Local de verdade, e também online.** Pelo JAR, o servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). A versão online roda o mesmo JAR num contêiner, com o endereço e o limite de partidas definidos por variáveis de ambiente, sem mudar uma linha do jogo ([No ar: Docker e Render](#7-no-ar-docker-e-render)). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
+**Local de verdade, e também online.** Pelo JAR, o servidor escuta **só em `127.0.0.1`**: outro computador na mesma rede não consegue nem ver que ele existe (RNF13). A versão online roda o mesmo JAR num contêiner, com o endereço e o limite de partidas definidos por variáveis de ambiente, sem mudar uma linha do jogo ([No ar: Docker e Coolify](#7-no-ar-docker-e-coolify)). Mensagens malformadas pelo WebSocket viram um evento `ERRO`, e a partida continua (RNF14).
 
 ---
 
@@ -472,7 +472,7 @@ canteiro/
 │   └── imagens/                     imagens do README e o gerador dos diagramas
 ├── .github/pull_request_template.md
 ├── .editorconfig · .gitattributes · .gitignore
-├── Dockerfile · .dockerignore · render.yaml   imagem e hospedagem pública
+├── Dockerfile · .dockerignore               imagem e hospedagem pública
 └── README.md
 ```
 
@@ -532,7 +532,7 @@ canteiro/
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
 | `.editorconfig` | UTF-8, LF e indentação iguais em qualquer editor |
-| `Dockerfile` · `.dockerignore` · `render.yaml` | A imagem do jogo para hospedagem pública e a configuração do Render. Veja [No ar: Docker e Render](#7-no-ar-docker-e-render) |
+| `Dockerfile` · `.dockerignore` | A imagem do jogo para hospedagem pública. Veja [No ar: Docker e Coolify](#7-no-ar-docker-e-coolify) |
 | `target/`, `node_modules/`, `dist/` | **Não versionadas.** São geradas pelo Maven e pelo npm. Pode apagar quando quiser |
 
 > [!NOTE]
@@ -736,9 +736,9 @@ Precisa só de um JAR rápido, sem as telas? `./mvnw package -Dfrontend.pular=tr
 | `ArquiteturaTest` falhou | Alguém importou Javalin, JSON, gráfico ou uma camada de cima dentro do modelo | A mensagem mostra o arquivo e a linha. Mova o código para `api` ou `app` |
 | `javadoc:javadoc` falhou com `warning: no comment` | Classe ou método público sem Javadoc | Documente o que a mensagem aponta |
 
-### 7. No ar: Docker e Render
+### 7. No ar: Docker e Coolify
 
-Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Render** (plano grátis), configurado pelo `render.yaml`, que publica a `develop` sozinho a cada merge.
+Além do JAR local, o jogo roda num contêiner para ficar acessível pela internet. A receita está no **`Dockerfile`** da raiz, que serve para qualquer hospedagem que aceite Docker. Hoje ele está no **Coolify**, num VPS da Hetzner, ao lado de outros projetos. Quando o CI da `develop` termina verde, o workflow `deploy.yml` pede o deploy pela API do Coolify (`scripts/sobe-para-coolify.sh`), espera o desfecho e confere de fora que o jogo responde. O auto-deploy do Coolify fica desligado, para nada subir sem passar pelos testes, e a troca é sem queda: o contêiner antigo só sai depois que o novo passa no healthcheck de `/api/dificuldades`.
 
 ```bash
 docker build -t canteiro .
@@ -758,7 +758,7 @@ O comportamento muda por variáveis de ambiente, sem mexer no código. Sem nenhu
 Em qualquer modo, **a partida sem conexão por 10 minutos é descartada** (RF31). Assim, as abas fechadas não deixam laços rodando para sempre.
 
 > [!WARNING]
-> **No plano grátis, o Render desliga o serviço depois de 15 minutos sem acesso.** A primeira visita depois disso demora cerca de um minuto para carregar, e as partidas abertas se perdem, porque ficam em memória. **Os arquivos em `/app/dados` também não sobrevivem** a um reinício ou a um deploy novo: o plano grátis não tem disco permanente, então o ranking online recomeça do zero de vez em quando. O ranking que vale de verdade é o do JAR, na `~/.canteiro/` de cada jogador.
+> **As partidas abertas ficam em memória**, então um deploy novo ou um reinício encerra as que estiverem em andamento. **Os arquivos em `/app/dados` sobrevivem**: a pasta é um volume do Coolify, e o ranking online não recomeça a cada deploy. O ranking que vale de verdade continua sendo o do JAR, na `~/.canteiro/` de cada jogador.
 
 ---
 
