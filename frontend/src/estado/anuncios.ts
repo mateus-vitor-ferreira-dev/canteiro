@@ -1,4 +1,4 @@
-import type { EventoDto } from "@/api/protocolo";
+import type { EventoDto, PreviaDto } from "@/api/protocolo";
 
 /**
  * O texto que o leitor de tela fala quando algo acontece na partida. Peça
@@ -17,6 +17,12 @@ export function anuncioDoEvento(evento: EventoDto, nivel?: number): string | nul
         }
         case "COLAPSO":
             return "A estrutura desabou!";
+        case "QUEBRA":
+            return "A parte em balanço se soltou!";
+        case "ESMAGAMENTO": {
+            const n = evento.dados.celulas?.length ?? 1;
+            return n === 1 ? "Um bloco foi esmagado!" : `${n} blocos foram esmagados!`;
+        }
         case "META_CUMPRIDA":
             return evento.dados.pontos
                 ? `Meta cumprida! Mais ${evento.dados.pontos} pontos`
@@ -30,4 +36,26 @@ export function anuncioDoEvento(evento: EventoDto, nivel?: number): string | nul
         default:
             return null;
     }
+}
+
+/**
+ * O aviso de que a jogada da peça atual quebraria blocos: a parte em balanço
+ * que se soltaria (RN20) e os blocos que seriam esmagados (RN21).
+ *
+ * @param previa a prévia da jogada
+ * @returns o aviso, ou `null` se a jogada não quebra nada
+ */
+export function avisoDaPrevia(previa: PreviaDto): string | null {
+    const partes: string[] = [];
+    if (previa.quebras.length) {
+        partes.push(`solta ${blocos(previa.quebras.length)}`);
+    }
+    if (previa.esmagados.length) {
+        partes.push(`esmaga ${blocos(previa.esmagados.length)}`);
+    }
+    return partes.length ? `Esta jogada ${partes.join(" e ")}!` : null;
+}
+
+function blocos(n: number): string {
+    return n === 1 ? "1 bloco" : `${n} blocos`;
 }

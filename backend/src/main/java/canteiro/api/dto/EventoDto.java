@@ -34,7 +34,8 @@ public record EventoDto(String tipo, String evento, DadosDto dados) {
         List<QuedaDto> quedas = evento.quedas().stream().map(QuedaDto::de).toList();
         Integer pontos = evento.pontos() == 0 ? null : evento.pontos();
         Boolean ousada = evento.ousada() ? Boolean.TRUE : null;
-        return new EventoDto(TIPO, evento.tipo().name(), new DadosDto(evento.linhas(), quedas, pontos, ousada, null));
+        return new EventoDto(TIPO, evento.tipo().name(), new DadosDto(evento.linhas(), quedas, pontos, ousada,
+                EstadoDto.pares(evento.celulas()), null));
     }
 
     /**
@@ -44,25 +45,26 @@ public record EventoDto(String tipo, String evento, DadosDto dados) {
      * @return o evento de erro
      */
     public static EventoDto erro(String mensagem) {
-        return new EventoDto(TIPO, ERRO, new DadosDto(List.of(), List.of(), null, null, mensagem));
+        return new EventoDto(TIPO, ERRO, new DadosDto(List.of(), List.of(), null, null, List.of(), mensagem));
     }
 
     /**
      * Detalhes do evento.
      *
      * @param linhas   linhas eliminadas
-     * @param quedas   blocos que caíram no colapso
+     * @param quedas   blocos que caíram: no colapso ou no balanço (RN20)
      * @param pontos   quanto a pontuação mudou: ganho da eliminação ou desconto (negativo) do colapso
      * @param ousada   {@code true} se as linhas foram fechadas numa obra ousada (RN17)
+     * @param celulas  células envolvidas, como pares [linha, coluna]: as dos blocos esmagados (RN21)
      * @param mensagem explicação de um erro
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public record DadosDto(List<Integer> linhas, List<QuedaDto> quedas, Integer pontos, Boolean ousada,
-                           String mensagem) {
+                           List<List<Integer>> celulas, String mensagem) {
     }
 
     /**
-     * Um bloco que caiu no colapso.
+     * Um bloco que caiu: no colapso ou no balanço.
      *
      * @param origem  [linha, coluna] antes de cair
      * @param destino [linha, coluna] onde parou

@@ -74,6 +74,39 @@ const COLAPSO: readonly Nota[] = [
     },
 ];
 
+/** Balanço se soltando: um estalo agudo de coisa partindo e o baque curto da queda. */
+const QUEBRA: readonly Nota[] = [
+    {
+        onda: "ruido",
+        inicio: 0,
+        duracao: 0.06,
+        frequencia: 4200,
+        frequenciaFinal: 1800,
+        ganho: 0.35,
+    },
+    {
+        onda: "triangle",
+        inicio: 0.12,
+        duracao: 0.14,
+        frequencia: 130,
+        frequenciaFinal: 50,
+        ganho: 0.45,
+    },
+];
+
+/** Bloco esmagado: um rangido curto e o farelo do material cedendo. */
+const ESMAGAMENTO: readonly Nota[] = [
+    { onda: "square", inicio: 0, duracao: 0.18, frequencia: 70, frequenciaFinal: 40, ganho: 0.18 },
+    {
+        onda: "ruido",
+        inicio: 0.02,
+        duracao: 0.3,
+        frequencia: 900,
+        frequenciaFinal: 200,
+        ganho: 0.4,
+    },
+];
+
 /** Meta cumprida: o arpejo inteiro, rápido, e o dó de cima sustentado. */
 const META: readonly Nota[] = [
     ...ARPEJO_HZ.map((frequencia, i): Nota => ({
@@ -114,7 +147,7 @@ const SEMITONS_MAXIMOS = 10;
 
 /**
  * O que tocar para cada evento da partida (RF28): fixação, linhas eliminadas,
- * colapso, nível novo e meta cumprida. Os outros eventos não têm som.
+ * colapso, balanço que quebrou, esmagamento, nível novo e meta cumprida. Os outros eventos não têm som.
  *
  * @param sequencia quantas peças seguidas fecharam linha: o arpejo das linhas sobe com ela
  *
@@ -128,6 +161,10 @@ export function receitaDoEvento(evento: EventoDto, sequencia = 0): readonly Nota
             return arpejo(evento.dados.linhas?.length ?? 1, sequencia);
         case "COLAPSO":
             return COLAPSO;
+        case "QUEBRA":
+            return QUEBRA;
+        case "ESMAGAMENTO":
+            return ESMAGAMENTO;
         case "META_CUMPRIDA":
             return META;
         case "NIVEL_SUBIU":

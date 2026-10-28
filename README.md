@@ -100,24 +100,26 @@ Tudo sai num **único JAR**. Dois cliques nele sobem o servidor em `127.0.0.1` e
 | 📥 **Reserva** | Dá para guardar uma peça e trocar pela reservada, **uma vez por peça gerada** |
 | 🧹 **Linhas** | Linha completa é eliminada. Eliminar 2, 3 ou 4 linhas de uma vez rende bônus progressivo |
 | ⏱️ **Ajuste** | A peça que encosta no apoio espera **meio segundo** antes de fixar: dá para deslizar ou girar no último instante |
-| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente. Um anel no tabuleiro mostra **onde o centro de massa vai parar** com a jogada da peça atual |
+| ⚖️ **Estabilidade** | Vai de 100 % com desvio nulo a 0 % quando o desvio chega ao limite do nível, variando linearmente. Um anel no tabuleiro mostra **onde o centro de massa vai parar** com a jogada da peça atual, e um **X vermelho** marca os blocos que ela quebraria |
 | 🎯 **Obra ousada** | Fechar linha com a estabilidade abaixo de **25 %** vale **50 % a mais**: arriscar compensa |
 | 🔗 **Sequência** | Cada peça seguida que fecha linha soma **10 %** aos pontos da próxima eliminação, até o dobro |
 | 🏅 **Meta do nível** | Cada nível sorteia um objetivo curto, como "elimine 3 linhas de uma vez". Cumprir vale **500 × nível** pontos |
-| 💥 **Colapso** | Desvio acima do limite: os blocos acima da linha crítica caem, a pontuação perde o equivalente a **2 linhas** e o contador de colapsos sobe |
+| 🪝 **Balanço** | A parte da peça sem nada embaixo está em balanço. Se a peça for **mais pesada que o material em que se apoia**, o balanço **se solta e cai**. Concreto sobre madeira perde a ponta; aço sobre aço, ou no chão, segura |
+| 🔨 **Esmagamento** | Cada material aguenta um **peso máximo em cima**, na mesma coluna. Perto do limite, o bloco **racha**; passou, ele **estoura e vira um buraco**, e a linha dele não fecha mais. Construa como numa obra: pesado embaixo, leve em cima |
+| 💥 **Colapso** | Desvio acima do limite, na estrutura inteira **ou na parte de cima**, medida sobre onde ela encosta: os blocos acima da linha crítica caem, a pontuação perde o equivalente a **2 linhas** e o contador de colapsos sobe |
 | 📈 **Nível** | Sobe a cada **10 linhas**. A queda acelera e o desvio tolerado diminui |
 | 🏁 **Fim** | Quando uma peça nasce já colidindo, ou quando há um colapso com a pilha acima de **18 linhas** |
 
 ### Os materiais
 
-Forma e material são **independentes**: qualquer forma pode sair em qualquer material. O material define a densidade, a cor, o bônus por linha e o efeito no momento em que a peça é assentada.
+Forma e material são **independentes**: qualquer forma pode sair em qualquer material. O material define a densidade, a cor, o bônus por linha, o peso que aguenta em cima e o efeito no momento em que a peça é assentada.
 
-| Material | Peso | Bônus por linha | Efeito ao fixar | Aparece a partir do |
-|---|---|---|---|---|
-| 🪵 **Madeira** | leve | baixo (10) | nenhum | nível 1 |
-| 🧱 **Alvenaria** | médio | médio | a definir | nível 1 |
-| 🪨 **Concreto** | pesado | alto | a definir | nível 3 |
-| 🔩 **Aço** | o mais pesado | o mais alto (40) | **consolida os blocos logo abaixo**, que passam a resistir ao desprendimento no colapso | nível 5, e fica mais frequente a partir do 9 |
+| Material | Densidade | Aguenta em cima | Bônus por linha | Efeito ao fixar | Aparece a partir do |
+|---|---|---|---|---|---|
+| 🪵 **Madeira** | 0,6 | 8: cinco alvenarias a esmagam; no difícil, um aço basta | baixo (10) | nenhum | nível 1 |
+| 🧱 **Alvenaria** | 1,8 | 20 | médio (20) | nenhum | nível 1 |
+| 🪨 **Concreto** | 2,4 | 40 | alto (30) | nenhum | nível 3 |
+| 🔩 **Aço** | 7,85 | tudo: nunca é esmagado | o mais alto (40) | **consolida os blocos logo abaixo**, que passam a resistir ao desprendimento no colapso | nível 5, e sai com o dobro da chance a partir do 9 |
 
 > [!TIP]
 > Cada material tem **padrão de textura** além da cor (veios na madeira, tijolos na alvenaria, pontilhado no concreto, hachura no aço), para jogadores com daltonismo (RNF06).
@@ -134,6 +136,8 @@ A dificuldade cresce por dois caminhos ao mesmo tempo, a **velocidade** e o **ap
 | 7 – 8 | 380 ms | 1,7 coluna | todos |
 | 9 – 10 | 280 ms | 1,4 coluna | todos, com aço mais frequente |
 | 11+ | 200 ms | 1,2 coluna | todos, com aço mais frequente |
+
+Além do nível inicial, cada dificuldade multiplica o limite de desvio e o peso que os materiais aguentam: o **fácil** deixa os blocos 25 % mais resistentes; o **difícil** aperta o limite e enfraquece os blocos em 20 %.
 
 <sub>São os valores iniciais. Eles vão ser ajustados nos testes com jogadores a partir da semana 8.</sub>
 
@@ -205,7 +209,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 ### Regras de negócio
 
 <details>
-<summary><strong>RN01 – RN19</strong>: as regras do jogo, todas no backend</summary>
+<summary><strong>RN01 – RN22</strong>: as regras do jogo, todas no backend</summary>
 
 | Código | Regra |
 |---|---|
@@ -228,6 +232,9 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RN17 | Eliminar linhas com o índice de estabilidade abaixo de 25 %, medido depois de o elemento assentar e antes de as linhas sumirem, é uma obra ousada e vale 50 % a mais |
 | RN18 | Cada elemento seguido que elimina linha soma 10 % aos pontos da eliminação seguinte, até 100 %. Um elemento que não elimina linha ou um colapso zera a sequência |
 | RN19 | Cada nível tem uma meta, sorteada pela semente da partida entre: eliminar 2 linhas com o material mais pesado do nível predominando, eliminar 3 linhas ou mais de uma vez, eliminar 4 linhas sem o índice cair abaixo de 50 % ou fechar uma linha numa obra ousada. Cumprir a meta soma 500 × nível pontos, uma vez por nível; a meta não cumprida é trocada no nível seguinte, sem desconto |
+| RN20 | Ao assentar, a coluna da peça sem bloco nem chão logo abaixo está em balanço. Se a densidade da peça for maior que a do material mais denso em que ela se apoia (o chão aguenta tudo), os blocos em balanço se soltam e caem na própria coluna |
+| RN21 | Cada material aguenta em cima, na mesma coluna, uma massa máxima: madeira 8, alvenaria 20, concreto 40 e aço sem limite, vezes o fator da dificuldade (fácil 1,25, normal 1, difícil 0,8). A carga é a massa dos blocos colados acima, até o primeiro vazio. Passou, o bloco é esmagado e vira um buraco, e os blocos de cima ficam onde estão |
+| RN22 | Além da estrutura inteira, conta a parte de cima: os blocos acima da linha crítica, com o eixo no meio da faixa em que eles encostam nela. Vale a pior das duas medidas, e o limite de desvio é multiplicado pelo fator da dificuldade (difícil 0,8) |
 
 </details>
 
@@ -241,7 +248,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | Código | Descrição | Prior. | Lado | Status | Onde está |
 |---|---|:-:|:-:|:-:|---|
 | RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; cada opção abre a sua tela (#26, #32, #38, #68) |
-| RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25) |
+| RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25); cada dificuldade multiplica o limite de desvio e a resistência dos materiais (#119) |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ✅ | O motor gera peças continuamente (#20) pelo método da sacola, com semente (#12) |
 | RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12) |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ✅ | As 3 próximas peças, com forma e material, ao lado do tabuleiro (#23, #25) |
@@ -250,13 +257,13 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF08 | Girar o elemento nos dois sentidos, com deslocamento corretivo quando a rotação simples causar sobreposição | E | ☕ | ✅ | Peças no padrão SRS (#10) e rotação com deslocamento corretivo nos dois sentidos (#21) |
 | RF09 | Permitir a queda instantânea do elemento até a primeira posição de apoio | E | ☕ | ✅ | Queda instantânea até o primeiro apoio, com peça fantasma (#20) |
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ✅ | Reserva em pilha, com uma troca por peça, e a peça guardada ao lado do tabuleiro (#13) |
-| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101) |
+| RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101); a parte em balanço se solta se o apoio for mais leve que a peça (#117) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
 | RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22), com os bônus da obra ousada e da sequência de linhas (#103) e o da meta do nível (#100) |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |
 | RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ✅ | Índice, desvio e limite sempre na tela, e o eixo e o centro de massa desenhados no tabuleiro (#28, #25); prévia de onde o centro de massa vai parar com a jogada da peça atual (#107) |
-| RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29); aviso de que a jogada da peça atual derruba a obra (#107) |
-| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva, penalidade e evento COLAPSO (#28), com a animação de 1 s na tela (#29); o tabuleiro treme no colapso e as linhas eliminadas acendem (#106) |
+| RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29); aviso de que a jogada da peça atual derruba a obra (#107); X vermelho nos blocos que a jogada soltaria ou esmagaria, com o aviso no painel (#117, #118) |
+| RF17 | Executar o colapso quando o desvio ultrapassar o limite, reacomodando os blocos desprendidos | E | ☕ | ✅ | Linha crítica, queda recursiva, penalidade e evento COLAPSO (#28), com a animação de 1 s na tela (#29); o tabuleiro treme no colapso e as linhas eliminadas acendem (#106); o colapso considera também a parte de cima (#119) |
 | RF18 | Avançar de nível a cada dez linhas, ajustando velocidade e limite de desvio | E | ☕ | ✅ | Sobe a cada 10 linhas, acelera a queda e aperta o limite de desvio (#22, #28) |
 | RF19 | Permitir pausar e retomar a partida | E | ☕ 🌐 | ✅ | P ou Esc pausa e retoma, com a camada de pausa (#20, #23, #25) |
 | RF20 | Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado | E | ☕ 🌐 | ✅ | O motor encerra a partida nas duas condições da RN13 (#20, #28); tela de fim com pontuação, nível, linhas, colapsos e tempo (#32) |
@@ -286,7 +293,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RNF03 | Desempenho | O tempo entre o pressionamento de uma tecla e a resposta visual não deve passar de 50 ms, contando a ida e a volta pelo WebSocket | ✅ | Da tecla ao estado novo: mediana de 13 ms e pior caso de 32 ms, medidos jogando pelo JAR (#25) |
 | RNF04 | Portabilidade | O jogo deve rodar sem alteração de código em Windows, Linux e macOS, exigindo do jogador apenas Java 17 ou superior e um navegador atual (Chrome, Firefox, Edge ou Safari, nas duas últimas versões) | 🟡 | O CI abre o JAR no Linux, no Windows e no macOS com Java 17 e confere a tela e a API (#40); falta o teste com dois cliques e nos navegadores em máquinas reais |
 | RNF05 | Usabilidade | Os comandos devem ser aprendidos sem manual, com legenda visível na própria tela de jogo | ✅ | Legenda das teclas sempre visível na partida, gerada da mesma tabela que o teclado usa (#25); legenda dos materiais e botões de toque no celular (#59); no celular, gestos no tabuleiro, botões em duas linhas e a partida inteira numa tela, sem rolar (#105) |
-| RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ✅ | Textura em cada material (veios, tijolos, pontilhado, hachura) e borda clara nos blocos, legenda com nome e peso; conferido com simulação de protanopia, deuteranopia, tritanopia e escala de cinza (#59) |
+| RNF06 | Usabilidade | As cores dos materiais devem ser distinguíveis também por padrão de textura, atendendo jogadores com daltonismo | ✅ | Textura em cada material (veios, tijolos, pontilhado, hachura) e borda clara nos blocos, legenda com nome e peso; conferido com simulação de protanopia, deuteranopia, tritanopia e escala de cinza (#59); as rachaduras do peso (#118) e o X da prévia são desenho, não cor |
 | RNF07 | Manutenibilidade | Todas as classes e métodos públicos do backend devem ter Javadoc completo, com parâmetros, retorno e exceções. Os tipos exportados do frontend devem ter comentário TSDoc | 🔁 | O build reprova Javadoc faltando (`./mvnw javadoc:javadoc`) |
 | RNF08 | Manutenibilidade | As regras do jogo devem ficar inteiramente na camada de modelo do backend, sem dependência de Javalin, de JSON nem de classes gráficas, permitindo testá-las sem servidor e sem navegador | ✅ | `ArquiteturaTest` (#1, ampliado no #4) |
 | RNF09 | Manutenibilidade | Nenhum método ou função com mais de 40 linhas úteis. Nenhuma classe Java com mais de 400 linhas. Nenhum componente Svelte com mais de 200 linhas | 🔁 | Conferido em cada PR, por quem o abre |
@@ -431,7 +438,7 @@ canteiro/
 │   │   │   │   │   ├── pecas/       Peca + as 7 formas
 │   │   │   │   │   ├── materiais/   Material + os 4 materiais
 │   │   │   │   │   ├── estruturas/  sacola, fila, pilha, histórico
-│   │   │   │   │   ├── fisica/      centro de massa, estabilidade, colapso
+│   │   │   │   │   ├── fisica/      centro de massa, estabilidade, colapso, balanço, esmagamento
 │   │   │   │   │   ├── metas/       a meta de cada nível e o sorteio
 │   │   │   │   │   └── constantes/  dimensões e limites do jogo
 │   │   │   │   └── persistencia/    ranking, materiais, repetições
@@ -488,7 +495,7 @@ canteiro/
 | `modelo/pecas/` | `Peca` (abstrata) e as 7 formas | Uma hierarquia inteira de herança, junta para ser fácil de achar e comparar | ❌ |
 | `modelo/materiais/` | `Material` (abstrata) e os 4 materiais | A segunda hierarquia, independente da primeira. A cor é um número RGB, não `java.awt.Color` | ❌ |
 | `modelo/estruturas/` | Gerador por sacola, fila de próximas, pilha de reserva, histórico | As estruturas de dados que a disciplina avalia, fáceis de mostrar e testar sozinhas | ❌ |
-| `modelo/fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice, colapso | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
+| `modelo/fisica/` | `AnalisadorEstrutural`: acumuladores, centro de massa, índice; `Colapso`, `Balanco` e `Esmagamento` | **O diferencial do projeto** e o ponto mais provável de bug. Merece pacote e testes próprios | ❌ |
 | `modelo/metas/` | `Meta` (interface), um tipo de meta por classe e o `QuadroMetas`, que sorteia a do nível | Uma meta nova é uma classe nova, sem mexer no motor | ❌ |
 | `modelo/constantes/` | `COLUNAS = 10`, `LINHAS = 20`... | Os "números mágicos" proibidos têm um lugar para morar | ❌ |
 | `persistencia/` | Catálogo de materiais, configurações, ranking, repetições | Arquivo tem outro tipo de erro (sumiu, veio corrompido). Isolado, o tratamento defensivo fica num lugar só | ❌ |
@@ -1208,7 +1215,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 🌐 **Versão online**: o mesmo jogo em [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com), publicado a cada merge na `develop`
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **[Relatório de plataforma e desvios](docs/Relatorio_Plataforma_e_Desvios.md)**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios são a troca da interface em Swing por uma interface no navegador, a versão online, que escuta fora do `127.0.0.1` dentro do contêiner, a partida no celular e as regras novas RN16 a RN19
+- 📝 **[Relatório de plataforma e desvios](docs/Relatorio_Plataforma_e_Desvios.md)**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios são a troca da interface em Swing por uma interface no navegador, a versão online, que escuta fora do `127.0.0.1` dentro do contêiner, a partida no celular e as regras novas RN16 a RN22
 - 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
 - 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 

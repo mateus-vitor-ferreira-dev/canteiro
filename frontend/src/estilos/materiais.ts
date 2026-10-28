@@ -30,6 +30,10 @@ const TRACO_ESCURO = "rgba(60, 38, 16, 0.55)";
 const TRACO_CLARO = "rgba(255, 244, 232, 0.8)";
 const PONTO_ESCURO = "rgba(27, 36, 50, 0.6)";
 const HACHURA_CLARA = "rgba(230, 236, 244, 0.6)";
+const LUZ = "rgba(255, 255, 255, 0.22)";
+const SOMBRA = "rgba(10, 14, 22, 0.28)";
+const TRINCA_ESCURA = "rgba(14, 16, 22, 0.9)";
+const TRINCA_CLARA = "rgba(255, 255, 255, 0.55)";
 
 /** Pontos do concreto, em frações do lado: fixos, para o bloco não "tremer" a cada quadro. */
 const PONTOS_CONCRETO: readonly [number, number][] = [
@@ -79,9 +83,102 @@ export function desenharBloco(
             desenharHachura(ctx, x, y, lado);
             break;
     }
+    desenharRelevo(ctx, x, y, lado);
     ctx.lineWidth = 1;
     ctx.strokeStyle = COR_BORDA;
     ctx.strokeRect(x + 0.5, y + 0.5, lado - 1, lado - 1);
+}
+
+/**
+ * Luz em cima e à esquerda, sombra embaixo e à direita: o bloco ganha volume,
+ * como uma peça de verdade, sem esconder a textura.
+ */
+function desenharRelevo(ctx: CanvasRenderingContext2D, x: number, y: number, lado: number): void {
+    const faixa = Math.max(1, lado / 9);
+    ctx.fillStyle = LUZ;
+    ctx.fillRect(x, y, lado, faixa);
+    ctx.fillRect(x, y + faixa, faixa, lado - faixa);
+    ctx.fillStyle = SOMBRA;
+    ctx.fillRect(x + faixa, y + lado - faixa, lado - faixa, faixa);
+    ctx.fillRect(x + lado - faixa, y + faixa, faixa, lado - 2 * faixa);
+}
+
+/**
+ * As trincas, em frações do lado: cada nível acrescenta uma, entrando por um
+ * lado diferente. Fixas, para o bloco não "tremer" a cada quadro.
+ */
+const TRINCAS: readonly (readonly [number, number][])[] = [
+    [
+        [0.52, 0],
+        [0.44, 0.2],
+        [0.56, 0.38],
+        [0.46, 0.58],
+    ],
+    [
+        [0, 0.6],
+        [0.18, 0.52],
+        [0.34, 0.66],
+        [0.5, 0.6],
+        [0.46, 0.58],
+    ],
+    [
+        [1, 0.3],
+        [0.8, 0.42],
+        [0.72, 0.68],
+        [0.82, 1],
+    ],
+];
+
+/**
+ * Desenha o bloco rachando sob o peso de cima (RN21): uma trinca no nível 1,
+ * duas no 2 e três, com uma lasca solta no canto, no 3. A trinca tem um filete
+ * claro ao lado do traço escuro, para aparecer no aço e na madeira, e é
+ * desenho, não cor: aparece também em escala de cinza (RNF06).
+ *
+ * @param nivel de 1 (começou a rachar) a 3 (prestes a ceder)
+ */
+export function desenharRachadura(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    lado: number,
+    nivel: number,
+): void {
+    const largura = Math.max(1, lado / 14);
+    for (const trinca of TRINCAS.slice(0, Math.min(nivel, TRINCAS.length))) {
+        tracar(ctx, x, y, lado, trinca, TRINCA_CLARA, largura + 1.5);
+        tracar(ctx, x, y, lado, trinca, TRINCA_ESCURA, largura);
+    }
+    if (nivel >= TRINCAS.length) {
+        ctx.fillStyle = TRINCA_ESCURA;
+        ctx.beginPath();
+        ctx.moveTo(x + lado, y + lado * 0.72);
+        ctx.lineTo(x + lado, y + lado);
+        ctx.lineTo(x + lado * 0.74, y + lado);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function tracar(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    lado: number,
+    pontos: readonly [number, number][],
+    cor: string,
+    largura: number,
+): void {
+    ctx.strokeStyle = cor;
+    ctx.lineWidth = largura;
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    pontos.forEach(([px, py], i) =>
+        i === 0
+            ? ctx.moveTo(x + lado * px, y + lado * py)
+            : ctx.lineTo(x + lado * px, y + lado * py),
+    );
+    ctx.stroke();
 }
 
 function desenharVeios(ctx: CanvasRenderingContext2D, x: number, y: number, lado: number): void {

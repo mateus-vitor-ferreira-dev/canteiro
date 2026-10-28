@@ -59,7 +59,7 @@ class ProtocoloJsonTest {
     void estadoTemOsCamposDoProtocolo() throws Exception {
         JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motorComUmaPeca())));
 
-        assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
+        assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "rachaduras", "pecaAtual", "pecaFantasma", "proximas",
                 "reservada", "podeReservar", "placar", "estabilidade", "meta"), campos(estado));
         assertEquals(List.of("descricao", "progresso", "alvo", "cumprida"), campos(estado.get("meta")));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
@@ -67,7 +67,7 @@ class ProtocoloJsonTest {
                 campos(estado.get("placar")));
         assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta", "previa"),
                 campos(estado.get("estabilidade")));
-        assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba"),
+        assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba", "quebras", "esmagados"),
                 campos(estado.at("/estabilidade/previa")));
         assertEquals(22, estado.get("tabuleiro").size());
         assertEquals(10, estado.get("tabuleiro").get(0).size());

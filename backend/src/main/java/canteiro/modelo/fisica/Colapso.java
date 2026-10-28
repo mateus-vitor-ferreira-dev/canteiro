@@ -73,8 +73,15 @@ public final class Colapso {
         return critica;
     }
 
-    /** Desce o bloco uma linha enquanto houver espaço embaixo. Devolve onde ele parou. */
-    private static Celula cair(Tabuleiro tabuleiro, Celula posicao) {
+    /**
+     * Desce o bloco uma linha enquanto houver espaço embaixo. O balanço
+     * (RN20) usa a mesma queda.
+     *
+     * @param tabuleiro onde o bloco está
+     * @param posicao   célula ocupada pelo bloco
+     * @return onde ele parou
+     */
+    static Celula cair(Tabuleiro tabuleiro, Celula posicao) {
         Celula abaixo = posicao.deslocada(1, 0);
         if (!Tabuleiro.dentro(abaixo) || tabuleiro.ocupada(abaixo.linha(), abaixo.coluna())) {
             return posicao;

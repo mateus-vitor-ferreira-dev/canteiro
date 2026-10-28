@@ -15,6 +15,7 @@ public final class Alvenaria extends Material {
 
     private static final double DENSIDADE = 1.8;
     private static final int COR = 0xC8704B;
+    private static final double CARGA_MAXIMA = 20.0;
     private static final int BONUS_LINHA = 20;
 
     /**
@@ -41,5 +42,15 @@ public final class Alvenaria extends Material {
     @Override
     public int bonusLinha() {
         return BONUS_LINHA;
+    }
+
+    /**
+     * A alvenaria aguenta uma coluna da própria alvenaria, mas não três blocos de aço.
+     *
+     * @return a carga máxima (RN21)
+     */
+    @Override
+    public double cargaMaxima() {
+        return CARGA_MAXIMA;
     }
 }

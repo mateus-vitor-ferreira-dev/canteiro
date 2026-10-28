@@ -4,6 +4,7 @@ import {
     MATERIAIS,
     corDoMaterial,
     desenharBloco,
+    desenharRachadura,
     infoDoMaterial,
 } from "./materiais";
 
@@ -26,6 +27,7 @@ function contextoFalso() {
         stroke: anotar("stroke"),
         arc: anotar("arc"),
         fill: anotar("fill"),
+        closePath: anotar("closePath"),
     };
     return { ctx: ctx as unknown as CanvasRenderingContext2D, chamadas };
 }
@@ -74,10 +76,30 @@ describe("desenharBloco", () => {
         expect(new Set(assinaturas).size).toBe(MATERIAIS.length);
     });
 
-    it("pinta um único retângulo e contorna o bloco com a borda clara", () => {
+    it("pinta o bloco, as quatro faixas do relevo e contorna com a borda clara", () => {
         const { ctx, chamadas } = contextoFalso();
         desenharBloco(ctx, 0, 0, 28, "ACO");
-        expect(chamadas.filter((c) => c === "fillRect")).toHaveLength(1);
+        expect(chamadas.filter((c) => c === "fillRect")).toHaveLength(5);
         expect(chamadas.at(-1)).toBe("strokeRect");
+    });
+});
+
+describe("desenharRachadura", () => {
+    it("cada nível acrescenta uma trinca, com o filete claro e o traço escuro", () => {
+        for (const nivel of [1, 2, 3]) {
+            const { ctx, chamadas } = contextoFalso();
+            desenharRachadura(ctx, 0, 0, 28, nivel);
+            expect(chamadas.filter((c) => c === "stroke")).toHaveLength(2 * nivel);
+        }
+    });
+
+    it("só o nível 3 solta a lasca do canto", () => {
+        const doisNiveis = contextoFalso();
+        desenharRachadura(doisNiveis.ctx, 0, 0, 28, 2);
+        expect(doisNiveis.chamadas).not.toContain("fill");
+
+        const tresNiveis = contextoFalso();
+        desenharRachadura(tresNiveis.ctx, 0, 0, 28, 3);
+        expect(tresNiveis.chamadas.filter((c) => c === "fill")).toHaveLength(1);
     });
 });

@@ -1,4 +1,4 @@
-import type { EventoDto } from "@/api/protocolo";
+import type { EventoDto, Posicao } from "@/api/protocolo";
 import { COLUNAS, LINHAS_OCULTAS } from "./desenho";
 
 /** Quanto dura o clarão das linhas eliminadas, em milissegundos. */
@@ -8,6 +8,58 @@ export const DURACAO_CLARAO_LINHAS_MS = 350;
 export const LIMIAR_RANGIDO = 0.25;
 
 const COR_CLARAO_LINHAS = "255, 236, 179";
+
+/** Quanto dura o estouro de um bloco esmagado (RN21), em milissegundos. */
+export const DURACAO_ESTOURO_MS = 550;
+
+const COR_ESTILHACO = "200, 196, 188";
+const COR_POEIRA = "170, 160, 145";
+
+/** Para onde voa cada estilhaço, em frações da célula por unidade de progresso. */
+const ESTILHACOS: readonly [number, number][] = [
+    [-0.7, -0.5],
+    [0.6, -0.7],
+    [-0.5, 0.4],
+    [0.7, 0.3],
+    [0.05, -0.9],
+];
+
+/**
+ * Desenha os blocos esmagados estourando: uma nuvem de poeira que cresce e
+ * estilhaços que voam e somem. As células já estão vazias no estado novo.
+ *
+ * @param progresso de 0 (o instante do estouro) a 1 (a poeira assentou)
+ */
+export function desenharEstouro(
+    ctx: CanvasRenderingContext2D,
+    celulas: readonly Posicao[],
+    progresso: number,
+    celula: number,
+): void {
+    const p = Math.min(1, Math.max(0, progresso));
+    for (const [linha, coluna] of celulas) {
+        const visivel = linha - LINHAS_OCULTAS;
+        if (visivel < 0) {
+            continue;
+        }
+        const cx = (coluna + 0.5) * celula;
+        const cy = (visivel + 0.5) * celula;
+        ctx.fillStyle = `rgba(${COR_POEIRA}, ${0.55 * (1 - p)})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, celula * (0.3 + 0.5 * p), 0, 2 * Math.PI);
+        ctx.fill();
+        const lado = celula * 0.28 * (1 - p);
+        ctx.fillStyle = `rgba(${COR_ESTILHACO}, ${1 - p})`;
+        for (const [dx, dy] of ESTILHACOS) {
+            ctx.fillRect(
+                cx + dx * celula * p - lado / 2,
+                cy + dy * celula * p - lado / 2,
+                lado,
+                lado,
+            );
+        }
+    }
+}
 
 /**
  * Pinta um clarão claro nas linhas que acabaram de sumir, apagando aos poucos.
@@ -53,7 +105,8 @@ const PONTOS = new Intl.NumberFormat("pt-BR");
 
 /**
  * O texto flutuante de um evento: o ganho das linhas (e se foi ousada), o
- * desconto do colapso, o bônus da meta ou o nível novo.
+ * desconto do colapso, o balanço que quebrou, o bloco esmagado, o bônus da
+ * meta ou o nível novo.
  *
  * @param nivelAntes nível mostrado quando o evento chega: o backend manda o
  *   evento antes do estado novo, então a subida vai para o nível seguinte
@@ -68,6 +121,10 @@ export function destaqueDoEvento(evento: EventoDto, nivelAntes?: number): Destaq
         }
         case "COLAPSO":
             return pontos < 0 ? { texto: `−${PONTOS.format(-pontos)}`, tipo: "perda" } : null;
+        case "QUEBRA":
+            return { texto: "Quebrou!", tipo: "perda" };
+        case "ESMAGAMENTO":
+            return { texto: "Esmagado!", tipo: "perda" };
         case "META_CUMPRIDA":
             return { texto: `Meta! +${PONTOS.format(pontos)}`, tipo: "meta" };
         case "NIVEL_SUBIU":

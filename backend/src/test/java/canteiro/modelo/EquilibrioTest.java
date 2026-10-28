@@ -65,7 +65,9 @@ class EquilibrioTest {
             motor.inscrever(registro);
             while (!motor.estado().encerrada() && pecas < 500) {
                 mexerAoAcaso(motor, sorteio);
-                Estabilidade previa = motor.previa();
+                Previa jogada = motor.previa();
+                Estabilidade previa = jogada.estabilidade();
+                int eventosAntes = registro.eventos.size();
                 int nivel = motor.placar().nivel();
                 long colapsosAntes = registro.colapsos();
                 motor.aplicar(Comando.QUEDA_INSTANTANEA);
@@ -75,6 +77,11 @@ class EquilibrioTest {
                 }
                 boolean desabou = registro.colapsos() > colapsosAntes;
                 assertEquals(previa.passouDoLimite(), desabou, "a prévia avisa o colapso, peça " + pecas);
+                List<EventoPartida> daJogada = registro.eventos.subList(eventosAntes, registro.eventos.size());
+                assertEquals(jogada.quebras(), origens(daJogada, EventoPartida.Tipo.QUEBRA),
+                        "a prévia avisa o balanço, peça " + pecas);
+                assertEquals(jogada.esmagados(), esmagadosAntesDoColapso(daJogada),
+                        "a prévia avisa o esmagamento, peça " + pecas);
                 if (!desabou) {
                     assertEquals(motor.estabilidade().centroDeMassa(), previa.centroDeMassa(), 1e-6);
                     assertEquals(motor.estabilidade().eixo(), previa.eixo(), 1e-9);
@@ -95,7 +102,7 @@ class EquilibrioTest {
         for (int i = 0; i < 4; i++) {
             motor.aplicar(Comando.DIREITA);
         }
-        Estabilidade previa = motor.previa();
+        Estabilidade previa = motor.previa().estabilidade();
         motor.aplicar(Comando.QUEDA_INSTANTANEA);
 
         assertEquals(1, motor.placar().linhas(), "a linha de baixo fechou");
@@ -151,7 +158,7 @@ class EquilibrioTest {
         MotorJogo motor = new MotorJogo(Dificuldade.FACIL, FonteLista.fixa().depois(Forma.O, aco));
         assertNull(motor.previa());
         motor.avancarCiclo();
-        assertTrue(motor.previa().indice() == 1.0, "uma peça sozinha está sobre a própria base");
+        assertTrue(motor.previa().estabilidade().indice() == 1.0, "uma peça sozinha está sobre a própria base");
     }
 
     @Test
@@ -235,6 +242,24 @@ class EquilibrioTest {
     }
 
     /** Observador que só anota os eventos. */
+    private static List<Celula> origens(List<EventoPartida> eventos, EventoPartida.Tipo tipo) {
+        return eventos.stream().filter(e -> e.tipo() == tipo)
+                .flatMap(e -> e.quedas().stream().map(Queda::origem)).toList();
+    }
+
+    private static List<Celula> esmagadosAntesDoColapso(List<EventoPartida> eventos) {
+        List<Celula> esmagados = new ArrayList<>();
+        for (EventoPartida evento : eventos) {
+            if (evento.tipo() == EventoPartida.Tipo.COLAPSO) {
+                break;
+            }
+            if (evento.tipo() == EventoPartida.Tipo.ESMAGAMENTO) {
+                esmagados.addAll(evento.celulas());
+            }
+        }
+        return esmagados;
+    }
+
     private static final class Registro implements ObservadorPartida {
         private final List<EventoPartida> eventos = new ArrayList<>();
 
