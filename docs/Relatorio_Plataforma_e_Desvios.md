@@ -70,7 +70,7 @@ As versões saem do `backend/pom.xml`, do `frontend/package.json` e do `Dockerfi
 
 ## 3. Desvios em relação à especificação 1.0
 
-A versão 1.0 previa um aplicativo desktop em Swing. A versão 2.0 dividiu o jogo em backend e frontend, antes de existir código. A tabela é a do Apêndice A.2 da [especificação](especificacao/ESPECIFICACAO.md).
+A versão 1.0 previa um aplicativo desktop em Swing. A versão 2.0 dividiu o jogo em backend e frontend, antes de existir código. A tabela é a do Apêndice A.2 da documentação do projeto (especificação 2.2), que não fica no repositório.
 
 | Item | Planejado (1.0) | Entregue | Por quê |
 |---|---|---|---|
