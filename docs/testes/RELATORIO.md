@@ -8,7 +8,7 @@ Tudo entre colchetes é para trocar; apague estes comentários quando o relatór
 
 | Campo | Conteúdo |
 |---|---|
-| **Responsáveis** | Alisson Antônio Oliveira Santos · Wanessa Kylie Silva Medeiros |
+| **Responsável** | Alisson Antônio Oliveira Santos |
 | **Período** | [de AAAA-MM-DD a AAAA-MM-DD] |
 | **Última atualização** | [AAAA-MM-DD] |
 

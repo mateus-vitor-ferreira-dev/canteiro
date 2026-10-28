@@ -59,7 +59,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 - [👥 Equipe](#-equipe)
 
 > [!NOTE]
-> **Este README é a referência do projeto para a equipe.** A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
+> **Este README é a referência do projeto para a equipe.** O processo, da issue ao merge, está resumido no **[manual da equipe](docs/EQUIPE.md)**. A versão formal, com objetivos, requisitos, critérios de aceitação, cronograma, riscos e divisão de responsabilidades, está na **[proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**. Para um panorama rápido, veja os **[slides da apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**.
 
 ---
 
@@ -197,7 +197,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 35 prontos e 6 começados, de 31 funcionais e 16 não funcionais. As regras de negócio entram junto com o modelo, a partir das semanas 3 – 4.
+**Andamento:** 39 prontos e 6 começados, de 31 funcionais e 16 não funcionais (os 2 restantes são regras de código 🔁). As regras de negócio não têm status: cada uma entra junto com o código do modelo que a aplica.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -252,7 +252,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF10 | Permitir reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento | E | ☕ | ✅ | Reserva em pilha, com uma troca por peça, e a peça guardada ao lado do tabuleiro (#13) |
 | RF11 | Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado | E | ☕ | ✅ | Fixação na grade (#11), acionada pelo motor ao bater embaixo (#20), com meio segundo de ajuste antes de fixar (#101) |
 | RF12 | Identificar e eliminar as linhas completas após a fixação, descendo as linhas de cima | E | ☕ | ✅ | Linhas completas eliminadas e as de cima descendo (#20) |
-| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22), com os bônus da obra ousada e da sequência de linhas (#103) |
+| RF13 | Calcular a pontuação considerando linhas simultâneas, material predominante e nível | E | ☕ | ✅ | Base por linhas simultâneas × nível × bônus do material predominante (#22), com os bônus da obra ousada e da sequência de linhas (#103) e o da meta do nível (#100) |
 | RF14 | Recalcular o centro de massa sempre que a composição do tabuleiro mudar | E | ☕ | ✅ | Centro de massa incremental, atualizado a cada bloco fixado ou eliminado (#28) |
 | RF15 | Exibir continuamente o índice de estabilidade, o desvio corrente e o limite tolerado | E | ☕ 🌐 | ✅ | Índice, desvio e limite sempre na tela, e o eixo e o centro de massa desenhados no tabuleiro (#28, #25); prévia de onde o centro de massa vai parar com a jogada da peça atual (#107) |
 | RF16 | Sinalizar visualmente a aproximação do limite de desvio antes do colapso | E | 🌐 | ✅ | Painel com barra, medidor do centro de massa em relação ao eixo e aviso do lado da carga no alerta (#29); aviso de que a jogada da peça atual derruba a obra (#107) |
@@ -398,10 +398,9 @@ E cada passo tem o seu teste: [`DificuldadeTest`](backend/src/test/java/canteiro
 
 | Quem | Onde vai trabalhar na maior parte do tempo |
 |---|---|
-| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket) e todo o `frontend/src/` (a tela de partida e as telas de apoio) |
+| **Mateus** | `backend/.../modelo/` (motor, peças, materiais, estruturas, física), `backend/.../api/` e `controle/` (servidor e WebSocket), todo o `frontend/src/` (a tela de partida e as telas de apoio), a seção de requisitos deste README e o relatório de plataforma e desvios em `docs/` |
 | **Marcelo** | `backend/.../persistencia/` (materiais, configurações, ranking e repetições em arquivo) e o que usa esses arquivos em `backend/.../api/rotas/` e `controle/` (ranking, configurações, relatório, replay e modo treino) |
-| **Wanessa** | `docs/` (manual da equipe, relatório e apresentação), este README (seção de requisitos) e o [board](https://github.com/users/mateus-vitor-ferreira-dev/projects/5). **Não precisa abrir `backend/src` nem `frontend/src`** |
-| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores) e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
+| **Alisson** | `docs/testes/` (roteiros de teste manual, registro das execuções e sessões com jogadores), `docs/apresentacao/` e as issues de bug. **Não precisa abrir `backend/src` nem `frontend/src`**: para testar o jogo, basta rodar o JAR ([🚀 Rodando localmente](#-rodando-localmente)) |
 
 ### O que ninguém edita à mão
 
@@ -521,7 +520,7 @@ canteiro/
 | `backend/src/test/java/` | Os testes, **nos mesmos pacotes do código testado**: o teste de `modelo/fisica/AnalisadorEstrutural` fica em `test/.../modelo/fisica/AnalisadorEstruturalTest`. No frontend, o teste fica ao lado do arquivo, com o sufixo `.test.ts` |
 | `backend/src/test/resources/arquivos/` | Arquivos de entrada **feitos para quebrar**: ranking vazio, linha malformada, caractere inválido (RNF12) |
 | `backend/.mvn/`, `mvnw`, `mvnw.cmd` | O Maven Wrapper: todos usam **a mesma versão do Maven**, sem instalar nada |
-| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e, em breve, o manual da equipe (`EQUIPE.md`) |
+| `docs/` | A proposta do projeto e os slides da apresentação, em PDF, as imagens deste README, os testes manuais (`testes/`: roteiros, execuções, sessões com jogadores e o [relatório](docs/testes/RELATORIO.md)) e o [manual da equipe](docs/EQUIPE.md) |
 | `.github/` | O modelo de PR: todo PR novo já abre com o checklist |
 | `.gitignore` | Impede que `target/`, `node_modules/`, `dist/`, `.idea/` e arquivos do sistema entrem no repositório |
 | `.gitattributes` | Resolve o problema de fim de linha entre Windows e Linux (`CRLF` × `LF`), que senão faz o Git achar que o arquivo inteiro mudou |
@@ -1138,7 +1137,7 @@ git push
 - ❌ **Trabalhar direto na `develop` ou na `main`.** Sempre crie um ramo. O GitHub vai recusar o push de qualquer jeito.
 - ❌ **`git push --force`** em ramo que outra pessoa também usa.
 - ❌ **Commitar arquivos gerados**, como `target/`, `node_modules/`, `dist/`, `*.class`, `.idea/` ou `.vscode/`. O `.gitignore` já barra esses arquivos.
-- ❌ **Fazer merge do seu próprio PR sem ninguém ter olhado**, a não ser que o grupo combine o contrário.
+- ❌ **Fazer merge com o CI vermelho.** O botão nem libera, mas não tente contornar: corrija no mesmo ramo.
 - ❌ **Passar dias sem dar push.** Se o computador der problema, o trabalho que não foi para o GitHub se perde.
 - ❌ **Apagar o conteúdo de um conflito sem entender o que ele é.**
 - ❌ **Usar uma conta do GitHub ou um e-mail que não são seus.** A contribuição fica registrada para outra pessoa.
@@ -1209,7 +1208,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 - ☕ **Executável**: um único JAR com o frontend embutido, que abre com dois cliques
 - 🌐 **Versão online**: o mesmo jogo em [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com), publicado a cada merge na `develop`
 - 📚 **Javadoc**: páginas geradas a partir dos comentários do código do backend
-- 📝 **Relatório de plataforma e desvios**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios até aqui são a troca da interface em Swing por uma interface no navegador e a versão online, que escuta fora do `127.0.0.1` dentro do contêiner
+- 📝 **[Relatório de plataforma e desvios](docs/Relatorio_Plataforma_e_Desvios.md)**: o ambiente usado e o que mudou em relação ao planejado, com o porquê. Os principais desvios são a troca da interface em Swing por uma interface no navegador, a versão online, que escuta fora do `127.0.0.1` dentro do contêiner, a partida no celular e as regras novas RN16 a RN19
 - 🗂️ **[Proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf)**: resumo, requisitos, cronograma, riscos e divisão de responsabilidades
 - 🎬 **[Apresentação](docs/apresentacao/Apresentacao_Canteiro.pdf)**: slides em linguagem simples, com a parte de cada integrante, e o [vídeo narrado](docs/apresentacao/Apresentacao_Canteiro.mp4)
 
@@ -1222,12 +1221,11 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 
 | Integrante | GitHub | Responsabilidades |
 |---|---|---|
-| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua |
+| Mateus Vitor Ferreira | [@mateus-vitor-ferreira-dev](https://github.com/mateus-vitor-ferreira-dev) | ☕ Arquitetura, servidor e protocolo · motor do jogo · física e colapso · estruturas de dados · medições de desempenho · 🌐 tela de partida e telas de apoio · build e integração contínua · 📋 requisitos · 📝 manual da equipe e relatório de plataforma e desvios |
 | Marcelo Camillo De Paula Leite | [@WendigoAwake](https://github.com/WendigoAwake) | ☕ Persistência em arquivo · rotas de ranking, configurações e relatório · replay · modo treino |
-| Wanessa Kylie Silva Medeiros | [@WanessaK21](https://github.com/WanessaK21) | 📋 Requisitos · 🧪 plano de testes (roteiros, com o Alisson) · ♿ usabilidade e acessibilidade · 📝 manual da equipe e relatório |
-| Alisson | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Execução dos testes a cada entrega · validação com jogadores · 📝 apoio na documentação · 🎬 apresentação do projeto |
+| Alisson Antônio Oliveira Santos | [@alissonsantos6-248](https://github.com/alissonsantos6-248) | 🧪 Plano de testes: roteiros e execução a cada entrega · validação com jogadores · ♿ usabilidade e acessibilidade · 📝 revisão da documentação · 🎬 apresentação do projeto |
 
-Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista, já com o Alisson, está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16); as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus. A tabela acima é a que vale hoje.
+Os testes automatizados são escritos por quem programa, no mesmo PR; os roteiros manuais, os testes de aceitação e a validação com jogadores ficam com a frente de testes. A divisão prevista está na [proposta do projeto](docs/proposta/Proposta_Projeto_Canteiro.pdf) (seção 16). Desde então, as telas de apoio, que lá aparecem com o Marcelo, acabaram feitas pelo Mateus, e a equipe passou a ter três integrantes: os requisitos, o manual e o relatório de plataforma e desvios ficaram com o Mateus, e os roteiros de teste, a usabilidade e a apresentação, com o Alisson. A tabela acima é a que vale hoje.
 
 ---
 
