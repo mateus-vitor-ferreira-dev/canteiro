@@ -5,6 +5,8 @@
     import type { PartidaAoVivo } from "@/estado/partida.svelte";
     import type { Som } from "@/estado/som.svelte";
     import { LIMIAR_RANGIDO } from "@/componentes/efeitos";
+    import { Musica } from "@/estado/musica.svelte";
+    import { intensidadeDoPerigo } from "@/sons/musica";
     import CamadaPartida from "./CamadaPartida.svelte";
     import Destaques from "./Destaques.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -24,7 +26,7 @@
     }: {
         /** A partida ao vivo. */
         partida: PartidaAoVivo;
-        /** Os sons, para o botão do resumo. */
+        /** Os sons: o botão do resumo, o rangido e a música seguem o mesmo liga e desliga. */
         som: Som;
         /** Lado de cada quadrado do tabuleiro, em pixels. */
         celula: number;
@@ -57,6 +59,25 @@
         som.ranger();
         const relogio = setInterval(() => som.ranger(), INTERVALO_RANGIDO_MS);
         return () => clearInterval(relogio);
+    });
+
+    // A música acompanha o perigo: mais cheia e mais rápida quanto mais perto de perder.
+    // Para na pausa e no fim de jogo.
+    const musica = new Musica(() => som.ligado);
+    const emJogo = $derived(
+        partida.estado !== null &&
+            partida.estado.estado !== "PAUSA" &&
+            partida.estado.estado !== "FIM_DE_JOGO",
+    );
+    $effect(() => {
+        musica.intensidade = partida.estado ? intensidadeDoPerigo(partida.estado) : 0;
+    });
+    $effect(() => {
+        if (!emJogo) {
+            return;
+        }
+        musica.tocar();
+        return () => musica.parar();
     });
 </script>
 
