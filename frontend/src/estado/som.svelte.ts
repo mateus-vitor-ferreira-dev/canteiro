@@ -3,8 +3,14 @@ import { RANGIDO, receitaDoEvento, type Nota } from "@/sons/receitas";
 import { tocarNotas } from "@/sons/sintetizador";
 import { configuracoes } from "./configuracoes.svelte";
 
-/** Toca notas num volume de 0 a 1. Os testes trocam por um falso. */
-export type Tocador = (notas: readonly Nota[], volume: number) => void;
+/**
+ * Toca notas num volume de 0 a 1, agora ou a partir de um instante do relógio
+ * do áudio (`quando`, em segundos). Os testes trocam por um falso.
+ */
+export type Tocador = (notas: readonly Nota[], volume: number, quando?: number) => void;
+
+/** O instante atual do relógio do áudio, em segundos, ou `null` se não há áudio. */
+export type Relogio = () => number | null;
 
 /** O mínimo do `localStorage` que o som usa. */
 export type Armazenamento = Pick<Storage, "getItem" | "setItem">;
@@ -35,7 +41,7 @@ export class Som {
      * @param volume de onde vem o volume; o padrão é o das configurações (RF27)
      */
     constructor(
-        tocador: Tocador = tocadorDoNavegador(),
+        tocador: Tocador = tocadorDoNavegador,
         armazenamento = armazenamentoDoNavegador(),
         volume: LerVolume = () => configuracoes.volume / PORCENTO,
     ) {
@@ -92,31 +98,48 @@ function armazenamentoDoNavegador(): Armazenamento | null {
     }
 }
 
+let contexto: AudioContext | null = null;
+let saida: GainNode | null = null;
+
 /**
- * Toca pelo Web Audio. O contexto só nasce no primeiro som: o navegador não
- * deixa tocar antes de o jogador interagir, e a essa altura ele já apertou teclas.
- * Sem Web Audio, fica mudo em vez de quebrar a partida.
+ * O contexto de áudio da página, o mesmo para os efeitos e a música. Só nasce
+ * quando o primeiro som é pedido: o navegador não deixa tocar antes de o
+ * jogador interagir, e a essa altura ele já clicou ou apertou teclas. Sem Web
+ * Audio, devolve `null`, e o jogo fica mudo em vez de quebrar.
  */
-function tocadorDoNavegador(): Tocador {
-    let contexto: AudioContext | null = null;
-    let saida: GainNode | null = null;
-    return (notas, volume) => {
-        try {
-            if (!contexto || !saida) {
-                if (typeof AudioContext === "undefined") {
-                    return;
-                }
-                contexto = new AudioContext();
-                saida = contexto.createGain();
-                saida.connect(contexto.destination);
-            }
-            if (contexto.state === "suspended") {
-                void contexto.resume();
-            }
-            saida.gain.value = volume;
-            tocarNotas(contexto, saida, notas);
-        } catch {
-            // Um som que falha não pode derrubar a partida.
+function audioDaPagina(): { contexto: AudioContext; saida: GainNode } | null {
+    if (!contexto || !saida) {
+        if (typeof AudioContext === "undefined") {
+            return null;
         }
-    };
+        contexto = new AudioContext();
+        saida = contexto.createGain();
+        saida.connect(contexto.destination);
+    }
+    if (contexto.state === "suspended") {
+        void contexto.resume();
+    }
+    return { contexto, saida };
 }
+
+/** Toca pelo Web Audio. Um som que falha não pode derrubar a partida. */
+export const tocadorDoNavegador: Tocador = (notas, volume, quando) => {
+    try {
+        const audio = audioDaPagina();
+        if (audio) {
+            audio.saida.gain.value = volume;
+            tocarNotas(audio.contexto, audio.saida, notas, quando ?? audio.contexto.currentTime);
+        }
+    } catch {
+        // segue mudo
+    }
+};
+
+/** O relógio do áudio da página, que a música usa para emendar os compassos. */
+export const relogioDoNavegador: Relogio = () => {
+    try {
+        return audioDaPagina()?.contexto.currentTime ?? null;
+    } catch {
+        return null;
+    }
+};

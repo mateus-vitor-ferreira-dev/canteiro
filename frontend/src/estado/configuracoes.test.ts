@@ -60,8 +60,27 @@ describe("Configuracoes", () => {
         const config = new Configuracoes({ ler: vi.fn(), salvar }, guardado);
         expect(await config.salvar({ DIREITA: ["KeyD"] }, 40)).toBe("servidor");
         expect(salvar).toHaveBeenCalledWith({ teclas: { DIREITA: ["KeyD"] }, volume: 40 });
-        expect(guardado.dados).toEqual({});
+        expect(guardado.dados).toEqual({ "canteiro.musica": "ligada" });
         expect(config.volume).toBe(40);
+    });
+
+    it("a música começa como o jogador deixou neste navegador", () => {
+        const api = { ler: vi.fn(), salvar: vi.fn() };
+        expect(new Configuracoes(api, armazenamento()).musica).toBe(true);
+        expect(
+            new Configuracoes(api, armazenamento({ "canteiro.musica": "desligada" })).musica,
+        ).toBe(false);
+        expect(new Configuracoes(api, null).musica).toBe(true);
+    });
+
+    it("a música fica no navegador, fora do que vai para o servidor", async () => {
+        const salvar = vi.fn().mockResolvedValue(undefined);
+        const guardado = armazenamento();
+        const config = new Configuracoes({ ler: vi.fn(), salvar }, guardado);
+        await config.salvar({}, 60, false);
+        expect(salvar).toHaveBeenCalledWith({ teclas: {}, volume: 60 });
+        expect(guardado.dados["canteiro.musica"]).toBe("desligada");
+        expect(config.musica).toBe(false);
     });
 
     it("sem a rota no servidor, salva no navegador", async () => {
@@ -83,8 +102,9 @@ describe("Configuracoes", () => {
             { ler: vi.fn(), salvar: vi.fn().mockRejectedValue(recusa) },
             armazenamento(),
         );
-        await expect(config.salvar({ DIREITA: ["KeyD"] }, 40)).rejects.toBe(recusa);
+        await expect(config.salvar({ DIREITA: ["KeyD"] }, 40, false)).rejects.toBe(recusa);
         expect(config.volume).toBe(VOLUME_PADRAO);
+        expect(config.musica).toBe(true);
     });
 });
 
