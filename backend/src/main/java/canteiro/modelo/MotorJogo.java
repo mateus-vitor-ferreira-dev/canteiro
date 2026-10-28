@@ -342,10 +342,10 @@ public final class MotorJogo {
      * O que aconteceria se a peça atual pousasse na fantasma: a estabilidade,
      * sem as linhas que ela completaria, e os blocos que quebrariam.
      *
-     * @return a prévia da jogada, ou {@code null} se não houver peça caindo
+     * @return a prévia da jogada, ou {@code null} se não houver peça caindo ou a partida acabou
      */
     public Previa previa() {
-        if (emQueda == null) {
+        if (emQueda == null || estado.encerrada()) {
             return null;
         }
         return assentamento.previa(emQueda.celulasNoPouso(), emQueda.peca().material());

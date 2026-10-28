@@ -3,6 +3,7 @@ package canteiro.api;
 import canteiro.api.dto.EstadoDto;
 import canteiro.api.dto.EventoDto;
 import canteiro.modelo.Celula;
+import canteiro.modelo.Comando;
 import canteiro.modelo.Dificuldade;
 import canteiro.modelo.EventoPartida;
 import canteiro.modelo.MotorJogo;
@@ -53,6 +54,19 @@ class ProtocoloJsonTest {
     void eventoDeErroTrazAMensagem() throws Exception {
         assertEquals("{\"tipo\":\"EVENTO\",\"evento\":\"ERRO\",\"dados\":{\"mensagem\":\"x\"}}",
                 json.writeValueAsString(EventoDto.erro("x")));
+    }
+
+    @Test
+    void estadoDoFimDeJogoViraJsonSemPrevia() throws Exception {
+        MotorJogo motor = motorComUmaPeca();
+        for (int i = 0; i < 400 && !motor.estado().encerrada(); i++) {
+            motor.aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+        assertEquals("FIM_DE_JOGO", motor.estado().name());
+
+        JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertEquals("FIM_DE_JOGO", estado.get("estado").asText(), "a tela precisa receber o fim para mostrá-lo");
+        assertTrue(estado.at("/estabilidade/previa").isNull());
     }
 
     @Test
