@@ -6,7 +6,6 @@ import canteiro.api.rotas.RotasPartidas;
 import canteiro.api.rotas.RotasRanking;
 import canteiro.api.ws.CanalPartida;
 import canteiro.controle.GerenciadorPartidas;
-import canteiro.persistencia.ArquivoConfiguracoes;
 import canteiro.persistencia.ArquivosDoJogo;
 import canteiro.persistencia.RankingArquivo;
 import io.javalin.Javalin;
@@ -46,7 +45,6 @@ public final class ServidorWeb {
     private static final Logger LOG = LoggerFactory.getLogger(ServidorWeb.class);
 
     private final GerenciadorPartidas partidas;
-    private final ArquivoConfiguracoes configuracoes;
     private final RankingArquivo ranking;
     private final boolean frontendEmbutido;
     private final Javalin javalin;
@@ -59,8 +57,7 @@ public final class ServidorWeb {
      */
     public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos) {
         this.partidas = Objects.requireNonNull(partidas, "partidas");
-        this.configuracoes = Objects.requireNonNull(arquivos, "arquivos").configuracoes();
-        this.ranking = arquivos.ranking();
+        this.ranking = Objects.requireNonNull(arquivos, "arquivos").ranking();
         this.frontendEmbutido = ServidorWeb.class.getResource(PASTA_FRONTEND) != null;
         this.javalin = Javalin.create(this::configurar);
     }
@@ -123,8 +120,8 @@ public final class ServidorWeb {
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
         new RotasRanking(partidas, ranking).registrar(rotas);
-        // #71: registre aqui a rota de configurações, com o arquivo já pronto:
-        // new RotasConfiguracoes(configuracoes).registrar(rotas);
+        // #71: a rota de configurações entra aqui. O arquivo já existe em ArquivosDoJogo.configuracoes(),
+        // que o construtor recebe; guarde-o num campo junto com o ranking.
 
         rotas.exception(Exception.class, (erro, ctx) -> {
             LOG.error("Erro inesperado em {} {}", ctx.method(), ctx.path(), erro);
