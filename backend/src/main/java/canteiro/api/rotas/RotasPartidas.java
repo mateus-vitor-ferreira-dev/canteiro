@@ -3,6 +3,7 @@ package canteiro.api.rotas;
 import canteiro.api.dto.ErroDto;
 import canteiro.api.dto.NovaPartidaDto;
 import canteiro.api.dto.PartidaCriadaDto;
+import canteiro.api.dto.RelatorioDto;
 import canteiro.controle.GerenciadorPartidas;
 import canteiro.controle.LimiteDePartidasException;
 import canteiro.modelo.Dificuldade;
@@ -12,13 +13,14 @@ import io.javalin.http.HttpStatus;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
+import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 
 import java.util.Objects;
 
 /**
- * Rotas de criação de partida (RF02).
+ * Rotas de criação de partida (RF02) e do relatório de fim de partida (RF25).
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -26,6 +28,7 @@ import java.util.Objects;
 public final class RotasPartidas {
 
     private static final String CAMINHO = "/api/partidas";
+    private static final String CAMINHO_RELATORIO = CAMINHO + "/{id}/relatorio";
 
     private final GerenciadorPartidas partidas;
 
@@ -45,6 +48,35 @@ public final class RotasPartidas {
      */
     public void registrar(RoutesConfig rotas) {
         rotas.post(CAMINHO, this::criar);
+        rotas.get(CAMINHO_RELATORIO, this::relatorio);
+    }
+
+    /**
+     * Devolve o relatório da partida: a estabilidade a cada peça, os colapsos
+     * e as peças por material. Funciona também com a partida em andamento.
+     *
+     * @param ctx contexto da requisição
+     */
+    @OpenApi(
+            path = CAMINHO_RELATORIO,
+            methods = HttpMethod.GET,
+            operationId = "relatorioDaPartida",
+            tags = "Partida",
+            summary = "Relatório da partida",
+            description = "O índice de estabilidade logo depois de cada peça fixada, o número das peças que "
+                    + "derrubaram a estrutura (a partir de 1) e quantas peças de cada material entraram.",
+            pathParams = @OpenApiParam(name = "id", description = "Id da partida", required = true),
+            responses = {
+                @OpenApiResponse(status = "200", description = "O relatório",
+                        content = @OpenApiContent(from = RelatorioDto.class)),
+                @OpenApiResponse(status = "404", description = "A partida não existe ou não está mais no servidor",
+                        content = @OpenApiContent(from = ErroDto.class))
+            })
+    void relatorio(Context ctx) {
+        partidas.buscar(ctx.pathParam("id")).ifPresentOrElse(
+                sessao -> ctx.json(RelatorioDto.de(sessao.relatorio())),
+                () -> ctx.status(HttpStatus.NOT_FOUND).json(new ErroDto("PARTIDA_NAO_ENCONTRADA",
+                        "Essa partida não está mais no servidor. Ela expira 10 minutos depois de fechada.")));
     }
 
     /**

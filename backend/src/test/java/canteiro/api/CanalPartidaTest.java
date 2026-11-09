@@ -1,6 +1,8 @@
 package canteiro.api;
 
 import canteiro.controle.GerenciadorPartidas;
+import canteiro.modelo.Comando;
+import canteiro.modelo.MotorJogo;
 import canteiro.modelo.EstadoPartida;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -86,6 +88,37 @@ class CanalPartidaTest {
     }
 
     @Test
+    void relatorioDePartidaInexistenteE404() throws Exception {
+        HttpResponse<String> resposta = get("/api/partidas/naoexiste/relatorio");
+
+        assertEquals(404, resposta.statusCode());
+        assertEquals("PARTIDA_NAO_ENCONTRADA", json.readTree(resposta.body()).get("erro").asText());
+    }
+
+    @Test
+    void relatorioTrazUmIndicePorPecaEOsMateriais() throws Exception {
+        String id = criarPartida();
+        MotorJogo motor = partidas.buscar(id).orElseThrow().motor();
+        int pecas = 3;
+        for (int i = 0; i < pecas; i++) {
+            motor.avancarCiclo();
+            motor.aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+
+        HttpResponse<String> resposta = get("/api/partidas/" + id + "/relatorio");
+
+        assertEquals(200, resposta.statusCode());
+        JsonNode relatorio = json.readTree(resposta.body());
+        assertEquals(pecas, relatorio.get("indices").size());
+        assertTrue(relatorio.get("colapsos").isArray());
+        int contadas = 0;
+        for (JsonNode quantidade : relatorio.get("materiais")) {
+            contadas += quantidade.asInt();
+        }
+        assertEquals(pecas, contadas);
+    }
+
+    @Test
     void recebeOEstadoEAplicaComandos() throws Exception {
         Conexao conexao = conectar(criarPartida());
         JsonNode caindo = conexao.esperar(m -> "PECA_CAINDO".equals(m.path("estado").asText()));
@@ -147,6 +180,11 @@ class CanalPartidaTest {
         HttpRequest pedido = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + porta + "/api/partidas"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(corpo)).build();
+        return cliente.send(pedido, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> get(String caminho) throws IOException, InterruptedException {
+        HttpRequest pedido = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + porta + caminho)).GET().build();
         return cliente.send(pedido, HttpResponse.BodyHandlers.ofString());
     }
 
