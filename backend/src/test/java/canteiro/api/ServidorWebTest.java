@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -75,6 +77,23 @@ class ServidorWebTest {
         assertEquals(650, normal.get("intervaloQuedaMs").asLong());
         assertEquals(2.5, normal.get("limiteDesvio").asDouble());
         assertEquals(3, normal.get("materiaisLiberados").size());
+    }
+
+    @ParameterizedTest(name = "{0}: queda a cada {1} ms, limite {2}, {3} materiais")
+    @CsvSource({
+        "0, FACIL, 800, 3.0, 2",
+        "1, NORMAL, 650, 2.5, 3",
+        "2, DIFICIL, 500, 1.6, 4"
+    })
+    void cadaDificuldadeTemVelocidadeELimiteProprios(int posicao, String codigo, long intervaloQuedaMs,
+                                                     double limiteDesvio, int materiais)
+            throws IOException, InterruptedException {
+        JsonNode dificuldade = json.readTree(get("/api/dificuldades").body()).get(posicao);
+
+        assertEquals(codigo, dificuldade.get("codigo").asText());
+        assertEquals(intervaloQuedaMs, dificuldade.get("intervaloQuedaMs").asLong());
+        assertEquals(limiteDesvio, dificuldade.get("limiteDesvio").asDouble());
+        assertEquals(materiais, dificuldade.get("materiaisLiberados").size());
     }
 
     @Test
