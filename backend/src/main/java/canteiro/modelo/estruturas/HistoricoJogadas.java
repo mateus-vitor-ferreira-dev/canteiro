@@ -23,6 +23,13 @@ public final class HistoricoJogadas {
     private final Deque<Jogada> pilha = new ArrayDeque<>();
 
     /**
+     * Cria o histórico vazio.
+     */
+    public HistoricoJogadas() {
+        // os campos já começam zerados
+    }
+
+    /**
      * Empilha uma jogada.
      *
      * @param jogada jogada feita

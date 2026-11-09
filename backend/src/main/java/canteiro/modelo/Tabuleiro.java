@@ -23,6 +23,13 @@ public final class Tabuleiro {
     private final Bloco[][] grade = new Bloco[Dimensoes.LINHAS][Dimensoes.COLUNAS];
 
     /**
+     * Cria a grade vazia.
+     */
+    public Tabuleiro() {
+        // os campos já começam zerados
+    }
+
+    /**
      * Informa se a peça, colocada nessa posição, bate em alguma coisa: nas
      * bordas, no fundo, acima do topo da grade ou num bloco já fixado. As
      * linhas ocultas contam como espaço livre.

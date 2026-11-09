@@ -28,6 +28,13 @@ public final class AtrasoFixacao {
     private int recomecos;
 
     /**
+     * Cria a contagem zerada, pronta para a primeira peça.
+     */
+    public AtrasoFixacao() {
+        // os campos já começam zerados
+    }
+
+    /**
      * Zera tudo para uma peça nova.
      */
     public void novaPeca() {
