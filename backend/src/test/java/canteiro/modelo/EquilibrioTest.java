@@ -197,6 +197,7 @@ class EquilibrioTest {
         EventoPartida.Tipo penultimo = registro.eventos.get(registro.eventos.size() - 2).tipo();
         assertEquals(EventoPartida.Tipo.FIM_DE_JOGO, ultimo);
         assertEquals(EventoPartida.Tipo.COLAPSO, penultimo);
+        assertEquals(EstadoPartida.FIM_DE_JOGO, registro.ultimoEstado, "a tela precisa receber o estado do fim");
     }
 
     @Test
@@ -262,10 +263,11 @@ class EquilibrioTest {
 
     private static final class Registro implements ObservadorPartida {
         private final List<EventoPartida> eventos = new ArrayList<>();
+        private EstadoPartida ultimoEstado;
 
         @Override
         public void estadoMudou(MotorJogo motor) {
-            // só os eventos interessam aqui
+            ultimoEstado = motor.estado();
         }
 
         @Override

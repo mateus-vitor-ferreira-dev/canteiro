@@ -140,7 +140,7 @@ Junto com elas veio a **prévia do centro de massa** (#107): o jogador vê, ante
 |---|---|---|---|
 | `Comando` no pacote `controle` | `Comando` em `canteiro.modelo` | O motor recebe comandos, e o modelo não pode importar o controle (RNF08) | #50 |
 | `Material.aoFixar(Tabuleiro, Peca)` | `Material.aoFixar(Tabuleiro, List<Celula>)` | A peça não sabe onde está no tabuleiro. O aço precisa das células em que ela assentou | #48 |
-| A pontuação, o nível e o colapso dentro do `MotorJogo` | Saíram para `Assentamento` | O `MotorJogo` tinha passado do limite de 400 linhas (RNF09); hoje tem 389 | #101 |
+| A pontuação, o nível e o colapso dentro do `MotorJogo` | Saíram para `Assentamento` | O `MotorJogo` tinha passado do limite de 400 linhas (RNF09); hoje tem 399 | #101 |
 
 ## 5. O que ainda não foi feito
 

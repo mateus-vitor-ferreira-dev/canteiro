@@ -190,6 +190,7 @@ public final class MotorJogo {
     private void assentar() {
         boolean acabou = assentamento.executar(emQueda);
         emQueda = null;
+        mudou = true; // a grade mudou; e, se a obra desabou alta demais, a tela precisa do fim de jogo
         if (!acabou) {
             estado = EstadoPartida.GERANDO_PECA;
             gerarPeca();
