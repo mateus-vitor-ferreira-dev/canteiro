@@ -4,6 +4,7 @@ import canteiro.modelo.Comando;
 import canteiro.modelo.EstadoPartida;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.ObservadorPartida;
+import canteiro.modelo.Reprodutor;
 import canteiro.modelo.constantes.Tempo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ public final class SessaoPartida {
 
     private final String id;
     private final Treino treino;
+    private final Reprodutor reproducao;
     private final RegistroRelatorio relatorio;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
     private final List<ObservadorPartida> inscritos = new CopyOnWriteArrayList<>();
@@ -70,21 +72,25 @@ public final class SessaoPartida {
      * @param relogio instante atual, em nanossegundos
      */
     public SessaoPartida(String id, MotorJogo motor, LongSupplier relogio) {
-        this(id, motor, null, relogio);
+        this(id, motor, null, null, relogio);
     }
 
     /**
-     * Cria a sessão, ainda parada, de uma partida de treino ou não.
+     * Cria a sessão, ainda parada, de uma partida comum, de treino ou da
+     * reprodução de uma gravada. Quem escolhe é o {@link GerenciadorPartidas}.
      *
-     * @param id      identificador da partida
-     * @param motor   motor da partida
-     * @param treino  o desfazer da partida de treino (RF26), ou {@code null} se ela não for de treino
-     * @param relogio instante atual, em nanossegundos
+     * @param id         identificador da partida
+     * @param motor      motor da partida
+     * @param treino     o desfazer da partida de treino (RF26), ou {@code null} se ela não for de treino
+     * @param reproducao as jogadas de uma partida gravada, que a sessão refaz no lugar do jogador
+     *                   (RF24), ou {@code null} se alguém joga
+     * @param relogio    instante atual, em nanossegundos
      */
-    public SessaoPartida(String id, MotorJogo motor, Treino treino, LongSupplier relogio) {
+    SessaoPartida(String id, MotorJogo motor, Treino treino, Reprodutor reproducao, LongSupplier relogio) {
         this.id = Objects.requireNonNull(id, "id");
         this.motor = Objects.requireNonNull(motor, "motor");
         this.treino = treino;
+        this.reproducao = reproducao;
         this.relogio = Objects.requireNonNull(relogio, "relógio");
         this.semOuvinteDesde = relogio.getAsLong();
         // direto no motor: o registro e o treino não são ouvintes, não contam para saber se a partida foi abandonada
@@ -184,6 +190,10 @@ public final class SessaoPartida {
      * Um ciclo: aplica os comandos da fila, na ordem de chegada, e avança o motor.
      */
     void ciclo() {
+        if (reproducao != null) {
+            cicloDaReproducao();
+            return;
+        }
         Comando comando;
         while ((comando = comandos.poll()) != null) {
             if (comando == Comando.DESFAZER && treino != null) {
@@ -195,6 +205,22 @@ public final class SessaoPartida {
         }
         motor.avancarCiclo();
         depoisDoPasso();
+    }
+
+    /**
+     * Na reprodução, quem joga são as jogadas gravadas. Do navegador, só valem
+     * pausar e retomar; pausada, a gravação espera.
+     */
+    private void cicloDaReproducao() {
+        Comando comando;
+        while ((comando = comandos.poll()) != null) {
+            if (comando == Comando.PAUSAR || comando == Comando.RETOMAR) {
+                motor.aplicar(comando);
+            }
+        }
+        if (motor.estado() != EstadoPartida.PAUSA) {
+            reproducao.passo(motor);
+        }
     }
 
     private void depoisDoPasso() {
@@ -273,6 +299,16 @@ public final class SessaoPartida {
      */
     public boolean modoTreino() {
         return treino != null;
+    }
+
+    /**
+     * Informa se a sessão é a reprodução de uma partida gravada (RF24), que
+     * não entra no ranking: a original já pôde entrar.
+     *
+     * @return {@code true} se ninguém joga, só assiste
+     */
+    public boolean reproducao() {
+        return reproducao != null;
     }
 
     /**

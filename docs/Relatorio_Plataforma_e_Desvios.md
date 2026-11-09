@@ -145,11 +145,10 @@ Junto com elas veio a **prévia do centro de massa** (#107): o jogador vê, ante
 
 ## 5. O que ainda não foi feito
 
-São os requisitos desejáveis cujo backend ainda está em andamento. As telas já existem.
+Todos os requisitos funcionais, essenciais e desejáveis, estão prontos. Falta só o que depende de máquinas reais.
 
 | Requisito | Falta | Issue |
 |---|---|---|
-| RF24 (replay) | A gravação e as rotas das repetições | #35 |
 | RNF01 e RNF04 | A medição na máquina de referência e o teste com dois cliques em máquinas reais | #27, #40 |
 
 [a preencher na entrega: atualizar esta tabela com o que ficou de fora e o porquê]

@@ -31,7 +31,7 @@ Não basta fechar linha: é preciso decidir **onde colocar carga**. Cada peça v
 
 <img src="docs/imagens/tela-principal.png" alt="Tela inicial do CANTEIRO: menu com nova partida, ranking, repetições e configurações" width="820"/>
 
-<sub>Tela inicial do jogo, capturada da versão atual. A partida está completa; faltam o ranking gravado em arquivo e os recursos desejáveis.</sub>
+<sub>Tela inicial do jogo, capturada da versão atual. Todos os requisitos funcionais estão prontos, os desejáveis também; falta medir o desempenho e o dois cliques em máquinas reais.</sub>
 
 **▶️ Jogue agora: [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com)**, sem instalar nada. Na rede da UFLA, que bloqueia o domínio `digitalcodexa.com`, use [este endereço](https://ccsaafhnlgiwuhixo3eulcvk.49.12.249.23.sslip.io).
 
@@ -201,7 +201,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | ⬜ | Ainda não começado |
 | 🔁 | Regra de código: vale para todo PR, não tem "pronto" |
 
-**Andamento:** 42 prontos e 3 começados, de 31 funcionais e 16 não funcionais (os 2 restantes são regras de código 🔁). As regras de negócio não têm status: cada uma entra junto com o código do modelo que a aplica.
+**Andamento:** 43 prontos e 2 começados, de 31 funcionais e 16 não funcionais (os 2 restantes são regras de código 🔁). As regras de negócio não têm status: cada uma entra junto com o código do modelo que a aplica.
 
 > [!TIP]
 > **Quem termina um requisito atualiza o status aqui, no mesmo PR.** Na coluna *Onde está*, cite o número do PR (`#12`). O checklist do PR lembra disso.
@@ -270,7 +270,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF21 | Registrar a pontuação no ranking persistente, com o nome informado pelo jogador | E | ☕ 🌐 | ✅ | Campo do nome no fim de partida (#32) e `POST /api/ranking`, que lê a pontuação da própria partida, só aceita partida encerrada e uma vez só, e grava em `ranking.csv` (#31) |
 | RF22 | Exibir o ranking com as dez melhores pontuações | E | ☕ 🌐 | ✅ | Tela do ranking, com o nome recém-salvo em destaque (#32), e `GET /api/ranking` com as dez melhores, uma por jogador (#31) |
 | RF23 | Registrar em pilha todas as jogadas executadas na partida | E | ☕ | ✅ | Cada comando entra numa pilha com o ciclo em que chegou; as jogadas e a semente reproduzem a partida (#14) |
-| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | 🟡 | Tela das repetições, com data, dificuldade e pontuação de cada partida gravada; a reprodução abre no tabuleiro de sempre, avisa que é uma gravação e só aceita pausar (#68); faltam a gravação e as rotas `GET /api/repeticoes` e `POST /api/repeticoes/{id}/reproduzir` (#35) |
+| RF24 | Reproduzir passo a passo uma partida encerrada, a partir do histórico | D | ☕ 🌐 | ✅ | Tela das repetições, com data, dificuldade e pontuação de cada partida gravada; a reprodução abre no tabuleiro de sempre, avisa que é uma gravação e só aceita pausar (#68). Cada partida comum que termina é gravada em `repeticoes/`, só com a dificuldade, a semente e as jogadas, e as 50 mais recentes ficam; `GET /api/repeticoes` lista e `POST /api/repeticoes/{id}/reproduzir` refaz as jogadas ciclo a ciclo, com a mesma pontuação e o mesmo tabuleiro final (#130) |
 | RF25 | Exibir, ao fim da partida, um relatório com a evolução do índice de estabilidade e a distribuição de materiais | D | ☕ 🌐 | ✅ | Tela do relatório com o gráfico da estabilidade, os colapsos marcados, a tabela dos números e as peças por material (#36); `GET /api/partidas/{id}/relatorio`, com o índice anotado a cada peça fixada por um observador da partida, sem mexer no motor (#128) |
 | RF26 | Oferecer, no modo treino, o desfazer da última jogada | D | ☕ 🌐 | ✅ | Na tela: a opção de modo treino ao criar a partida, desfazer por U, Ctrl+Z ou botão de toque, e o aviso de que o treino não entra no ranking (#69). No backend, desfazer refaz a partida com a mesma semente até a última peça fixada voltar ao topo, com o tabuleiro, o placar e as próximas peças de antes; a partida de treino é recusada no ranking (#129) |
 | RF27 | Permitir configurar as teclas de comando | D | ☕ 🌐 | ✅ | Tela de configurações com a troca de cada tecla e o volume; a partida e a legenda usam as teclas novas (#38). No JAR, ficam em `configuracoes.properties`, por `GET` e `PUT /api/configuracoes`, que recusam ação desconhecida, tecla repetida e volume fora de 0 a 100; na versão online, que é compartilhada, cada navegador guarda as suas (#127) |
@@ -1206,7 +1206,7 @@ git switch develop && git pull           # 8. depois do merge, volta e atualiza
 | ✅ 5 – 6 | Motor, rotação, linhas, pontuação; laço e WebSocket; tela de partida mínima | ☕ 🌐 | Jogável no navegador, ainda sem estabilidade |
 | ✅ 7 – 8 | Acumuladores, centro de massa, índice e colapso; painel de estabilidade | ☕ 🌐 | **Mecânica diferencial completa** |
 | ✅ 9 – 10 | Telas completas, animações, texturas, retorno visual, reconexão | 🌐 | Interface integrada, e o jogo [no ar](https://canteiro.digitalcodexa.com) |
-| 🔄 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Persistência e ranking prontos (#24, #31); falta o backend dos desejáveis: configurações (#71), relatório (#70), modo treino (#37) e replay (#35) |
+| ✅ 11 | Persistência, ranking, repetição, configurações e relatório | ☕ 🌐 | Persistência e ranking (#24, #31), e o backend dos desejáveis: configurações, relatório, modo treino e replay (#127 a #130) |
 | ⬜ 12 | Testes com jogadores, balanceamento, Javadoc e empacotamento | ☕ 🌐 | **Entrega final** |
 
 ### Entregáveis

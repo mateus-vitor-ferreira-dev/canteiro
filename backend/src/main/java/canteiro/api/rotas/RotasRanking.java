@@ -105,7 +105,7 @@ public final class RotasRanking {
                         content = @OpenApiContent(from = PosicaoRankingDto.class)),
                 @OpenApiResponse(status = "400", description = "Corpo malformado ou nome inválido",
                         content = @OpenApiContent(from = ErroDto.class)),
-                @OpenApiResponse(status = "409", description = "Partida em andamento, de treino ou já registrada",
+                @OpenApiResponse(status = "409", description = "Partida em andamento, de treino, reproduzida ou já registrada",
                         content = @OpenApiContent(from = ErroDto.class)),
                 @OpenApiResponse(status = "410", description = "A partida não está mais no servidor",
                         content = @OpenApiContent(from = ErroDto.class)),
@@ -141,6 +141,11 @@ public final class RotasRanking {
      * para a leitura não concorrer com a thread da partida.
      */
     private void gravar(Context ctx, SessaoPartida sessao, String nome) {
+        if (sessao.reproducao()) {
+            ctx.status(HttpStatus.CONFLICT).json(new ErroDto("PARTIDA_REPRODUZIDA",
+                    "Uma partida reproduzida não entra no ranking: a original já pôde entrar."));
+            return;
+        }
         if (sessao.modoTreino()) {
             // RN15: o treino pode desfazer jogadas, então a pontuação dele não vale para o ranking
             ctx.status(HttpStatus.CONFLICT).json(new ErroDto("PARTIDA_DE_TREINO",
