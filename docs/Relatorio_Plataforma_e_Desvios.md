@@ -151,7 +151,6 @@ São os requisitos desejáveis cujo backend ainda está em andamento. As telas j
 | RF24 (replay) | A gravação e as rotas das repetições | #35 |
 | RF25 (relatório de fim de partida) | A rota `GET /api/partidas/{id}/relatorio` | #70 |
 | RF26 (modo treino com desfazer) | O motor desfazer a jogada. Até lá, o backend recusa a partida de treino com um aviso | #37 |
-| RF27 (configurar as teclas) | Guardar no servidor. Hoje as teclas ficam no navegador | #71 |
 | RNF01 e RNF04 | A medição na máquina de referência e o teste com dois cliques em máquinas reais | #27, #40 |
 
 [a preencher na entrega: atualizar esta tabela com o que ficou de fora e o porquê]

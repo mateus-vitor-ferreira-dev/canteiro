@@ -82,6 +82,16 @@ public record Configuracao(String host, int porta, boolean abrirNavegador, int l
     }
 
     /**
+     * Informa se o servidor é compartilhado por vários jogadores, como a
+     * versão online: é o que escuta fora de {@value ServidorWeb#HOST}.
+     *
+     * @return {@code true} se o servidor pode ser alcançado por outras máquinas
+     */
+    public boolean compartilhado() {
+        return !ServidorWeb.HOST.equals(host);
+    }
+
+    /**
      * Lê a configuração de um conjunto de variáveis de ambiente.
      *
      * @param ambiente as variáveis, como as de {@link System#getenv()}

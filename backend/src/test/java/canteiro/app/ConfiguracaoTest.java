@@ -30,6 +30,7 @@ class ConfiguracaoTest {
         assertTrue(config.abrirNavegador());
         assertEquals(GerenciadorPartidas.SEM_LIMITE, config.limitePartidas());
         assertEquals(PastaDoJogo.padrao(), config.pasta());
+        assertFalse(config.compartilhado());
     }
 
     @Test
@@ -46,6 +47,7 @@ class ConfiguracaoTest {
         assertFalse(config.abrirNavegador());
         assertEquals(8, config.limitePartidas());
         assertEquals(Path.of("/app/dados"), config.pasta());
+        assertTrue(config.compartilhado());
     }
 
     @Test
