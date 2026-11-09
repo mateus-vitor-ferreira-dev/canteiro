@@ -141,6 +141,7 @@ Junto com elas veio a **prévia do centro de massa** (#107): o jogador vê, ante
 | `Comando` no pacote `controle` | `Comando` em `canteiro.modelo` | O motor recebe comandos, e o modelo não pode importar o controle (RNF08) | #50 |
 | `Material.aoFixar(Tabuleiro, Peca)` | `Material.aoFixar(Tabuleiro, List<Celula>)` | A peça não sabe onde está no tabuleiro. O aço precisa das células em que ela assentou | #48 |
 | A pontuação, o nível e o colapso dentro do `MotorJogo` | Saíram para `Assentamento` | O `MotorJogo` tinha passado do limite de 400 linhas (RNF09); hoje tem 399 | #101 |
+| Desfazer com uma pilha de cópias do estado (tabuleiro, placar, peça em queda) | O motor é refeito do começo, com a mesma semente, até a peça desfeita voltar ao topo (`Treino` e `Reprodutor`) | Copiar o estado exigiria copiar também a fila de peças, o sorteio da sacola, a reserva e a meta do nível. A partida já era reproduzível, então refazer as jogadas devolve tudo igual, e o `MotorJogo` não cresceu. O mesmo `Reprodutor` serve ao replay | #129 |
 
 ## 5. O que ainda não foi feito
 
@@ -149,7 +150,6 @@ São os requisitos desejáveis cujo backend ainda está em andamento. As telas j
 | Requisito | Falta | Issue |
 |---|---|---|
 | RF24 (replay) | A gravação e as rotas das repetições | #35 |
-| RF26 (modo treino com desfazer) | O motor desfazer a jogada. Até lá, o backend recusa a partida de treino com um aviso | #37 |
 | RNF01 e RNF04 | A medição na máquina de referência e o teste com dois cliques em máquinas reais | #27, #40 |
 
 [a preencher na entrega: atualizar esta tabela com o que ficou de fora e o porquê]

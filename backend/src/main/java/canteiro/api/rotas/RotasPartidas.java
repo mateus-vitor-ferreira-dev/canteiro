@@ -90,15 +90,14 @@ public final class RotasPartidas {
             operationId = "criarPartida",
             tags = "Partida",
             summary = "Cria uma partida",
-            description = "Cria a partida na dificuldade escolhida e devolve o id. A partida começa quando o "
-                    + "navegador conecta em /ws/partidas/{id}.",
+            description = "Cria a partida na dificuldade escolhida, de treino ou não, e devolve o id. A partida "
+                    + "começa quando o navegador conecta em /ws/partidas/{id}. Na de treino, o comando DESFAZER "
+                    + "volta a última peça fixada para o topo, e ela não entra no ranking.",
             requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = NovaPartidaDto.class), required = true),
             responses = {
                 @OpenApiResponse(status = "201", description = "Partida criada",
                         content = @OpenApiContent(from = PartidaCriadaDto.class)),
                 @OpenApiResponse(status = "400", description = "Dificuldade ausente ou desconhecida",
-                        content = @OpenApiContent(from = ErroDto.class)),
-                @OpenApiResponse(status = "501", description = "Modo treino pedido, mas ainda não disponível",
                         content = @OpenApiContent(from = ErroDto.class)),
                 @OpenApiResponse(status = "503", description = "O servidor já tem o máximo de partidas abertas",
                         content = @OpenApiContent(from = ErroDto.class))
@@ -111,14 +110,8 @@ public final class RotasPartidas {
                     "Escolha uma dificuldade: FACIL, NORMAL ou DIFICIL."));
             return;
         }
-        if (corpo.modoTreino()) {
-            // o motor ainda não desfaz jogadas (#37): melhor recusar do que criar um treino que não é treino
-            ctx.status(HttpStatus.NOT_IMPLEMENTED).json(new ErroDto("MODO_TREINO_INDISPONIVEL",
-                    "O modo treino ainda não está disponível nesta versão do jogo."));
-            return;
-        }
         try {
-            ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade).id()));
+            ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade, corpo.modoTreino()).id()));
         } catch (LimiteDePartidasException cheio) {
             ctx.status(HttpStatus.SERVICE_UNAVAILABLE).json(new ErroDto("SERVIDOR_CHEIO",
                     "O servidor está com muitas partidas abertas. Tente de novo em alguns minutos."));
