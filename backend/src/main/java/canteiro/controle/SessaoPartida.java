@@ -38,6 +38,7 @@ public final class SessaoPartida {
 
     private final String id;
     private final MotorJogo motor;
+    private final RegistroRelatorio relatorio;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
     private final MedidorDesempenho medidor = new MedidorDesempenho(System::nanoTime);
     private final LongSupplier relogio;
@@ -68,6 +69,9 @@ public final class SessaoPartida {
         this.motor = Objects.requireNonNull(motor, "motor");
         this.relogio = Objects.requireNonNull(relogio, "relógio");
         this.semOuvinteDesde = relogio.getAsLong();
+        // direto no motor: o registro não é um ouvinte, não conta para saber se a partida foi abandonada
+        this.relatorio = new RegistroRelatorio(motor);
+        motor.inscrever(relatorio);
     }
 
     /**
@@ -197,6 +201,16 @@ public final class SessaoPartida {
      */
     public String id() {
         return id;
+    }
+
+    /**
+     * Devolve o que o relatório de fim de partida mostra, anotado peça a peça (RF25).
+     * Pode ser lido de qualquer thread.
+     *
+     * @return o registro da partida
+     */
+    public RegistroRelatorio relatorio() {
+        return relatorio;
     }
 
     /**
