@@ -326,8 +326,11 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 | `POST /api/partidas` | front → back | Cria uma partida com a dificuldade escolhida (e `modoTreino`, para o treino) e devolve o `id` |
 | `WS /ws/partidas/{id}` | front → back | `{ "tipo": "COMANDO", "comando": "GIRAR_HORARIO" }` |
 | `WS /ws/partidas/{id}` | back → front | `ESTADO` (tabuleiro, peça, fila, reserva, placar, estabilidade) e `EVENTO` (linhas eliminadas, colapso, nível, fim) |
-| `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome |
-| `GET /api/materiais` · `/api/dificuldades` · `/api/configuracoes` · `/api/repeticoes` | ambos | Catálogo, dificuldades, teclas e repetições |
+| `GET /api/dificuldades` | back → front | As três dificuldades, com o intervalo de queda, o limite de desvio e os materiais liberados |
+| `GET /api/partidas/{id}/relatorio` | back → front | O índice de estabilidade a cada peça, as peças que derrubaram a obra e as peças por material |
+| `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome. Partida de treino ou reproduzida é recusada |
+| `GET /api/configuracoes` · `PUT /api/configuracoes` | ambos | As teclas trocadas e o volume. Só no JAR: na versão online, a rota não existe e cada navegador guarda as suas |
+| `GET /api/repeticoes` · `POST /api/repeticoes/{id}/reproduzir` | ambos | As partidas gravadas e a reprodução de uma delas, que abre no mesmo `WS /ws/partidas/{id}` |
 
 **As rotas REST estão documentadas no Swagger**, que vem junto com o backend: com ele rodando, abra **`http://127.0.0.1:7070/api/docs`** para ler cada rota e testá-la no navegador. A especificação em JSON fica em `/api/openapi.json`. O Swagger é gerado das anotações `@OpenApi` de cada rota, então ele nunca fica desatualizado.
 
@@ -338,14 +341,14 @@ As mensagens do WebSocket não aparecem no Swagger. A referência delas é o có
 
 ### Dados persistidos
 
-Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário, criada quando algo precisa ser gravado. Os valores padrão vão dentro do JAR (`backend/src/main/resources/dados/`) e são usados se o arquivo faltar ou vier corrompido. O código fica em `persistencia/`: `LeitorPropriedades` lê sem nunca lançar exceção, `CarregadorMateriais` monta o catálogo e `ArquivoConfiguracoes` lê e grava as teclas e o volume.
+Não há banco de dados. Tudo fica em arquivos de texto na pasta `~/.canteiro/` do usuário, criada quando algo precisa ser gravado. Os valores padrão vão dentro do JAR (`backend/src/main/resources/dados/`) e são usados se o arquivo faltar ou vier corrompido. O código fica em `persistencia/`: `LeitorPropriedades` lê sem nunca lançar exceção, `CarregadorMateriais` monta o catálogo, `ArquivoConfiguracoes` lê e grava as teclas e o volume, `RankingArquivo` cuida do ranking e `ArquivoRepeticoes` das partidas gravadas.
 
 | Arquivo | Formato | Conteúdo |
 |---|---|---|
 | `materiais.properties` | chave = valor | Densidade e cor de cada material (`ACO.densidade=7.85`, `ACO.cor=4E5A6B`). Carregado no catálogo ao abrir o jogo |
 | `configuracoes.properties` | chave = valor | Só as teclas que o jogador trocou (`tecla.PAUSA=KeyP,Escape`) e o volume |
 | `ranking.csv` | CSV (`;`) | Nome, pontuação, nível, linhas, colapsos e data, a melhor partida de cada jogador. Só entram partidas **sem uso do desfazer** (RN15) |
-| `repeticoes/<data>.txt` | uma jogada por linha | Semente do gerador e, para cada jogada, o ciclo e o comando: o suficiente para reconstruir a partida inteira |
+| `repeticoes/<data-hora>.txt` | uma jogada por linha | Uma linha de cabeçalho com a dificuldade, a semente, a pontuação e a data, e depois cada jogada como `ciclo;COMANDO`: o suficiente para reconstruir a partida inteira. Só partidas comuns, sem treino; ficam as 50 mais recentes |
 
 ---
 
@@ -371,7 +374,7 @@ Se você está na dúvida entre o backend e o frontend, faça a pergunta: **"iss
 | Mexer no tabuleiro, no motor ou nas regras de pontos | `backend/src/main/java/canteiro/modelo/` | #11, #20, #21, #22 |
 | Mexer na sacola de peças, na fila, na reserva ou no histórico | `backend/src/main/java/canteiro/modelo/estruturas/` | #12, #13, #14 |
 | Mexer no centro de massa e no colapso | `backend/src/main/java/canteiro/modelo/fisica/` | #28 |
-| Ler ou gravar arquivo (ranking, configurações, replay) | `backend/src/main/java/canteiro/persistencia/`, com os valores padrão em `backend/src/main/resources/dados/` | #24, #31, #35 |
+| Ler ou gravar arquivo (ranking, configurações, replay) | `backend/src/main/java/canteiro/persistencia/`, com os valores padrão em `backend/src/main/resources/dados/` | #24, #31, #130 |
 | Criar uma rota nova na API | `backend/.../api/rotas/` (a rota, com `@OpenApi`) e `backend/.../api/dto/` (o formato do JSON). Depois, o mesmo tipo em `frontend/src/api/protocolo.ts` e a função em `frontend/src/api/cliente.ts` | #23, #31 |
 | Criar ou mudar uma tela | `frontend/src/telas/<NomeDaTela>/` (uma pasta por tela) | #25, #26, #32 |
 | Criar um pedaço de tela usado por **mais de uma** tela | `frontend/src/componentes/` | #29 |
