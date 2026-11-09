@@ -2,8 +2,6 @@ package canteiro.controle;
 
 import canteiro.modelo.Dificuldade;
 import canteiro.modelo.MotorJogo;
-import canteiro.modelo.estruturas.FontePecas;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 /**
  * As partidas em andamento, numa tabela hash indexada pelo id.
@@ -42,7 +41,7 @@ public final class GerenciadorPartidas {
     private static final Logger LOG = LoggerFactory.getLogger(GerenciadorPartidas.class);
 
     private final Map<String, SessaoPartida> sessoes = new ConcurrentHashMap<>();
-    private final Function<Dificuldade, FontePecas> fabricaDeFontes;
+    private final FabricaDeFontes fabricaDeFontes;
     private final int limite;
     private final LongSupplier relogio;
     private final SecureRandom sorteio = new SecureRandom();
@@ -53,7 +52,7 @@ public final class GerenciadorPartidas {
      *
      * @param fabricaDeFontes cria a fonte de peças de cada partida nova
      */
-    public GerenciadorPartidas(Function<Dificuldade, FontePecas> fabricaDeFontes) {
+    public GerenciadorPartidas(FabricaDeFontes fabricaDeFontes) {
         this(fabricaDeFontes, SEM_LIMITE, System::nanoTime);
     }
 
@@ -65,7 +64,7 @@ public final class GerenciadorPartidas {
      * @param relogio         instante atual, em nanossegundos, repassado às sessões
      * @throws IllegalArgumentException se o limite não for positivo
      */
-    public GerenciadorPartidas(Function<Dificuldade, FontePecas> fabricaDeFontes, int limite,
+    public GerenciadorPartidas(FabricaDeFontes fabricaDeFontes, int limite,
                                LongSupplier relogio) {
         if (limite < 1) {
             throw new IllegalArgumentException("o limite de partidas deve ser positivo: " + limite);
@@ -86,15 +85,36 @@ public final class GerenciadorPartidas {
      * @throws LimiteDePartidasException se já houver o máximo de partidas abertas
      */
     public SessaoPartida criar(Dificuldade dificuldade) {
+        return criar(dificuldade, false);
+    }
+
+    /**
+     * Cria uma partida, de treino ou não, ainda parada. A semente das peças é
+     * sorteada aqui: com ela, a partida pode ser refeita do começo, para
+     * desfazer uma jogada no treino (RF26).
+     *
+     * @param dificuldade dificuldade escolhida
+     * @param modoTreino  se a partida é de treino, com o desfazer liberado
+     * @return a sessão criada
+     * @throws LimiteDePartidasException se já houver o máximo de partidas abertas
+     */
+    public SessaoPartida criar(Dificuldade dificuldade, boolean modoTreino) {
         if (sessoes.size() >= limite) {
             throw new LimiteDePartidasException(limite);
         }
-        MotorJogo motor = new MotorJogo(dificuldade, fabricaDeFontes.apply(dificuldade));
+        long semente = sorteio.nextLong();
+        Supplier<MotorJogo> novoMotor = () -> new MotorJogo(dificuldade, fabricaDeFontes.criar(dificuldade, semente));
+        Treino treino = modoTreino ? new Treino(novoMotor) : null;
+        return guardar(id -> new SessaoPartida(id, novoMotor.get(), treino, relogio));
+    }
+
+    /** Guarda a sessão com um id que ainda não existe. */
+    private SessaoPartida guardar(Function<String, SessaoPartida> criarSessao) {
         String id;
         SessaoPartida sessao;
         do {
             id = novoId();
-            sessao = new SessaoPartida(id, motor, relogio);
+            sessao = criarSessao.apply(id);
         } while (sessoes.putIfAbsent(id, sessao) != null);
         return sessao;
     }

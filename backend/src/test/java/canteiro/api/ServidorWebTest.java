@@ -113,7 +113,7 @@ class ServidorWebTest {
     void recusaPartidaNovaQuandoOServidorEstaCheio() throws IOException, InterruptedException {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
         ServidorWeb cheio = new ServidorWeb(new GerenciadorPartidas(
-                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 1, System::nanoTime),
+                (d, semente) -> new GeradorPecas(semente, catalogo, d.nivelInicial()), 1, System::nanoTime),
                 ServidoresDeTeste.arquivos(pasta));
         int portaCheio = cheio.iniciar(PORTA_LIVRE);
         try {

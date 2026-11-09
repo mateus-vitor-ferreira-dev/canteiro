@@ -105,7 +105,7 @@ public final class RotasRanking {
                         content = @OpenApiContent(from = PosicaoRankingDto.class)),
                 @OpenApiResponse(status = "400", description = "Corpo malformado ou nome inválido",
                         content = @OpenApiContent(from = ErroDto.class)),
-                @OpenApiResponse(status = "409", description = "Partida em andamento ou já registrada",
+                @OpenApiResponse(status = "409", description = "Partida em andamento, de treino ou já registrada",
                         content = @OpenApiContent(from = ErroDto.class)),
                 @OpenApiResponse(status = "410", description = "A partida não está mais no servidor",
                         content = @OpenApiContent(from = ErroDto.class)),
@@ -141,8 +141,12 @@ public final class RotasRanking {
      * para a leitura não concorrer com a thread da partida.
      */
     private void gravar(Context ctx, SessaoPartida sessao, String nome) {
-        // RN15: partida de treino (com desfazer) não entra. Hoje o treino é recusado ao
-        // criar a partida; quando a #37 existir, recuse aqui a partida que usou o desfazer.
+        if (sessao.modoTreino()) {
+            // RN15: o treino pode desfazer jogadas, então a pontuação dele não vale para o ranking
+            ctx.status(HttpStatus.CONFLICT).json(new ErroDto("PARTIDA_DE_TREINO",
+                    "Partidas de treino não entram no ranking. Jogue uma partida normal para entrar."));
+            return;
+        }
         if (!registradas.add(sessao.id())) {
             ctx.status(HttpStatus.CONFLICT).json(new ErroDto("PARTIDA_JA_REGISTRADA",
                     "Essa partida já está no ranking."));

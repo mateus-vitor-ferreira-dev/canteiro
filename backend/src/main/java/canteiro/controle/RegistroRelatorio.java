@@ -25,7 +25,7 @@ import java.util.TreeMap;
  */
 public final class RegistroRelatorio implements ObservadorPartida {
 
-    private final MotorJogo motor;
+    private MotorJogo motor;
     private final List<Double> indices = new ArrayList<>();
     private final List<Integer> colapsos = new ArrayList<>();
     private final List<String> materiaisPorPeca = new ArrayList<>();
@@ -60,6 +60,20 @@ public final class RegistroRelatorio implements ObservadorPartida {
         indices.add(motor.estabilidade().indice());
         Peca peca = motor.pecaAtual();
         materiaisPorPeca.add(peca == null ? null : peca.material().codigo());
+    }
+
+    /**
+     * Esquece tudo o que foi anotado e passa a ler outro motor, como quando o
+     * modo treino desfaz a jogada e a partida é refeita desde o começo (RF26):
+     * o relatório mostra a partida que ficou.
+     *
+     * @param novo o motor da partida refeita, ainda no começo
+     */
+    public synchronized void recomecar(MotorJogo novo) {
+        motor = Objects.requireNonNull(novo, "motor");
+        indices.clear();
+        colapsos.clear();
+        materiaisPorPeca.clear();
     }
 
     /**

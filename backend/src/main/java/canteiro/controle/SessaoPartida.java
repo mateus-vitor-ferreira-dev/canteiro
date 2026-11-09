@@ -8,10 +8,13 @@ import canteiro.modelo.constantes.Tempo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,13 +40,15 @@ public final class SessaoPartida {
     private static final long MICROS_POR_CICLO = TimeUnit.SECONDS.toMicros(1) / Tempo.CICLOS_POR_SEGUNDO;
 
     private final String id;
-    private final MotorJogo motor;
+    private final Treino treino;
     private final RegistroRelatorio relatorio;
     private final Queue<Comando> comandos = new ConcurrentLinkedQueue<>();
+    private final List<ObservadorPartida> inscritos = new CopyOnWriteArrayList<>();
     private final MedidorDesempenho medidor = new MedidorDesempenho(System::nanoTime);
     private final LongSupplier relogio;
     private final AtomicInteger ouvintes = new AtomicInteger();
     private volatile long semOuvinteDesde;
+    private volatile MotorJogo motor;
     private ScheduledExecutorService laco;
 
     /**
@@ -65,13 +70,29 @@ public final class SessaoPartida {
      * @param relogio instante atual, em nanossegundos
      */
     public SessaoPartida(String id, MotorJogo motor, LongSupplier relogio) {
+        this(id, motor, null, relogio);
+    }
+
+    /**
+     * Cria a sessão, ainda parada, de uma partida de treino ou não.
+     *
+     * @param id      identificador da partida
+     * @param motor   motor da partida
+     * @param treino  o desfazer da partida de treino (RF26), ou {@code null} se ela não for de treino
+     * @param relogio instante atual, em nanossegundos
+     */
+    public SessaoPartida(String id, MotorJogo motor, Treino treino, LongSupplier relogio) {
         this.id = Objects.requireNonNull(id, "id");
         this.motor = Objects.requireNonNull(motor, "motor");
+        this.treino = treino;
         this.relogio = Objects.requireNonNull(relogio, "relógio");
         this.semOuvinteDesde = relogio.getAsLong();
-        // direto no motor: o registro não é um ouvinte, não conta para saber se a partida foi abandonada
+        // direto no motor: o registro e o treino não são ouvintes, não contam para saber se a partida foi abandonada
         this.relatorio = new RegistroRelatorio(motor);
         motor.inscrever(relatorio);
+        if (treino != null) {
+            motor.inscrever(treino);
+        }
     }
 
     /**
@@ -129,6 +150,7 @@ public final class SessaoPartida {
      * @param observador quem vai ouvir
      */
     public void inscrever(ObservadorPartida observador) {
+        inscritos.add(observador);
         motor.inscrever(observador);
         ouvintes.incrementAndGet();
     }
@@ -139,6 +161,7 @@ public final class SessaoPartida {
      * @param observador quem para de ouvir
      */
     public void desinscrever(ObservadorPartida observador) {
+        inscritos.remove(observador);
         motor.desinscrever(observador);
         if (ouvintes.updateAndGet(n -> Math.max(0, n - 1)) == 0) {
             semOuvinteDesde = relogio.getAsLong();
@@ -163,9 +186,48 @@ public final class SessaoPartida {
     void ciclo() {
         Comando comando;
         while ((comando = comandos.poll()) != null) {
-            motor.aplicar(comando);
+            if (comando == Comando.DESFAZER && treino != null) {
+                desfazer();
+            } else {
+                motor.aplicar(comando);
+                depoisDoPasso();
+            }
         }
         motor.avancarCiclo();
+        depoisDoPasso();
+    }
+
+    private void depoisDoPasso() {
+        if (treino != null) {
+            treino.depoisDoPasso(motor);
+        }
+    }
+
+    /**
+     * Troca o motor pelo refeito até a última peça fixada voltar ao topo
+     * (RF26). Os ouvintes passam para o motor novo e recebem o estado dele.
+     */
+    private void desfazer() {
+        MotorJogo antigo = motor;
+        Optional<MotorJogo> refeito = treino.desfazer(antigo, novo -> {
+            antigo.desinscrever(relatorio);
+            relatorio.recomecar(novo);
+            novo.inscrever(relatorio);
+        });
+        if (refeito.isEmpty()) {
+            return;
+        }
+        MotorJogo novo = refeito.get();
+        for (ObservadorPartida ouvinte : inscritos) {
+            antigo.desinscrever(ouvinte);
+            novo.inscrever(ouvinte);
+        }
+        antigo.desinscrever(treino);
+        novo.inscrever(treino);
+        motor = novo;
+        for (ObservadorPartida ouvinte : inscritos) {
+            ouvinte.estadoMudou(novo);
+        }
     }
 
     /** Um erro num ciclo não pode matar o laço: o agendador para de vez se a tarefa lançar exceção. */
@@ -201,6 +263,16 @@ public final class SessaoPartida {
      */
     public String id() {
         return id;
+    }
+
+    /**
+     * Informa se a partida é de treino, com o desfazer liberado (RF26). Partida
+     * de treino não entra no ranking (RN15).
+     *
+     * @return {@code true} se é de treino
+     */
+    public boolean modoTreino() {
+        return treino != null;
     }
 
     /**

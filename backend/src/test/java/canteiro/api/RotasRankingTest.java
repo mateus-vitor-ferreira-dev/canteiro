@@ -68,7 +68,7 @@ class RotasRankingTest {
 
     @BeforeEach
     void subirServidor() {
-        partidas = new GerenciadorPartidas(d -> SO_O);
+        partidas = new GerenciadorPartidas((d, semente) -> SO_O);
         servidor = new ServidorWeb(partidas, ServidoresDeTeste.arquivos(pasta));
         porta = servidor.iniciar(PORTA_LIVRE);
     }
@@ -121,6 +121,21 @@ class RotasRankingTest {
 
         assertEquals(CONFLITO, resposta.statusCode());
         assertEquals("PARTIDA_EM_ANDAMENTO", erro(resposta));
+    }
+
+    @Test
+    void partidaDeTreinoNaoEntra() throws IOException, InterruptedException {
+        SessaoPartida sessao = partidas.criar(Dificuldade.FACIL, true);
+        for (int i = 0; i < LIMITE_DE_PECAS && !sessao.motor().estado().encerrada(); i++) {
+            sessao.motor().avancarCiclo();
+            sessao.motor().aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+
+        HttpResponse<String> resposta = post(sessao.id(), "Ana");
+
+        assertEquals(CONFLITO, resposta.statusCode());
+        assertEquals("PARTIDA_DE_TREINO", erro(resposta));
+        assertTrue(json.readTree(get().body()).isEmpty(), "nada entrou no ranking");
     }
 
     @Test

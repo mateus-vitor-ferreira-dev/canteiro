@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -79,12 +80,14 @@ class CanalPartidaTest {
     }
 
     @Test
-    void modoTreinoERecusadoEnquantoOMotorNaoDesfaz() throws Exception {
-        HttpResponse<String> resposta = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
-        assertEquals(501, resposta.statusCode());
-        assertEquals("MODO_TREINO_INDISPONIVEL", json.readTree(resposta.body()).get("erro").asText());
+    void criaPartidaDeTreinoOuNao() throws Exception {
+        HttpResponse<String> treino = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
+        HttpResponse<String> normal = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}");
 
-        assertEquals(201, post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}").statusCode());
+        assertEquals(201, treino.statusCode());
+        assertEquals(201, normal.statusCode());
+        assertTrue(partidas.buscar(json.readTree(treino.body()).get("id").asText()).orElseThrow().modoTreino());
+        assertFalse(partidas.buscar(json.readTree(normal.body()).get("id").asText()).orElseThrow().modoTreino());
     }
 
     @Test
