@@ -8,6 +8,7 @@ import canteiro.modelo.estruturas.FontePecas;
 import canteiro.modelo.materiais.Madeira;
 import canteiro.modelo.pecas.Peca;
 import canteiro.modelo.pecas.PecaO;
+import canteiro.persistencia.Repeticao;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -136,6 +137,21 @@ class RotasRankingTest {
         assertEquals(CONFLITO, resposta.statusCode());
         assertEquals("PARTIDA_DE_TREINO", erro(resposta));
         assertTrue(json.readTree(get().body()).isEmpty(), "nada entrou no ranking");
+    }
+
+    @Test
+    void partidaReproduzidaNaoEntra() throws IOException, InterruptedException {
+        SessaoPartida sessao = partidas.reproduzir(new Repeticao("2026-09-28_14-32-05",
+                LocalDate.now().atStartOfDay(), Dificuldade.FACIL, 0, 0, List.of()));
+        for (int i = 0; i < LIMITE_DE_PECAS && !sessao.motor().estado().encerrada(); i++) {
+            sessao.motor().avancarCiclo();
+            sessao.motor().aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+
+        HttpResponse<String> resposta = post(sessao.id(), "Ana");
+
+        assertEquals(CONFLITO, resposta.statusCode());
+        assertEquals("PARTIDA_REPRODUZIDA", erro(resposta));
     }
 
     @Test

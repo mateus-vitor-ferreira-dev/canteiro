@@ -53,8 +53,9 @@ public final class Aplicacao {
         GerenciadorPartidas partidas = criarGerenciador(CarregadorMateriais.carregar(config.pasta()),
                 config.limitePartidas());
         partidas.iniciarLimpeza(TOLERANCIA_SEM_CONEXAO, INTERVALO_LIMPEZA);
-        ServidorWeb servidor = new ServidorWeb(partidas, ArquivosDoJogo.em(config.pasta()),
-                config.compartilhado());
+        ArquivosDoJogo arquivos = ArquivosDoJogo.em(config.pasta());
+        partidas.gravarRepeticoesEm(arquivos.repeticoes());
+        ServidorWeb servidor = new ServidorWeb(partidas, arquivos, config.compartilhado());
         int porta;
         try {
             porta = servidor.iniciar(config.host(), config.porta());

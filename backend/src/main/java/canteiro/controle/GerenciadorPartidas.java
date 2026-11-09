@@ -2,11 +2,15 @@ package canteiro.controle;
 
 import canteiro.modelo.Dificuldade;
 import canteiro.modelo.MotorJogo;
+import canteiro.modelo.Reprodutor;
+import canteiro.persistencia.ArquivoRepeticoes;
+import canteiro.persistencia.Repeticao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,6 +49,7 @@ public final class GerenciadorPartidas {
     private final int limite;
     private final LongSupplier relogio;
     private final SecureRandom sorteio = new SecureRandom();
+    private volatile ArquivoRepeticoes repeticoes;
     private ScheduledExecutorService limpeza;
 
     /**
@@ -105,7 +110,42 @@ public final class GerenciadorPartidas {
         long semente = sorteio.nextLong();
         Supplier<MotorJogo> novoMotor = () -> new MotorJogo(dificuldade, fabricaDeFontes.criar(dificuldade, semente));
         Treino treino = modoTreino ? new Treino(novoMotor) : null;
-        return guardar(id -> new SessaoPartida(id, novoMotor.get(), treino, relogio));
+        MotorJogo motor = novoMotor.get();
+        ArquivoRepeticoes arquivo = repeticoes;
+        if (!modoTreino && arquivo != null) {
+            // o treino desfaz jogadas e troca de motor no meio: só a partida comum é gravada
+            motor.inscrever(new GravadorRepeticao(arquivo, dificuldade, semente, LocalDateTime::now));
+        }
+        return guardar(id -> new SessaoPartida(id, motor, treino, null, relogio));
+    }
+
+    /**
+     * Cria a reprodução de uma partida gravada, ainda parada (RF24). Ela abre
+     * pelo WebSocket como uma partida comum, mas quem joga são as jogadas
+     * gravadas; do navegador, só valem pausar e retomar.
+     *
+     * @param repeticao a partida gravada, com as jogadas
+     * @return a sessão criada
+     * @throws LimiteDePartidasException se já houver o máximo de partidas abertas
+     */
+    public SessaoPartida reproduzir(Repeticao repeticao) {
+        if (sessoes.size() >= limite) {
+            throw new LimiteDePartidasException(limite);
+        }
+        Dificuldade dificuldade = repeticao.dificuldade();
+        MotorJogo motor = new MotorJogo(dificuldade, fabricaDeFontes.criar(dificuldade, repeticao.semente()));
+        Reprodutor reprodutor = new Reprodutor(repeticao.jogadas());
+        return guardar(id -> new SessaoPartida(id, motor, null, reprodutor, relogio));
+    }
+
+    /**
+     * Passa a gravar cada partida comum que terminar, para ser reproduzida
+     * depois (RF24). Sem chamar este método, nada é gravado, como nos testes.
+     *
+     * @param arquivo onde as repetições ficam
+     */
+    public void gravarRepeticoesEm(ArquivoRepeticoes arquivo) {
+        this.repeticoes = Objects.requireNonNull(arquivo, "arquivo de repetições");
     }
 
     /** Guarda a sessão com um id que ainda não existe. */

@@ -5,6 +5,7 @@ import canteiro.api.rotas.RotasConfiguracoes;
 import canteiro.api.rotas.RotasDificuldades;
 import canteiro.api.rotas.RotasPartidas;
 import canteiro.api.rotas.RotasRanking;
+import canteiro.api.rotas.RotasRepeticoes;
 import canteiro.api.ws.CanalPartida;
 import canteiro.controle.GerenciadorPartidas;
 import canteiro.persistencia.ArquivosDoJogo;
@@ -138,6 +139,7 @@ public final class ServidorWeb {
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
         new RotasRanking(partidas, arquivos.ranking()).registrar(rotas);
+        new RotasRepeticoes(arquivos.repeticoes(), partidas).registrar(rotas);
         if (!compartilhado) {
             new RotasConfiguracoes(arquivos.configuracoes()).registrar(rotas);
         }
