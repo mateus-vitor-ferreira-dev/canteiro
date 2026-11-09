@@ -41,6 +41,13 @@ public final class AnalisadorEstrutural {
     private double momento;
 
     /**
+     * Cria o analisador com a estrutura vazia.
+     */
+    public AnalisadorEstrutural() {
+        // os campos já começam zerados
+    }
+
+    /**
      * Soma um bloco aos acumuladores, em O(1).
      *
      * @param celula   onde o bloco foi fixado

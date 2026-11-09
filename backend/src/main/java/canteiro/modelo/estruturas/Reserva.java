@@ -25,6 +25,13 @@ public final class Reserva {
     private boolean travada;
 
     /**
+     * Cria a reserva vazia e destravada.
+     */
+    public Reserva() {
+        // os campos já começam zerados
+    }
+
+    /**
      * Guarda a peça atual e devolve a que estava guardada. A peça guardada
      * volta para a rotação inicial.
      *
