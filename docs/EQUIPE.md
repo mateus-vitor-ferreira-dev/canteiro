@@ -20,11 +20,11 @@ A área é o campo **Área** do board.
 
 | Área | Responsável | O que cobre |
 |---|---|---|
-| **Back** | Mateus e Marcelo | Mateus: arquitetura, servidor e protocolo, motor, física, estruturas de dados, medições. Marcelo: persistência e as rotas de ranking, configurações, relatório, replay e modo treino |
+| **Back** | Mateus | Arquitetura, servidor e protocolo, motor, física, estruturas de dados, medições, persistência e as rotas de ranking, configurações, relatório, replay e modo treino |
 | **Front** | Mateus | A tela de partida e as telas de apoio |
 | **Requisitos** | Mateus | A tabela de requisitos do README e a revisão no fim de cada sprint (#19) |
-| **Teste** | Alisson | Roteiros manuais, execução a cada entrega, issues de bug, sessões com jogadores, usabilidade e acessibilidade |
-| **Documentação** | Mateus e Alisson | Mateus: este manual e o relatório de plataforma e desvios. Alisson: a apresentação e a revisão dos documentos |
+| **Teste** | Alisson e Marcelo | Alisson: roteiros manuais, issues de bug, sessões com jogadores, usabilidade e acessibilidade. Marcelo: execução dos roteiros, teste das funções desejáveis e teste do JAR em máquinas reais, com a medição de desempenho |
+| **Documentação** | Mateus, Marcelo e Alisson | Mateus: este manual e o relatório de plataforma e desvios. Marcelo: a apresentação. Alisson: a revisão dos documentos |
 
 **É de todo mundo:**
 
