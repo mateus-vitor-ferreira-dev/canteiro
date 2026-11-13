@@ -23,6 +23,7 @@
         repeticao,
         aoTocar,
         aoSair,
+        aoMenu,
         aoTerminar,
     }: {
         /** A partida ao vivo. */
@@ -39,6 +40,8 @@
         aoTocar: (comando: Comando) => void;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
+        /** Chamado quando o jogador sai da partida pausada direto para o menu. */
+        aoMenu?: () => void;
         /** Chamado com o placar final, quando o jogador abre o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
     } = $props();
@@ -98,7 +101,7 @@
                 aoComando={aoTocar}
             />
             <Destaques evento={partida.ultimoEvento} nivel={partida.estado?.placar.nivel} />
-            <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
+            <CamadaPartida {partida} {repeticao} {aoSair} {aoMenu} {aoTerminar} />
         </div>
         {#if partida.estado}
             <div class="so-celular">
