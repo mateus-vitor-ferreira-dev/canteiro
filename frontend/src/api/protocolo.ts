@@ -20,6 +20,20 @@ export type DificuldadeDto = {
     materiaisLiberados: string[];
 };
 
+/** Um material do catálogo, como vem de `GET /api/materiais` (RF04). Espelho de `MaterialDto`. */
+export type MaterialDto = {
+    codigo: string;
+    nome: string;
+    /** Massa de um bloco de volume unitário (RN07). */
+    densidade: number;
+    /** Cor dos blocos, no formato `#RRGGBB`. */
+    cor: string;
+    /** Pontos extras de cada linha em que o material predomina (RN03). */
+    bonusLinha: number;
+    /** A maior massa que um bloco aguenta em cima, ou `null` se não há limite, como no aço (RN21). */
+    cargaMaxima: number | null;
+};
+
 /** Corpo de toda resposta de erro da API. Espelho de `ErroDto`. */
 export type ErroDto = {
     erro: string;

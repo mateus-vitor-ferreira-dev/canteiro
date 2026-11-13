@@ -3,11 +3,13 @@ package canteiro.api;
 import canteiro.api.dto.ErroDto;
 import canteiro.api.rotas.RotasConfiguracoes;
 import canteiro.api.rotas.RotasDificuldades;
+import canteiro.api.rotas.RotasMateriais;
 import canteiro.api.rotas.RotasPartidas;
 import canteiro.api.rotas.RotasRanking;
 import canteiro.api.rotas.RotasRepeticoes;
 import canteiro.api.ws.CanalPartida;
 import canteiro.controle.GerenciadorPartidas;
+import canteiro.modelo.materiais.CatalogoMateriais;
 import canteiro.persistencia.ArquivosDoJogo;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
@@ -49,6 +51,7 @@ public final class ServidorWeb {
     private final GerenciadorPartidas partidas;
     private final ArquivosDoJogo arquivos;
     private final boolean compartilhado;
+    private final CatalogoMateriais catalogo;
     private final boolean frontendEmbutido;
     private final Javalin javalin;
 
@@ -75,6 +78,21 @@ public final class ServidorWeb {
      * @param compartilhado se vários jogadores usam o mesmo servidor
      */
     public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos, boolean compartilhado) {
+        this(partidas, arquivos, compartilhado, CatalogoMateriais.padrao());
+    }
+
+    /**
+     * Configura o servidor com o catálogo de materiais em uso pelas partidas
+     * e registra as rotas, sem começar a escutar.
+     *
+     * @param partidas      onde as partidas ficam guardadas
+     * @param arquivos      os arquivos do jogador que as rotas leem e gravam
+     * @param compartilhado se vários jogadores usam o mesmo servidor
+     * @param catalogo      os materiais mostrados em {@code GET /api/materiais}
+     */
+    public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos, boolean compartilhado,
+                       CatalogoMateriais catalogo) {
+        this.catalogo = Objects.requireNonNull(catalogo, "catalogo");
         this.partidas = Objects.requireNonNull(partidas, "partidas");
         this.arquivos = Objects.requireNonNull(arquivos, "arquivos");
         this.compartilhado = compartilhado;
@@ -138,6 +156,7 @@ public final class ServidorWeb {
     private void registrarRotas(RoutesConfig rotas) {
         FiltroOrigem.registrar(rotas);
         RotasDificuldades.registrar(rotas);
+        new RotasMateriais(catalogo).registrar(rotas);
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
         new RotasRanking(partidas, arquivos.ranking()).registrar(rotas);
