@@ -50,12 +50,12 @@ public final class Aplicacao {
      */
     public static void main(String[] args) {
         Configuracao config = Configuracao.doAmbiente(System.getenv());
-        GerenciadorPartidas partidas = criarGerenciador(CarregadorMateriais.carregar(config.pasta()),
-                config.limitePartidas());
+        CatalogoMateriais catalogo = CarregadorMateriais.carregar(config.pasta());
+        GerenciadorPartidas partidas = criarGerenciador(catalogo, config.limitePartidas());
         partidas.iniciarLimpeza(TOLERANCIA_SEM_CONEXAO, INTERVALO_LIMPEZA);
         ArquivosDoJogo arquivos = ArquivosDoJogo.em(config.pasta());
         partidas.gravarRepeticoesEm(arquivos.repeticoes());
-        ServidorWeb servidor = new ServidorWeb(partidas, arquivos, config.compartilhado());
+        ServidorWeb servidor = new ServidorWeb(partidas, arquivos, config.compartilhado(), catalogo);
         int porta;
         try {
             porta = servidor.iniciar(config.host(), config.porta());

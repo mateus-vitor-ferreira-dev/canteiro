@@ -4,6 +4,7 @@ import type {
     DificuldadeDto,
     EntradaRankingDto,
     ErroDto,
+    MaterialDto,
     NovaPartidaDto,
     PartidaCriadaDto,
     RegistroRankingDto,
@@ -34,6 +35,11 @@ export class ErroApi extends Error {
 /** Lista as três dificuldades, da mais fácil para a mais difícil (RF02). */
 export function listarDificuldades(): Promise<DificuldadeDto[]> {
     return buscarJson<DificuldadeDto[]>("/api/dificuldades");
+}
+
+/** Lista o catálogo de materiais, do mais leve ao mais pesado (RF04). */
+export function listarMateriais(): Promise<MaterialDto[]> {
+    return buscarJson<MaterialDto[]>("/api/materiais");
 }
 
 /**

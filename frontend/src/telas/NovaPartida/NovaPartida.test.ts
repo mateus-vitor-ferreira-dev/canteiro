@@ -1,12 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ErroApi, criarPartida, listarDificuldades } from "@/api/cliente";
+import { ErroApi, criarPartida, listarDificuldades, listarMateriais } from "@/api/cliente";
 import type { DificuldadeDto } from "@/api/protocolo";
 import NovaPartida from "./NovaPartida.svelte";
 
 vi.mock("@/api/cliente", async (original) => ({
     ...(await original<typeof import("@/api/cliente")>()),
     listarDificuldades: vi.fn(),
+    listarMateriais: vi.fn(() => Promise.reject(new Error("sem catálogo"))),
     criarPartida: vi.fn(),
 }));
 
@@ -23,6 +24,24 @@ afterEach(() => {
 });
 
 describe("NovaPartida", () => {
+    it("usa os nomes do catálogo de materiais do backend", async () => {
+        vi.mocked(listarDificuldades).mockResolvedValue([NORMAL]);
+        vi.mocked(listarMateriais).mockResolvedValueOnce([
+            {
+                codigo: "MADEIRA",
+                nome: "Madeira de lei",
+                densidade: 0.9,
+                cor: "#E6C48F",
+                bonusLinha: 10,
+                cargaMaxima: 8,
+            },
+        ]);
+
+        render(NovaPartida, { aoCriar: vi.fn() });
+
+        expect(await screen.findByText("madeira de lei")).toBeInTheDocument();
+    });
+
     it("mostra cada dificuldade com queda, limite e materiais", async () => {
         vi.mocked(listarDificuldades).mockResolvedValue([
             {

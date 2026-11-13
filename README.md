@@ -250,7 +250,7 @@ Os critérios de aceitação de cada requisito estão na [proposta do projeto](d
 | RF01 | Exibir um menu principal com nova partida, ranking, repetições, configurações e sair | E | 🌐 | ✅ | Menu com as cinco opções, navegação sem recarregar e com o voltar do navegador; cada opção abre a sua tela (#26, #32, #38, #68) |
 | RF02 | Permitir escolher entre três dificuldades, que definem a velocidade inicial de queda e o limite de desvio | E | ☕ 🌐 | ✅ | GET /api/dificuldades (#4), POST /api/partidas (#23) e a tela: escolher a dificuldade cria e abre a partida (#8, #25); cada dificuldade multiplica o limite de desvio e a resistência dos materiais (#120); teste da velocidade e do limite das três dificuldades pela API (#131) |
 | RF03 | Gerar elementos continuamente enquanto a partida estiver em andamento | E | ☕ | ✅ | O motor gera peças continuamente (#20) pelo método da sacola, com semente (#12) |
-| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12) |
+| RF04 | Atribuir a cada elemento um material sorteado entre os liberados na fase | E | ☕ | ✅ | Materiais e catálogo (#9); o material de cada peça é sorteado entre os liberados no nível atual, que mudam quando o nível sobe (#12); `GET /api/materiais` publica o catálogo, e a escolha da dificuldade mostra os nomes que vêm dele |
 | RF05 | Exibir os três próximos elementos da fila, com forma e material | E | ☕ 🌐 | ✅ | As 3 próximas peças, com forma e material, ao lado do tabuleiro (#23, #25) |
 | RF06 | Descer o elemento em queda uma linha a cada intervalo definido pelo nível | E | ☕ | ✅ | Queda contada em ciclos, no intervalo do nível atual (#20, #22) |
 | RF07 | Mover o elemento em queda para a esquerda e para a direita, respeitando as bordas e os blocos fixados | E | ☕ | ✅ | Colisão no tabuleiro (#11) e movimento no motor (#20) |
@@ -327,6 +327,7 @@ O **`MotorJogo`** é o coordenador e **não implementa regra nenhuma, só delega
 | `WS /ws/partidas/{id}` | front → back | `{ "tipo": "COMANDO", "comando": "GIRAR_HORARIO" }` |
 | `WS /ws/partidas/{id}` | back → front | `ESTADO` (tabuleiro, peça, fila, reserva, placar, estabilidade) e `EVENTO` (linhas eliminadas, colapso, nível, fim) |
 | `GET /api/dificuldades` | back → front | As três dificuldades, com o intervalo de queda, o limite de desvio e os materiais liberados |
+| `GET /api/materiais` | back → front | O catálogo de materiais: código, nome, densidade, cor, bônus por linha e carga máxima (nula no aço) |
 | `GET /api/partidas/{id}/relatorio` | back → front | O índice de estabilidade a cada peça, as peças que derrubaram a obra e as peças por material |
 | `GET /api/ranking` · `POST /api/ranking` | ambos | Dez melhores; registro pelo id da partida e nome. Partida de treino ou reproduzida é recusada |
 | `GET /api/configuracoes` · `PUT /api/configuracoes` | ambos | As teclas trocadas e o volume. Só no JAR: na versão online, a rota não existe e cada navegador guarda as suas |
@@ -781,6 +782,7 @@ cd frontend && npm test        # Vitest
 | Teste | O que garante |
 |---|---|
 | `ArquiteturaTest` | Separação de camadas: só as cinco camadas na raiz · nada de Javalin, JSON ou classe gráfica fora de `app` e `api` · DTOs sem Javalin (RNF08) |
+| `RotasMateriaisTest` | `GET /api/materiais` devolve os quatro materiais com densidade, cor, bônus e carga; o aço vem sem carga máxima (RF04, RN21) |
 | `ServidorWebTest` | `GET /api/dificuldades` devolve as três dificuldades em JSON (RF02) · o servidor recusa conexão pelo IP de rede da máquina (RNF13) |
 | `DificuldadeTest` | Cada dificuldade cai mais rápido, tolera menos desvio e libera ao menos os materiais da anterior (RF02) |
 | `cliente.test.ts` 🌐 | O cliente REST devolve as dificuldades · transforma a resposta de erro da API em `ErroApi` · avisa quando o backend não está rodando |
