@@ -7,6 +7,7 @@
         partida,
         repeticao = false,
         aoSair,
+        aoMenu = aoSair,
         aoTerminar,
     }: {
         /** A partida, de onde vem o que mostrar. */
@@ -15,6 +16,8 @@
         repeticao?: boolean;
         /** Chamado quando o jogador sai para começar outra partida, ou volta à lista de repetições. */
         aoSair: () => void;
+        /** Chamado quando o jogador sai da partida pausada direto para o menu. */
+        aoMenu?: () => void;
         /** Chamado com o placar final, quando o jogador quer ver o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
     } = $props();
@@ -45,9 +48,14 @@
         <h2>Pausado</h2>
         <p class="no-teclado">Aperte <kbd>P</kbd> para continuar.</p>
         <p class="no-toque">
-            Toque em continuar, no canto dos botões. No tabuleiro: arraste para mover, toque para
-            girar, deslize rápido para baixo para cair e para cima para guardar.
+            No tabuleiro: arraste para mover, toque para girar, deslize rápido para baixo para cair
+            e para cima para guardar.
         </p>
+        <button type="button" onclick={() => partida.enviar("RETOMAR")}>Retomar</button>
+        {#if !repeticao}
+            <button type="button" class="secundario" onclick={aoSair}>Recomeçar</button>
+        {/if}
+        <button type="button" class="secundario" onclick={aoMenu}>Sair para o menu</button>
     </div>
 {:else if partida.encerrada && partida.estado && repeticao}
     <div class="camada" role="status">

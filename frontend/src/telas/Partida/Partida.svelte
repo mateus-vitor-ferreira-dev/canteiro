@@ -20,6 +20,7 @@
         treino = false,
         repeticao = false,
         aoSair,
+        aoMenu,
         aoTerminar,
         conectar,
         som = new Som(),
@@ -32,6 +33,8 @@
         repeticao?: boolean;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
+        /** Chamado quando o jogador sai da partida pausada direto para o menu. */
+        aoMenu?: () => void;
         /** Chamado com o placar final, quando o jogador abre o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
         /** Troca a conexão nos testes. */
@@ -122,7 +125,17 @@
     {/if}
 
     <div class="jogo">
-        <MesaDeJogo {partida} {som} {celula} {treino} {repeticao} {aoTocar} {aoSair} {aoTerminar} />
+        <MesaDeJogo
+            {partida}
+            {som}
+            {celula}
+            {treino}
+            {repeticao}
+            {aoTocar}
+            {aoSair}
+            {aoMenu}
+            {aoTerminar}
+        />
     </div>
 
     <ColunaApoio estado={partida.estado} {som} {treino} {repeticao} />
@@ -146,18 +159,6 @@
         grid-area: jogo;
         width: 100%;
     }
-    @media (min-width: 768px) {
-        .lateral {
-            grid-area: lateral;
-            display: grid;
-        }
-        .partida > :global(aside) {
-            display: block;
-        }
-        .jogo {
-            width: auto;
-        }
-    }
     /* Tablet: o tabuleiro à esquerda e todo o resto numa coluna ao lado. */
     @media (min-width: 768px) {
         .partida {
@@ -170,8 +171,16 @@
             justify-items: stretch;
         }
         .lateral {
+            grid-area: lateral;
+            display: grid;
             grid-template-columns: 1fr;
             gap: 0;
+        }
+        .partida > :global(aside) {
+            display: block;
+        }
+        .jogo {
+            width: auto;
         }
     }
     /* Computador: placar à esquerda, tabuleiro no meio, próximas e legendas à direita. */

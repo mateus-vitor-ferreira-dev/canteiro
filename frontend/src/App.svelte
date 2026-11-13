@@ -54,6 +54,7 @@
                 {treino}
                 {repeticao}
                 aoSair={() => navegacao.ir({ nome: repeticao ? "repeticoes" : "nova-partida" })}
+                aoMenu={() => navegacao.voltarAoMenu()}
                 aoTerminar={(placar) => navegacao.ir({ nome: "fim", id, placar, treino })}
             />
         {/key}
