@@ -27,7 +27,8 @@ import java.util.Objects;
  * de rede, para que outro computador da rede não alcance o jogo (RNF13). Só a
  * hospedagem pública escolhe outro endereço, pela configuração. Toda exceção
  * que escapar de uma rota vira uma resposta {@link ErroDto}, sem derrubar o
- * servidor (RNF14).</p>
+ * servidor (RNF14). Pedidos de outra origem, como de uma página de outro
+ * site aberta no mesmo navegador, são recusados ({@link FiltroOrigem}).</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -135,6 +136,7 @@ public final class ServidorWeb {
     }
 
     private void registrarRotas(RoutesConfig rotas) {
+        FiltroOrigem.registrar(rotas);
         RotasDificuldades.registrar(rotas);
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
