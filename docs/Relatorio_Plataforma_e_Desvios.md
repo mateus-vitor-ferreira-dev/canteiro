@@ -9,6 +9,7 @@ As linhas "pendente" da seção 2.3 esperam os testes em máquina real (#133).
 |---|---|
 | **Responsável** | Mateus Vitor Ferreira |
 | **Revisão** | Alisson Antônio Oliveira Santos |
+| **Testes em máquina real e apresentação** | Marcelo Camillo De Paula Leite |
 | **Versão do jogo** | 0.3.0 |
 | **Especificação de referência** | 2.5 (2026-10-29) |
 | **Última atualização** | 2026-11-13 |
@@ -24,6 +25,14 @@ Este relatório tem três partes:
 - **Seção 5:** os pontos em que o código entregue difere do texto da especificação 2.5.
 
 Cada mudança vem com a fonte e o porquê.
+
+### 1.1. Equipe
+
+| Integrante | O que fez nesta entrega |
+|---|---|
+| Mateus Vitor Ferreira | Toda a programação do backend e do frontend, a documentação do código em Javadoc, o empacotamento do JAR, a versão online e este relatório |
+| Marcelo Camillo De Paula Leite | A apresentação do projeto, as rodadas de teste com os roteiros, o teste das funções desejáveis (configurações, relatório, modo treino e repetições) e o teste do JAR em máquinas reais, com a medição de desempenho (#27, #132, #133) |
+| Alisson Antônio Oliveira Santos | Os roteiros de teste manual, as sessões com jogadores, a revisão de usabilidade e acessibilidade e a revisão deste relatório (#17, #30, #34) |
 
 ## 2. Ambiente usado
 
