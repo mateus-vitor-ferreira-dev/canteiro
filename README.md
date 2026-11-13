@@ -637,7 +637,7 @@ Javalin.create(config -> {
 ## 🚀 Rodando localmente
 
 > [!NOTE]
-> **O que já dá para ver:** o jogo completo, do menu ao fim da partida, com estabilidade, colapso, sons e reconexão. Ranking, repetições, relatório e configurações já têm tela, mas ainda esperam as rotas do backend. Só quer jogar? Abra [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com).
+> **O que já dá para ver:** o jogo completo, do menu ao fim da partida, com estabilidade, colapso, sons e reconexão, além de ranking, repetições, relatório, modo treino e configurações. Só quer jogar? Abra [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com).
 
 ### 1. Pré-requisitos
 
