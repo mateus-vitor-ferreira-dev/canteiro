@@ -17,11 +17,13 @@ function montar(som?: Som, treino = false, repeticao = false) {
     const conexao = { enviar: vi.fn(), fechar: vi.fn() };
     const aoSair = vi.fn();
     const aoTerminar = vi.fn();
+    const aoMenu = vi.fn();
     const tela = render(Partida, {
         id: "abc",
         treino,
         repeticao,
         aoSair,
+        aoMenu,
         aoTerminar,
         ...(som ? { som } : {}),
         conectar: (_id: string, o: OuvinteConexao) => {
@@ -33,7 +35,7 @@ function montar(som?: Som, treino = false, repeticao = false) {
     const evento = (e: EventoDto) => flushSync(() => ouvinte?.aoReceber(e));
     const reconectar = () => flushSync(() => ouvinte?.aoReconectar?.(1, 500));
     const desistir = () => flushSync(() => ouvinte?.aoDesistir?.());
-    return { conexao, aoSair, aoTerminar, tela, receber, evento, reconectar, desistir };
+    return { conexao, aoSair, aoMenu, aoTerminar, tela, receber, evento, reconectar, desistir };
 }
 
 describe("Partida", () => {
@@ -135,6 +137,26 @@ describe("Partida", () => {
         expect(screen.getByText("Pausado")).toBeInTheDocument();
         await fireEvent.keyDown(window, { code: "KeyP" });
         expect(conexao.enviar).toHaveBeenLastCalledWith("RETOMAR");
+    });
+
+    it("a pausa tem retomar, recomeçar e sair para o menu", async () => {
+        const { conexao, aoSair, aoMenu, receber } = montar();
+        receber(estadoDeTeste({ estado: "PAUSA" }));
+
+        await fireEvent.click(screen.getByRole("button", { name: "Retomar" }));
+        expect(conexao.enviar).toHaveBeenLastCalledWith("RETOMAR");
+        await fireEvent.click(screen.getByRole("button", { name: "Recomeçar" }));
+        expect(aoSair).toHaveBeenCalled();
+        await fireEvent.click(screen.getByRole("button", { name: "Sair para o menu" }));
+        expect(aoMenu).toHaveBeenCalled();
+    });
+
+    it("na pausa de uma repetição não há recomeçar", () => {
+        const { receber } = montar(undefined, false, true);
+        receber(estadoDeTeste({ estado: "PAUSA" }));
+
+        expect(screen.getByRole("button", { name: "Retomar" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Recomeçar" })).not.toBeInTheDocument();
     });
 
     it("no fim de jogo mostra a pontuação e deixa jogar de novo", async () => {

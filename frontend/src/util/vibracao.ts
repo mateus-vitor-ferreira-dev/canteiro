@@ -5,6 +5,8 @@ const PADROES: Partial<Record<EventoDto["evento"], number | number[]>> = {
     PECA_FIXADA: 12,
     LINHAS_ELIMINADAS: 30,
     COLAPSO: [70, 50, 140],
+    QUEBRA: 45,
+    ESMAGAMENTO: [40, 30, 60],
     META_CUMPRIDA: [30, 40, 30],
 };
 

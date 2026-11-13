@@ -55,6 +55,17 @@ public final class Bloco {
     }
 
     /**
+     * Um bloco igual a este, do mesmo material e consolidado do mesmo jeito.
+     *
+     * @return a cópia
+     */
+    public Bloco copia() {
+        Bloco copia = new Bloco(material);
+        copia.consolidado = consolidado;
+        return copia;
+    }
+
+    /**
      * Devolve o material do bloco.
      *
      * @return o material

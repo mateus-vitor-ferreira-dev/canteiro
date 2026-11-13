@@ -1,7 +1,8 @@
-<!-- O índice de estabilidade, com alerta antes do limite (RF15, RF16). -->
+<!-- O índice de estabilidade, com alerta antes do limite e aviso do que a jogada quebraria (RF15, RF16, RN20, RN21). -->
 <script lang="ts">
     import type { EstabilidadeDto } from "@/api/protocolo";
     import { formatarColunas } from "@/util/formatacao";
+    import { avisoDaPrevia } from "@/estado/anuncios";
 
     /** Estabilidade da estrutura, como veio na última mensagem do backend. */
     let { estabilidade }: { estabilidade: EstabilidadeDto } = $props();
@@ -16,6 +17,7 @@
     const ponteiro = $derived(noMedidor(estabilidade.centroDeMassa, estabilidade.eixo));
     const previa = $derived(estabilidade.previa);
     const previsto = $derived(previa ? Math.round(previa.indice * 100) : null);
+    const quebra = $derived(previa ? avisoDaPrevia(previa) : null);
 </script>
 
 <section class="painel" class:alerta={estabilidade.alerta} aria-label="Estabilidade">
@@ -65,6 +67,8 @@
 
     {#if previa?.derruba}
         <p class="aviso" role="alert">Esta jogada derruba a obra!</p>
+    {:else if quebra}
+        <p class="aviso" role="alert">{quebra}</p>
     {:else if estabilidade.alerta}
         <p class="aviso" role="alert">Atenção: carga demais à {lado}!</p>
     {/if}

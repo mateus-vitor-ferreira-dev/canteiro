@@ -4,13 +4,18 @@ import canteiro.modelo.Celula;
 import canteiro.modelo.Tabuleiro;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.materiais.Aco;
+import canteiro.modelo.materiais.Concreto;
 import canteiro.modelo.materiais.Madeira;
+import canteiro.modelo.materiais.Material;
 import canteiro.modelo.pecas.PecaI;
 import canteiro.modelo.pecas.PecaO;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -108,5 +113,51 @@ class AnalisadorEstruturalTest {
         for (int coluna = deColuna; coluna < ateColuna; coluna++) {
             analisador.registrar(new Celula(linha, coluna), madeira);
         }
+    }
+
+    @Test
+    void torreQueSeInclinaParaForaDoContatoDesaba() {
+        // fundo de aço inteiro e, em cima, uma escada de madeira que sai das colunas 0 e 1 e vai para a direita
+        Tabuleiro tabuleiro = new Tabuleiro();
+        for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+            colocar(tabuleiro, FUNDO, coluna, aco);
+        }
+        int[][] escada = {{1, 0}, {1, 1}, {2, 1}, {2, 2}, {2, 3}, {3, 3}, {3, 4}, {3, 5}, {4, 5}, {4, 6}, {4, 7}};
+        for (int[] degrau : escada) {
+            colocar(tabuleiro, FUNDO - degrau[0], degrau[1], madeira);
+        }
+
+        Estabilidade topo = AnalisadorEstrutural.estabilidadeDoTopo(tabuleiro, 2.0);
+        assertEquals(1.0, topo.eixo(), TOLERANCIA, "a escada só encosta no aço nas colunas 0 e 1");
+        assertTrue(topo.passouDoLimite());
+        Estabilidade estabilidade = analisador.estabilidade(tabuleiro, 2.0);
+        assertTrue(estabilidade.passouDoLimite(), "o centro da estrutura inteira está no eixo, mas vale a pior medida");
+        assertEquals(topo.desvio(), estabilidade.desvio(), TOLERANCIA);
+    }
+
+    @Test
+    void pecaNoCantoEmCimaDeUmaLinhaLargaFicaDePe() {
+        Tabuleiro tabuleiro = new Tabuleiro();
+        for (int coluna = 0; coluna < Dimensoes.COLUNAS; coluna++) {
+            colocar(tabuleiro, FUNDO, coluna, new Concreto());
+        }
+        colocar(tabuleiro, FUNDO - 1, 8, aco);
+        colocar(tabuleiro, FUNDO - 1, 9, aco);
+
+        Estabilidade topo = AnalisadorEstrutural.estabilidadeDoTopo(tabuleiro, 1.2);
+        assertEquals(0, topo.desvio(), TOLERANCIA, "o aço encosta só nas colunas 8 e 9, e o centro dele está ali");
+    }
+
+    @Test
+    void semNadaAcimaDaLinhaCriticaNaoHaParteDeCima() {
+        Tabuleiro tabuleiro = new Tabuleiro();
+        colocar(tabuleiro, FUNDO, 0, madeira);
+        assertNull(AnalisadorEstrutural.estabilidadeDoTopo(tabuleiro, 2.0));
+    }
+
+    private void colocar(Tabuleiro tabuleiro, int linha, int coluna, Material material) {
+        Celula celula = new Celula(linha, coluna);
+        tabuleiro.fixar(List.of(celula), material);
+        analisador.registrar(celula, material);
     }
 }

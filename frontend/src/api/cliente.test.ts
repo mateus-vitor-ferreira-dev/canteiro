@@ -4,6 +4,7 @@ import {
     SEM_CONEXAO,
     criarPartida,
     listarDificuldades,
+    listarMateriais,
     listarRepeticoes,
     reproduzirRepeticao,
 } from "./cliente";
@@ -26,6 +27,23 @@ function responder(corpo: unknown, status = 200): void {
 
 afterEach(() => {
     vi.unstubAllGlobals();
+});
+
+describe("listarMateriais", () => {
+    it("devolve o catálogo que o backend mandou", async () => {
+        const aco = {
+            codigo: "ACO",
+            nome: "Aço",
+            densidade: 7.85,
+            cor: "#4E5A6B",
+            bonusLinha: 40,
+            cargaMaxima: null,
+        };
+        responder([aco]);
+
+        await expect(listarMateriais()).resolves.toEqual([aco]);
+        expect(fetch).toHaveBeenCalledWith("/api/materiais", expect.anything());
+    });
 });
 
 describe("listarDificuldades", () => {

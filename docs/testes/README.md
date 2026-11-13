@@ -51,7 +51,7 @@ flowchart LR
 
 | Versão | Como abrir | Quando usar |
 |---|---|---|
-| **Online** | [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com). Na rede da UFLA, use [canteiro.onrender.com](https://canteiro.onrender.com) | O jeito mais rápido. Atualiza sozinha a cada merge na `develop`. **O ranking online zera a cada atualização**: para testar se o ranking continua depois de fechar o jogo, use o JAR |
+| **Online** | [canteiro.digitalcodexa.com](https://canteiro.digitalcodexa.com). Na rede da UFLA, use [este endereço](https://ccsaafhnlgiwuhixo3eulcvk.49.12.249.23.sslip.io) | O jeito mais rápido. Atualiza sozinha a cada merge na `develop`, e o ranking online continua entre uma atualização e outra. As partidas em andamento se perdem quando sai uma atualização |
 | **JAR** | Em [Actions → CI](https://github.com/mateus-vitor-ferreira-dev/canteiro/actions/workflows/ci.yml), abra a execução verde mais recente da `develop` e baixe o **`canteiro-jar`** em *Artifacts*. Dois cliques no `canteiro.jar` (precisa do Java 17) | A versão que é entregue. Obrigatória para os casos de arquivo (ranking, configurações) e de "dois cliques" |
 
 Na execução, anote sempre **qual das duas** e, no JAR, o link da execução do CI de onde ele veio.

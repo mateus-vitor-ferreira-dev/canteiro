@@ -52,4 +52,12 @@ class ProgressaoTest {
         assertThrows(IllegalArgumentException.class, () -> Progressao.intervaloQuedaMs(0));
         assertThrows(IllegalArgumentException.class, () -> Progressao.materiaisLiberados(0));
     }
+
+    @Test
+    void doNivelNoveEmDianteOAcoSaiComODobroDaChance() {
+        assertEquals(Progressao.materiaisLiberados(8), Progressao.sorteioDeMateriais(8));
+        List<String> sorteio = Progressao.sorteioDeMateriais(9);
+        assertEquals(2, sorteio.stream().filter("ACO"::equals).count());
+        assertEquals(5, sorteio.size());
+    }
 }

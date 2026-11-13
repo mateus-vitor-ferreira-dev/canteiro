@@ -1,4 +1,4 @@
-<!-- Configurações (RF27): o volume dos efeitos e as teclas de cada ação. Nada muda até o jogador salvar. -->
+<!-- Configurações (RF27, RF28): o volume, a música de fundo e as teclas de cada ação. Nada muda até o jogador salvar. -->
 <script lang="ts">
     import { VOLUME_PADRAO, configuracoes } from "@/estado/configuracoes.svelte";
     import { montarTeclas, type AcaoTecla, type TeclasPersonalizadas } from "@/estado/teclado";
@@ -10,12 +10,14 @@
 
     let teclas = $state<TeclasPersonalizadas>({ ...configuracoes.teclas });
     let volume = $state(configuracoes.volume);
+    let musica = $state(configuracoes.musica);
     let salvando = $state(false);
     let aviso = $state<{ texto: string; erro: boolean } | null>(null);
 
     const tabela = $derived(montarTeclas(teclas));
     const mudou = $derived(
         volume !== configuracoes.volume ||
+            musica !== configuracoes.musica ||
             JSON.stringify(tabela) !== JSON.stringify(configuracoes.tabela),
     );
 
@@ -27,14 +29,18 @@
     function restaurar() {
         teclas = {};
         volume = VOLUME_PADRAO;
-        aviso = { texto: "Voltaram as teclas e o volume padrão. Salve para manter.", erro: false };
+        musica = true;
+        aviso = {
+            texto: "Voltaram as teclas, o volume e a música padrão. Salve para manter.",
+            erro: false,
+        };
     }
 
     async function salvar() {
         salvando = true;
         aviso = null;
         try {
-            const destino = await configuracoes.salvar(teclas, volume);
+            const destino = await configuracoes.salvar(teclas, volume, musica);
             aviso = {
                 texto:
                     destino === "servidor"
@@ -56,7 +62,7 @@
 <section class="configuracoes" aria-labelledby="titulo-configuracoes">
     <h2 id="titulo-configuracoes" tabindex="-1">Configurações</h2>
 
-    <ControleVolume bind:volume />
+    <ControleVolume bind:volume bind:musica />
 
     <div class="grupo">
         <h3>Teclas</h3>

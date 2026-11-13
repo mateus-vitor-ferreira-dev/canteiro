@@ -50,10 +50,12 @@ public final class Aplicacao {
      */
     public static void main(String[] args) {
         Configuracao config = Configuracao.doAmbiente(System.getenv());
-        GerenciadorPartidas partidas = criarGerenciador(CarregadorMateriais.carregar(config.pasta()),
-                config.limitePartidas());
+        CatalogoMateriais catalogo = CarregadorMateriais.carregar(config.pasta());
+        GerenciadorPartidas partidas = criarGerenciador(catalogo, config.limitePartidas());
         partidas.iniciarLimpeza(TOLERANCIA_SEM_CONEXAO, INTERVALO_LIMPEZA);
-        ServidorWeb servidor = new ServidorWeb(partidas, ArquivosDoJogo.em(config.pasta()));
+        ArquivosDoJogo arquivos = ArquivosDoJogo.em(config.pasta());
+        partidas.gravarRepeticoesEm(arquivos.repeticoes());
+        ServidorWeb servidor = new ServidorWeb(partidas, arquivos, config.compartilhado(), catalogo);
         int porta;
         try {
             porta = servidor.iniciar(config.host(), config.porta());
@@ -75,12 +77,12 @@ public final class Aplicacao {
 
     /**
      * Monta o gerenciador de partidas. Cada partida ganha um gerador de peças
-     * próprio, pelo método da sacola, com uma semente nova, e os materiais com
+     * próprio, pelo método da sacola, com a semente que o gerenciador sorteia, e os materiais com
      * a densidade e a cor do arquivo do jogador (#24).
      */
     private static GerenciadorPartidas criarGerenciador(CatalogoMateriais catalogo, int limitePartidas) {
-        return new GerenciadorPartidas(dificuldade ->
-                new GeradorPecas(System.nanoTime(), catalogo, dificuldade.nivelInicial()),
+        return new GerenciadorPartidas((dificuldade, semente) ->
+                new GeradorPecas(semente, catalogo, dificuldade.nivelInicial()),
                 limitePartidas, System::nanoTime);
     }
 

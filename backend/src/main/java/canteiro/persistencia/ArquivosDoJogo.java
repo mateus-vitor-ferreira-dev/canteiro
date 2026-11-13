@@ -10,21 +10,25 @@ import java.util.Objects;
  *
  * @param configuracoes teclas e volume do jogador (RF27)
  * @param ranking       as melhores partidas (RF21, RF22)
+ * @param repeticoes    as partidas gravadas (RF24)
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
-public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes, RankingArquivo ranking) {
+public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes, RankingArquivo ranking,
+                             ArquivoRepeticoes repeticoes) {
 
     /**
      * Confere que nada falta.
      *
      * @param configuracoes teclas e volume do jogador
      * @param ranking       as melhores partidas
+     * @param repeticoes    as partidas gravadas
      * @throws NullPointerException se algum arquivo for nulo
      */
     public ArquivosDoJogo {
         Objects.requireNonNull(configuracoes, "configurações");
         Objects.requireNonNull(ranking, "ranking");
+        Objects.requireNonNull(repeticoes, "repetições");
     }
 
     /**
@@ -34,6 +38,7 @@ public record ArquivosDoJogo(ArquivoConfiguracoes configuracoes, RankingArquivo 
      * @return os arquivos do jogo nessa pasta
      */
     public static ArquivosDoJogo em(Path pasta) {
-        return new ArquivosDoJogo(new ArquivoConfiguracoes(pasta), new RankingArquivo(pasta));
+        return new ArquivosDoJogo(new ArquivoConfiguracoes(pasta), new RankingArquivo(pasta),
+                new ArquivoRepeticoes(pasta));
     }
 }

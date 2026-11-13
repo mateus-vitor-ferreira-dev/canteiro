@@ -17,7 +17,7 @@ final class ServidoresDeTeste {
 
     static GerenciadorPartidas gerenciador() {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
-        return new GerenciadorPartidas(d -> new GeradorPecas(SEMENTE, catalogo, d.nivelInicial()));
+        return new GerenciadorPartidas((d, semente) -> new GeradorPecas(SEMENTE, catalogo, d.nivelInicial()));
     }
 
     /** Os arquivos do jogador numa pasta temporária, nunca na {@code ~/.canteiro} de verdade. */

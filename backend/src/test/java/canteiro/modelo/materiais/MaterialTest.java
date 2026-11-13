@@ -94,6 +94,11 @@ class MaterialTest {
             public int bonusLinha() {
                 return 0;
             }
+
+            @Override
+            public double cargaMaxima() {
+                return 1;
+            }
         };
     }
 }

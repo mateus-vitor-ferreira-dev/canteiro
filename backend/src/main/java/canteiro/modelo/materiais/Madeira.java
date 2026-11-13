@@ -15,6 +15,7 @@ public final class Madeira extends Material {
 
     private static final double DENSIDADE = 0.6;
     private static final int COR = 0xE6C48F;
+    private static final double CARGA_MAXIMA = 8.0;
     private static final int BONUS_LINHA = 10;
 
     /**
@@ -41,5 +42,15 @@ public final class Madeira extends Material {
     @Override
     public int bonusLinha() {
         return BONUS_LINHA;
+    }
+
+    /**
+     * Madeira aguenta pouco: cinco blocos de alvenaria já a esmagam.
+     *
+     * @return a carga máxima (RN21)
+     */
+    @Override
+    public double cargaMaxima() {
+        return CARGA_MAXIMA;
     }
 }

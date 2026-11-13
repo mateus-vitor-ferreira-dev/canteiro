@@ -1,10 +1,17 @@
-<!-- O volume dos efeitos, de 0 a 100 %. Soltar a barra toca uma amostra. -->
+<!-- O volume, de 0 a 100 %, e a música de fundo. Soltar a barra toca uma amostra. -->
 <script lang="ts">
     import type { EventoDto } from "@/api/protocolo";
     import { Som } from "@/estado/som.svelte";
 
-    /** Volume no rascunho, de 0 a 100. */
-    let { volume = $bindable() }: { volume: number } = $props();
+    let {
+        volume = $bindable(),
+        musica = $bindable(),
+    }: {
+        /** Volume no rascunho, de 0 a 100. */
+        volume: number;
+        /** Se a música de fundo toca, no rascunho. */
+        musica: boolean;
+    } = $props();
 
     const PORCENTO = 100;
     const AMOSTRA: EventoDto = { tipo: "EVENTO", evento: "PECA_FIXADA", dados: {} };
@@ -15,7 +22,7 @@
 
 <div class="grupo">
     <h3>Som</h3>
-    <label for="volume">Volume dos efeitos</label>
+    <label for="volume">Volume dos efeitos e da música</label>
     <div class="volume">
         <input
             id="volume"
@@ -30,7 +37,14 @@
         <output for="volume">{volume} %</output>
     </div>
     <p id="dica-volume" class="dica">
-        Solte a barra para ouvir. O botão Som, na partida, liga e desliga.
+        Solte a barra para ouvir. O botão Som, na partida, liga e desliga tudo.
+    </p>
+    <label class="opcao">
+        <input type="checkbox" bind:checked={musica} aria-describedby="dica-musica" />
+        Música de fundo
+    </label>
+    <p id="dica-musica" class="dica">
+        Fica mais intensa quanto mais perto de perder. Desligada, os efeitos continuam.
     </p>
 </div>
 
@@ -51,6 +65,18 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+    }
+    .opcao {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 44px;
+    }
+    .opcao input {
+        flex: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        min-height: auto;
     }
     input {
         flex: 1;

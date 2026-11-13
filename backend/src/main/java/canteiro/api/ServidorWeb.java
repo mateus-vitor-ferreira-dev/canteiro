@@ -1,14 +1,16 @@
 package canteiro.api;
 
 import canteiro.api.dto.ErroDto;
+import canteiro.api.rotas.RotasConfiguracoes;
 import canteiro.api.rotas.RotasDificuldades;
+import canteiro.api.rotas.RotasMateriais;
 import canteiro.api.rotas.RotasPartidas;
 import canteiro.api.rotas.RotasRanking;
+import canteiro.api.rotas.RotasRepeticoes;
 import canteiro.api.ws.CanalPartida;
 import canteiro.controle.GerenciadorPartidas;
-import canteiro.persistencia.ArquivoConfiguracoes;
+import canteiro.modelo.materiais.CatalogoMateriais;
 import canteiro.persistencia.ArquivosDoJogo;
-import canteiro.persistencia.RankingArquivo;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.RoutesConfig;
@@ -27,7 +29,8 @@ import java.util.Objects;
  * de rede, para que outro computador da rede não alcance o jogo (RNF13). Só a
  * hospedagem pública escolhe outro endereço, pela configuração. Toda exceção
  * que escapar de uma rota vira uma resposta {@link ErroDto}, sem derrubar o
- * servidor (RNF14).</p>
+ * servidor (RNF14). Pedidos de outra origem, como de uma página de outro
+ * site aberta no mesmo navegador, são recusados ({@link FiltroOrigem}).</p>
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -46,21 +49,53 @@ public final class ServidorWeb {
     private static final Logger LOG = LoggerFactory.getLogger(ServidorWeb.class);
 
     private final GerenciadorPartidas partidas;
-    private final ArquivoConfiguracoes configuracoes;
-    private final RankingArquivo ranking;
+    private final ArquivosDoJogo arquivos;
+    private final boolean compartilhado;
+    private final CatalogoMateriais catalogo;
     private final boolean frontendEmbutido;
     private final Javalin javalin;
 
     /**
-     * Configura o servidor e registra as rotas, sem começar a escutar.
+     * Configura o servidor do jogo local, de um jogador só, e registra as
+     * rotas, sem começar a escutar.
      *
      * @param partidas onde as partidas ficam guardadas
      * @param arquivos  os arquivos do jogador que as rotas leem e gravam
      */
     public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos) {
+        this(partidas, arquivos, false);
+    }
+
+    /**
+     * Configura o servidor e registra as rotas, sem começar a escutar.
+     *
+     * <p>Num servidor compartilhado, como a versão online, as configurações
+     * de um jogador não podem valer para todos: a rota de configurações não
+     * é registrada, responde 404, e cada navegador guarda as suas (RF27).</p>
+     *
+     * @param partidas      onde as partidas ficam guardadas
+     * @param arquivos      os arquivos do jogador que as rotas leem e gravam
+     * @param compartilhado se vários jogadores usam o mesmo servidor
+     */
+    public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos, boolean compartilhado) {
+        this(partidas, arquivos, compartilhado, CatalogoMateriais.padrao());
+    }
+
+    /**
+     * Configura o servidor com o catálogo de materiais em uso pelas partidas
+     * e registra as rotas, sem começar a escutar.
+     *
+     * @param partidas      onde as partidas ficam guardadas
+     * @param arquivos      os arquivos do jogador que as rotas leem e gravam
+     * @param compartilhado se vários jogadores usam o mesmo servidor
+     * @param catalogo      os materiais mostrados em {@code GET /api/materiais}
+     */
+    public ServidorWeb(GerenciadorPartidas partidas, ArquivosDoJogo arquivos, boolean compartilhado,
+                       CatalogoMateriais catalogo) {
+        this.catalogo = Objects.requireNonNull(catalogo, "catalogo");
         this.partidas = Objects.requireNonNull(partidas, "partidas");
-        this.configuracoes = Objects.requireNonNull(arquivos, "arquivos").configuracoes();
-        this.ranking = arquivos.ranking();
+        this.arquivos = Objects.requireNonNull(arquivos, "arquivos");
+        this.compartilhado = compartilhado;
         this.frontendEmbutido = ServidorWeb.class.getResource(PASTA_FRONTEND) != null;
         this.javalin = Javalin.create(this::configurar);
     }
@@ -119,12 +154,16 @@ public final class ServidorWeb {
     }
 
     private void registrarRotas(RoutesConfig rotas) {
+        FiltroOrigem.registrar(rotas);
         RotasDificuldades.registrar(rotas);
+        new RotasMateriais(catalogo).registrar(rotas);
         new RotasPartidas(partidas).registrar(rotas);
         new CanalPartida(partidas).registrar(rotas);
-        new RotasRanking(partidas, ranking).registrar(rotas);
-        // #71: registre aqui a rota de configurações, com o arquivo já pronto:
-        // new RotasConfiguracoes(configuracoes).registrar(rotas);
+        new RotasRanking(partidas, arquivos.ranking()).registrar(rotas);
+        new RotasRepeticoes(arquivos.repeticoes(), partidas).registrar(rotas);
+        if (!compartilhado) {
+            new RotasConfiguracoes(arquivos.configuracoes()).registrar(rotas);
+        }
 
         rotas.exception(Exception.class, (erro, ctx) -> {
             LOG.error("Erro inesperado em {} {}", ctx.method(), ctx.path(), erro);

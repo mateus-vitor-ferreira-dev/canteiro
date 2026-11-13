@@ -8,22 +8,24 @@ const SILENCIO = 0.0001;
 const FOLGA = 0.05;
 
 /**
- * Toca as notas no contexto de áudio, a partir de agora. Cada nota ganha um
+ * Toca as notas no contexto de áudio, a partir de agora ou de um instante dado. Cada nota ganha um
  * envelope (sobe rápido, some aos poucos); o ruído passa por um filtro cujo
  * corte desliza, para soar como entulho em vez de chiado de rádio.
  *
  * @param contexto contexto de áudio do navegador
  * @param destino para onde vai o som (o controle de volume)
  * @param notas o que tocar
+ * @param base instante do relógio do áudio a partir do qual as notas contam; o padrão é agora.
+ *   A música usa para emendar um compasso no outro sem buraco.
  */
 export function tocarNotas(
     contexto: BaseAudioContext,
     destino: AudioNode,
     notas: readonly Nota[],
+    base = contexto.currentTime,
 ): void {
-    const agora = contexto.currentTime;
     for (const nota of notas) {
-        const inicio = agora + nota.inicio;
+        const inicio = base + nota.inicio;
         const fim = inicio + nota.duracao;
         const envelope = contexto.createGain();
         envelope.gain.setValueAtTime(SILENCIO, inicio);

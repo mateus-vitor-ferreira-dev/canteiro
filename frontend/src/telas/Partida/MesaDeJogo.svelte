@@ -5,6 +5,9 @@
     import type { PartidaAoVivo } from "@/estado/partida.svelte";
     import type { Som } from "@/estado/som.svelte";
     import { LIMIAR_RANGIDO } from "@/componentes/efeitos";
+    import { Musica } from "@/estado/musica.svelte";
+    import { configuracoes } from "@/estado/configuracoes.svelte";
+    import { intensidadeDoPerigo } from "@/sons/musica";
     import CamadaPartida from "./CamadaPartida.svelte";
     import Destaques from "./Destaques.svelte";
     import ControlesToque from "./ControlesToque.svelte";
@@ -20,11 +23,12 @@
         repeticao,
         aoTocar,
         aoSair,
+        aoMenu,
         aoTerminar,
     }: {
         /** A partida ao vivo. */
         partida: PartidaAoVivo;
-        /** Os sons, para o botão do resumo. */
+        /** Os sons: o botão do resumo, o rangido e a música seguem o mesmo liga e desliga. */
         som: Som;
         /** Lado de cada quadrado do tabuleiro, em pixels. */
         celula: number;
@@ -36,6 +40,8 @@
         aoTocar: (comando: Comando) => void;
         /** Chamado quando o jogador sai da partida. */
         aoSair: () => void;
+        /** Chamado quando o jogador sai da partida pausada direto para o menu. */
+        aoMenu?: () => void;
         /** Chamado com o placar final, quando o jogador abre o resultado. */
         aoTerminar: (placar: PlacarDto) => void;
     } = $props();
@@ -58,6 +64,25 @@
         const relogio = setInterval(() => som.ranger(), INTERVALO_RANGIDO_MS);
         return () => clearInterval(relogio);
     });
+
+    // A música acompanha o perigo: mais cheia e mais rápida quanto mais perto de perder.
+    // Para na pausa e no fim de jogo, e fica calada com o som ou a música desligados.
+    const musica = new Musica(() => som.ligado && configuracoes.musica);
+    const emJogo = $derived(
+        partida.estado !== null &&
+            partida.estado.estado !== "PAUSA" &&
+            partida.estado.estado !== "FIM_DE_JOGO",
+    );
+    $effect(() => {
+        musica.intensidade = partida.estado ? intensidadeDoPerigo(partida.estado) : 0;
+    });
+    $effect(() => {
+        if (!emJogo) {
+            return;
+        }
+        musica.tocar();
+        return () => musica.parar();
+    });
 </script>
 
 <div class="mesa-de-jogo">
@@ -76,7 +101,7 @@
                 aoComando={aoTocar}
             />
             <Destaques evento={partida.ultimoEvento} nivel={partida.estado?.placar.nivel} />
-            <CamadaPartida {partida} {repeticao} {aoSair} {aoTerminar} />
+            <CamadaPartida {partida} {repeticao} {aoSair} {aoMenu} {aoTerminar} />
         </div>
         {#if partida.estado}
             <div class="so-celular">

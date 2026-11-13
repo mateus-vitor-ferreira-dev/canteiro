@@ -51,6 +51,16 @@ public final class Aco extends Material {
     }
 
     /**
+     * O aço nunca é esmagado.
+     *
+     * @return a carga máxima (RN21)
+     */
+    @Override
+    public double cargaMaxima() {
+        return Double.POSITIVE_INFINITY;
+    }
+
+    /**
      * O aço é pesado: ao ser assentado, consolida os blocos logo abaixo, que
      * passam a resistir ao desprendimento no colapso.
      *

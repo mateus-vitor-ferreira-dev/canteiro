@@ -3,6 +3,7 @@ package canteiro.api;
 import canteiro.api.dto.EstadoDto;
 import canteiro.api.dto.EventoDto;
 import canteiro.modelo.Celula;
+import canteiro.modelo.Comando;
 import canteiro.modelo.Dificuldade;
 import canteiro.modelo.EventoPartida;
 import canteiro.modelo.MotorJogo;
@@ -56,10 +57,23 @@ class ProtocoloJsonTest {
     }
 
     @Test
+    void estadoDoFimDeJogoViraJsonSemPrevia() throws Exception {
+        MotorJogo motor = motorComUmaPeca();
+        for (int i = 0; i < 400 && !motor.estado().encerrada(); i++) {
+            motor.aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+        assertEquals("FIM_DE_JOGO", motor.estado().name());
+
+        JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motor)));
+        assertEquals("FIM_DE_JOGO", estado.get("estado").asText(), "a tela precisa receber o fim para mostrá-lo");
+        assertTrue(estado.at("/estabilidade/previa").isNull());
+    }
+
+    @Test
     void estadoTemOsCamposDoProtocolo() throws Exception {
         JsonNode estado = json.readTree(json.writeValueAsString(EstadoDto.de(motorComUmaPeca())));
 
-        assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "pecaAtual", "pecaFantasma", "proximas",
+        assertEquals(List.of("tipo", "ciclo", "estado", "tabuleiro", "rachaduras", "pecaAtual", "pecaFantasma", "proximas",
                 "reservada", "podeReservar", "placar", "estabilidade", "meta"), campos(estado));
         assertEquals(List.of("descricao", "progresso", "alvo", "cumprida"), campos(estado.get("meta")));
         assertEquals(List.of("forma", "material", "blocos"), campos(estado.get("pecaAtual")));
@@ -67,7 +81,7 @@ class ProtocoloJsonTest {
                 campos(estado.get("placar")));
         assertEquals(List.of("indice", "desvio", "limite", "centroDeMassa", "eixo", "alerta", "previa"),
                 campos(estado.get("estabilidade")));
-        assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba"),
+        assertEquals(List.of("indice", "desvio", "centroDeMassa", "eixo", "derruba", "quebras", "esmagados"),
                 campos(estado.at("/estabilidade/previa")));
         assertEquals(22, estado.get("tabuleiro").size());
         assertEquals(10, estado.get("tabuleiro").get(0).size());

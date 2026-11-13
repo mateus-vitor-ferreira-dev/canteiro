@@ -3,6 +3,7 @@ package canteiro.api.rotas;
 import canteiro.api.dto.ErroDto;
 import canteiro.api.dto.NovaPartidaDto;
 import canteiro.api.dto.PartidaCriadaDto;
+import canteiro.api.dto.RelatorioDto;
 import canteiro.controle.GerenciadorPartidas;
 import canteiro.controle.LimiteDePartidasException;
 import canteiro.modelo.Dificuldade;
@@ -12,13 +13,14 @@ import io.javalin.http.HttpStatus;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
+import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 
 import java.util.Objects;
 
 /**
- * Rotas de criação de partida (RF02).
+ * Rotas de criação de partida (RF02) e do relatório de fim de partida (RF25).
  *
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
@@ -26,6 +28,7 @@ import java.util.Objects;
 public final class RotasPartidas {
 
     private static final String CAMINHO = "/api/partidas";
+    private static final String CAMINHO_RELATORIO = CAMINHO + "/{id}/relatorio";
 
     private final GerenciadorPartidas partidas;
 
@@ -45,6 +48,35 @@ public final class RotasPartidas {
      */
     public void registrar(RoutesConfig rotas) {
         rotas.post(CAMINHO, this::criar);
+        rotas.get(CAMINHO_RELATORIO, this::relatorio);
+    }
+
+    /**
+     * Devolve o relatório da partida: a estabilidade a cada peça, os colapsos
+     * e as peças por material. Funciona também com a partida em andamento.
+     *
+     * @param ctx contexto da requisição
+     */
+    @OpenApi(
+            path = CAMINHO_RELATORIO,
+            methods = HttpMethod.GET,
+            operationId = "relatorioDaPartida",
+            tags = "Partida",
+            summary = "Relatório da partida",
+            description = "O índice de estabilidade logo depois de cada peça fixada, o número das peças que "
+                    + "derrubaram a estrutura (a partir de 1) e quantas peças de cada material entraram.",
+            pathParams = @OpenApiParam(name = "id", description = "Id da partida", required = true),
+            responses = {
+                @OpenApiResponse(status = "200", description = "O relatório",
+                        content = @OpenApiContent(from = RelatorioDto.class)),
+                @OpenApiResponse(status = "404", description = "A partida não existe ou não está mais no servidor",
+                        content = @OpenApiContent(from = ErroDto.class))
+            })
+    void relatorio(Context ctx) {
+        partidas.buscar(ctx.pathParam("id")).ifPresentOrElse(
+                sessao -> ctx.json(RelatorioDto.de(sessao.relatorio())),
+                () -> ctx.status(HttpStatus.NOT_FOUND).json(new ErroDto("PARTIDA_NAO_ENCONTRADA",
+                        "Essa partida não está mais no servidor. Ela expira 10 minutos depois de fechada.")));
     }
 
     /**
@@ -58,15 +90,14 @@ public final class RotasPartidas {
             operationId = "criarPartida",
             tags = "Partida",
             summary = "Cria uma partida",
-            description = "Cria a partida na dificuldade escolhida e devolve o id. A partida começa quando o "
-                    + "navegador conecta em /ws/partidas/{id}.",
+            description = "Cria a partida na dificuldade escolhida, de treino ou não, e devolve o id. A partida "
+                    + "começa quando o navegador conecta em /ws/partidas/{id}. Na de treino, o comando DESFAZER "
+                    + "volta a última peça fixada para o topo, e ela não entra no ranking.",
             requestBody = @OpenApiRequestBody(content = @OpenApiContent(from = NovaPartidaDto.class), required = true),
             responses = {
                 @OpenApiResponse(status = "201", description = "Partida criada",
                         content = @OpenApiContent(from = PartidaCriadaDto.class)),
                 @OpenApiResponse(status = "400", description = "Dificuldade ausente ou desconhecida",
-                        content = @OpenApiContent(from = ErroDto.class)),
-                @OpenApiResponse(status = "501", description = "Modo treino pedido, mas ainda não disponível",
                         content = @OpenApiContent(from = ErroDto.class)),
                 @OpenApiResponse(status = "503", description = "O servidor já tem o máximo de partidas abertas",
                         content = @OpenApiContent(from = ErroDto.class))
@@ -79,14 +110,8 @@ public final class RotasPartidas {
                     "Escolha uma dificuldade: FACIL, NORMAL ou DIFICIL."));
             return;
         }
-        if (corpo.modoTreino()) {
-            // o motor ainda não desfaz jogadas (#37): melhor recusar do que criar um treino que não é treino
-            ctx.status(HttpStatus.NOT_IMPLEMENTED).json(new ErroDto("MODO_TREINO_INDISPONIVEL",
-                    "O modo treino ainda não está disponível nesta versão do jogo."));
-            return;
-        }
         try {
-            ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade).id()));
+            ctx.status(HttpStatus.CREATED).json(new PartidaCriadaDto(partidas.criar(dificuldade, corpo.modoTreino()).id()));
         } catch (LimiteDePartidasException cheio) {
             ctx.status(HttpStatus.SERVICE_UNAVAILABLE).json(new ErroDto("SERVIDOR_CHEIO",
                     "O servidor está com muitas partidas abertas. Tente de novo em alguns minutos."));

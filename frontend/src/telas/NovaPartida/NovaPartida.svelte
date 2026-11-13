@@ -1,9 +1,10 @@
 <!-- Escolha da dificuldade e do modo treino antes de começar a partida (RF02, RF26). -->
 <script lang="ts">
-    import { criarPartida, listarDificuldades } from "@/api/cliente";
+    import { criarPartida, listarDificuldades, listarMateriais } from "@/api/cliente";
     import type { CodigoDificuldade } from "@/api/protocolo";
     import { formatarColunas, formatarSegundos } from "@/util/formatacao";
 
+    /** Nomes usados até o catálogo chegar, ou se `GET /api/materiais` falhar. */
     const NOMES_MATERIAIS: Record<string, string> = {
         MADEIRA: "madeira",
         ALVENARIA: "alvenaria",
@@ -15,6 +16,19 @@
     let { aoCriar }: { aoCriar: (id: string, treino: boolean) => void } = $props();
 
     const dificuldades = listarDificuldades();
+    let nomesMateriais = $state<Record<string, string>>(NOMES_MATERIAIS);
+    listarMateriais()
+        .then((catalogo) => {
+            nomesMateriais = Object.fromEntries(
+                catalogo.map((material) => [
+                    material.codigo,
+                    material.nome.toLocaleLowerCase("pt-BR"),
+                ]),
+            );
+        })
+        .catch(() => {
+            // Sem o catálogo, os nomes fixos bastam.
+        });
     let criando = $state(false);
     let treino = $state(false);
     let erroAoCriar = $state<string | null>(null);
@@ -33,7 +47,7 @@
     }
 
     function nomesDosMateriais(codigos: string[]): string {
-        return codigos.map((codigo) => NOMES_MATERIAIS[codigo] ?? codigo).join(", ");
+        return codigos.map((codigo) => nomesMateriais[codigo] ?? codigo).join(", ");
     }
 </script>
 

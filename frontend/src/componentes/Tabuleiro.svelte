@@ -1,16 +1,11 @@
-<!-- O tabuleiro em Canvas, redesenhado a cada quadro com o último estado recebido (RNF01), a animação do colapso (RF17) e os gestos de toque. -->
+<!-- O tabuleiro em Canvas, redesenhado a cada quadro com o último estado recebido (RNF01), as animações do colapso (RF17), do balanço (RN20) e do esmagamento (RN21) e os gestos de toque. -->
 <script lang="ts">
-    import type { Comando, EstadoDto, EventoDto, QuedaDto } from "@/api/protocolo";
+    import type { Comando, EstadoDto, EventoDto } from "@/api/protocolo";
     import { ReconhecedorGestos } from "@/estado/gestos";
-    import {
-        COLUNAS,
-        DURACAO_COLAPSO_MS,
-        LINHAS_VISIVEIS,
-        desenharColapso,
-        desenharTabuleiro,
-    } from "./desenho";
+    import { COLUNAS, LINHAS_VISIVEIS, desenharTabuleiro } from "./desenho";
     import { densidadeDaTela, prefereMenosMovimento } from "@/util/tela";
-    import { DURACAO_CLARAO_LINHAS_MS, balancoDoCentro, desenharClaraoLinhas } from "./efeitos";
+    import { balancoDoCentro } from "./efeitos";
+    import { Animacoes } from "./animacoes";
 
     let {
         estado,
@@ -20,7 +15,7 @@
     }: {
         /** Último estado da partida, ou `null` antes da primeira mensagem. */
         estado: EstadoDto | null;
-        /** Último evento recebido: um `COLAPSO` dispara a animação. */
+        /** Último evento recebido: colapso, quebra, esmagamento e linhas disparam a animação. */
         evento?: EventoDto | null;
         /** Lado de cada quadrado, em pixels. */
         celula?: number;
@@ -68,35 +63,21 @@
     const densidade = densidadeDaTela();
     const largura = $derived(COLUNAS * celula);
     const altura = $derived(LINHAS_VISIVEIS * celula);
-    let colapso: { quedas: QuedaDto[]; inicio: number } | null = null;
-    let clarao: { linhas: number[]; inicio: number } | null = null;
+    const animacoes = new Animacoes();
     let tremendo = $state(false);
     const menosMovimento = prefereMenosMovimento();
 
-    // Linhas que somem acendem; o colapso sacode o tabuleiro. Com movimento reduzido, nada disso.
+    // Cada evento é um objeto novo e começa a sua animação; o colapso e o esmagamento
+    // ainda sacodem o tabuleiro. Com movimento reduzido, os blocos já aparecem no lugar.
     $effect(() => {
         if (menosMovimento || !evento) {
             return;
         }
-        if (evento.evento === "LINHAS_ELIMINADAS" && evento.dados.linhas?.length) {
-            clarao = { linhas: evento.dados.linhas, inicio: performance.now() };
-        }
-        if (evento.evento === "COLAPSO") {
+        animacoes.receber(evento, performance.now());
+        if (evento.evento === "COLAPSO" || evento.evento === "ESMAGAMENTO") {
             tremendo = true;
             const fim = setTimeout(() => (tremendo = false), 450);
             return () => clearTimeout(fim);
-        }
-    });
-
-    // Cada evento é um objeto novo: um COLAPSO recém-chegado começa a animação.
-    // Com movimento reduzido, os blocos já aparecem no lugar, sem queda nem clarão.
-    $effect(() => {
-        if (
-            evento?.evento === "COLAPSO" &&
-            evento.dados.quedas?.length &&
-            !prefereMenosMovimento()
-        ) {
-            colapso = { quedas: evento.dados.quedas, inicio: performance.now() };
         }
     });
 
@@ -116,22 +97,7 @@
                     ? balancoDoCentro(estado.estabilidade.indice, agora, celula)
                     : 0;
             desenharTabuleiro(ctx, estado, celula, balanco);
-            if (clarao) {
-                const progresso = (agora - clarao.inicio) / DURACAO_CLARAO_LINHAS_MS;
-                if (progresso < 1) {
-                    desenharClaraoLinhas(ctx, clarao.linhas, progresso, celula);
-                } else {
-                    clarao = null;
-                }
-            }
-            if (colapso && estado) {
-                const progresso = (agora - colapso.inicio) / DURACAO_COLAPSO_MS;
-                if (progresso < 1) {
-                    desenharColapso(ctx, estado, colapso.quedas, progresso, celula);
-                } else {
-                    colapso = null;
-                }
-            }
+            animacoes.desenhar(ctx, estado, agora, celula);
             quadro = requestAnimationFrame(desenhar);
         };
         quadro = requestAnimationFrame(desenhar);

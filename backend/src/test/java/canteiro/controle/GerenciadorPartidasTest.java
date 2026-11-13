@@ -27,7 +27,7 @@ class GerenciadorPartidasTest {
 
     private final CatalogoMateriais catalogo = CatalogoMateriais.padrao();
     private final GerenciadorPartidas partidas = new GerenciadorPartidas(
-            d -> new GeradorPecas(1, catalogo, d.nivelInicial()));
+            (d, semente) -> new GeradorPecas(semente, catalogo, d.nivelInicial()));
 
     @Test
     void criaPartidasComIdsDiferentes() {
@@ -66,7 +66,7 @@ class GerenciadorPartidasTest {
     @Test
     void recusaPartidaAlemDoLimite() {
         GerenciadorPartidas comTeto = new GerenciadorPartidas(
-                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 2, System::nanoTime);
+                (d, semente) -> new GeradorPecas(semente, catalogo, d.nivelInicial()), 2, System::nanoTime);
         comTeto.criar(Dificuldade.FACIL);
         comTeto.criar(Dificuldade.FACIL);
 
@@ -78,7 +78,7 @@ class GerenciadorPartidasTest {
     void descartaSoAsPartidasSemConexaoHaMaisTempoQueATolerancia() {
         AtomicLong agora = new AtomicLong();
         GerenciadorPartidas comRelogio = new GerenciadorPartidas(
-                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), GerenciadorPartidas.SEM_LIMITE, agora::get);
+                (d, semente) -> new GeradorPecas(semente, catalogo, d.nivelInicial()), GerenciadorPartidas.SEM_LIMITE, agora::get);
         SessaoPartida esquecida = comRelogio.criar(Dificuldade.FACIL);
         SessaoPartida conectada = comRelogio.criar(Dificuldade.FACIL);
         SessaoPartida fechadaAgora = comRelogio.criar(Dificuldade.FACIL);

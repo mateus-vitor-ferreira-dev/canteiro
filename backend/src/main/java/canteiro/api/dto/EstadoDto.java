@@ -4,6 +4,7 @@ import canteiro.modelo.Bloco;
 import canteiro.modelo.Celula;
 import canteiro.modelo.MotorJogo;
 import canteiro.modelo.Placar;
+import canteiro.modelo.Previa;
 import canteiro.modelo.constantes.Dimensoes;
 import canteiro.modelo.constantes.Tempo;
 import canteiro.modelo.fisica.Estabilidade;
@@ -23,6 +24,7 @@ import java.util.List;
  * @param ciclo        número do ciclo
  * @param estado       nome do {@code EstadoPartida}
  * @param tabuleiro    grade de 22 × 10 com o código do material de cada bloco, ou {@code null} onde está vazio
+ * @param rachaduras   os blocos rachando sob o peso de cima, como trincas [linha, coluna, nível de 1 a 3] (RN21)
  * @param pecaAtual    peça caindo, ou {@code null}
  * @param pecaFantasma onde a peça atual vai pousar, como pares [linha, coluna]
  * @param proximas     as três próximas peças, com as células da forma relativas ao quadrado dela
@@ -34,7 +36,8 @@ import java.util.List;
  * @author Mateus Vitor Ferreira
  * @version 0.1.0
  */
-public record EstadoDto(String tipo, long ciclo, String estado, List<List<String>> tabuleiro, PecaDto pecaAtual,
+public record EstadoDto(String tipo, long ciclo, String estado, List<List<String>> tabuleiro,
+                        List<List<Integer>> rachaduras, PecaDto pecaAtual,
                         List<List<Integer>> pecaFantasma, List<PecaDto> proximas, PecaDto reservada,
                         boolean podeReservar, PlacarDto placar, EstabilidadeDto estabilidade, MetaDto meta) {
 
@@ -53,7 +56,7 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
     public static EstadoDto de(MotorJogo motor) {
         Peca atual = motor.pecaAtual();
         Peca reservada = motor.pecaReservada();
-        return new EstadoDto(TIPO, motor.ciclo(), motor.estado().name(), grade(motor),
+        return new EstadoDto(TIPO, motor.ciclo(), motor.estado().name(), grade(motor), rachaduras(motor),
                 atual == null ? null : PecaDto.de(atual, motor.celulasPecaAtual()),
                 pares(motor.celulasFantasma()),
                 motor.proximas(PROXIMAS).stream().map(p -> PecaDto.de(p, p.celulas())).toList(),
@@ -74,6 +77,11 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
             linhas.add(colunas);
         }
         return linhas;
+    }
+
+    private static List<List<Integer>> rachaduras(MotorJogo motor) {
+        return motor.rachaduras().stream()
+                .map(r -> List.of(r.celula().linha(), r.celula().coluna(), r.nivel())).toList();
     }
 
     static List<List<Integer>> pares(List<Celula> celulas) {
@@ -128,7 +136,7 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
     public record EstabilidadeDto(double indice, double desvio, double limite, double centroDeMassa, double eixo,
                                   boolean alerta, PreviaDto previa) {
 
-        static EstabilidadeDto de(Estabilidade e, Estabilidade previa) {
+        static EstabilidadeDto de(Estabilidade e, Previa previa) {
             return new EstabilidadeDto(e.indice(), e.desvio(), e.limite(), e.centroDeMassa(), e.eixo(), e.alerta(),
                     previa == null ? null : PreviaDto.de(previa));
         }
@@ -142,11 +150,16 @@ public record EstadoDto(String tipo, long ciclo, String estado, List<List<String
      * @param centroDeMassa em colunas a partir da borda esquerda
      * @param eixo          meio da base de apoio, em colunas
      * @param derruba       se a jogada passaria do limite e causaria colapso
+     * @param quebras       os blocos da peça que se soltariam do apoio, como pares [linha, coluna] (RN20)
+     * @param esmagados     os blocos que seriam esmagados, como pares [linha, coluna] (RN21)
      */
-    public record PreviaDto(double indice, double desvio, double centroDeMassa, double eixo, boolean derruba) {
+    public record PreviaDto(double indice, double desvio, double centroDeMassa, double eixo, boolean derruba,
+                            List<List<Integer>> quebras, List<List<Integer>> esmagados) {
 
-        static PreviaDto de(Estabilidade e) {
-            return new PreviaDto(e.indice(), e.desvio(), e.centroDeMassa(), e.eixo(), e.passouDoLimite());
+        static PreviaDto de(Previa previa) {
+            Estabilidade e = previa.estabilidade();
+            return new PreviaDto(e.indice(), e.desvio(), e.centroDeMassa(), e.eixo(), e.passouDoLimite(),
+                    pares(previa.quebras()), pares(previa.esmagados()));
         }
     }
 

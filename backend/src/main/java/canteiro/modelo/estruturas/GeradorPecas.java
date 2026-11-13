@@ -87,7 +87,7 @@ public final class GeradorPecas implements FontePecas {
     }
 
     private List<Material> materiaisDoNivel(int nivel) {
-        return Progressao.materiaisLiberados(nivel).stream().map(catalogo::buscar).toList();
+        return Progressao.sorteioDeMateriais(nivel).stream().map(catalogo::buscar).toList();
     }
 
     private void completar(int quantidade) {

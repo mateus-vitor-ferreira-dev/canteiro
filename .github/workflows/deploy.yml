@@ -1,0 +1,59 @@
+# Publica no Coolify, no VPS da Hetzner, quando o CI da develop termina verde.
+#
+# Fica fora do ci.yml de propósito: lá o `cancel-in-progress` cancela a execução
+# anterior a cada push, e um deploy cortado no meio deixaria o Coolify sem saber
+# se subiu. Aqui a fila é própria e nada é cancelado.
+#
+# O auto-deploy do Coolify fica desligado: ele subiria a develop sem esperar os
+# testes.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [develop]
+
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Coolify
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      COOLIFY_URL: https://coolify.digitalcodexa.com
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+      COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
+      URL_PRODUCAO: ${{ vars.URL_PRODUCAO }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy to Coolify
+        timeout-minutes: 15
+        run: scripts/sobe-para-coolify.sh
+
+      # O Coolify dá `finished` quando o contêiner passa no healthcheck interno.
+      # Este passo confere pelo domínio, que é o caminho de quem joga, e cobre a
+      # janela até o proxy apontar para o contêiner novo.
+      - name: Confere que o jogo responde em produção
+        run: |
+          for tentativa in 1 2 3 4 5 6; do
+            if curl -fsS --max-time 15 -o /dev/null "$URL_PRODUCAO/api/dificuldades"; then
+              echo "Tentativa $tentativa: o jogo respondeu."
+              exit 0
+            fi
+            echo "Tentativa $tentativa: ainda não respondeu."
+            sleep 10
+          done
+          echo "### 🔴 O jogo não respondeu depois do deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$URL_PRODUCAO/api/dificuldades\` não devolveu 200 em seis tentativas. Veja os logs da aplicação no Coolify." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

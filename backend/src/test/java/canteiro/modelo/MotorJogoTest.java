@@ -204,6 +204,7 @@ class MotorJogoTest {
         }
         assertEquals(EstadoPartida.FIM_DE_JOGO, motor.estado());
         assertTrue(registro.eventos.contains(EventoPartida.de(EventoPartida.Tipo.FIM_DE_JOGO)));
+        assertNull(motor.previa(), "a peça nasceu em cima da pilha: não há jogada para prever");
 
         long ciclo = motor.ciclo();
         motor.avancarCiclo();

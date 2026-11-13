@@ -9,6 +9,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -77,6 +79,23 @@ class ServidorWebTest {
         assertEquals(3, normal.get("materiaisLiberados").size());
     }
 
+    @ParameterizedTest(name = "{0}: queda a cada {1} ms, limite {2}, {3} materiais")
+    @CsvSource({
+        "0, FACIL, 800, 3.0, 2",
+        "1, NORMAL, 650, 2.5, 3",
+        "2, DIFICIL, 500, 1.6, 4"
+    })
+    void cadaDificuldadeTemVelocidadeELimiteProprios(int posicao, String codigo, long intervaloQuedaMs,
+                                                     double limiteDesvio, int materiais)
+            throws IOException, InterruptedException {
+        JsonNode dificuldade = json.readTree(get("/api/dificuldades").body()).get(posicao);
+
+        assertEquals(codigo, dificuldade.get("codigo").asText());
+        assertEquals(intervaloQuedaMs, dificuldade.get("intervaloQuedaMs").asLong());
+        assertEquals(limiteDesvio, dificuldade.get("limiteDesvio").asDouble());
+        assertEquals(materiais, dificuldade.get("materiaisLiberados").size());
+    }
+
     @Test
     void publicaAEspecificacaoOpenApiComAsRotas() throws IOException, InterruptedException {
         HttpResponse<String> resposta = get(DocumentacaoApi.CAMINHO_ESPECIFICACAO);
@@ -113,7 +132,7 @@ class ServidorWebTest {
     void recusaPartidaNovaQuandoOServidorEstaCheio() throws IOException, InterruptedException {
         CatalogoMateriais catalogo = CatalogoMateriais.padrao();
         ServidorWeb cheio = new ServidorWeb(new GerenciadorPartidas(
-                d -> new GeradorPecas(1, catalogo, d.nivelInicial()), 1, System::nanoTime),
+                (d, semente) -> new GeradorPecas(semente, catalogo, d.nivelInicial()), 1, System::nanoTime),
                 ServidoresDeTeste.arquivos(pasta));
         int portaCheio = cheio.iniciar(PORTA_LIVRE);
         try {

@@ -44,7 +44,7 @@ describe("desenharTabuleiro", () => {
 
         desenharTabuleiro(ctx, estado, 10);
 
-        const blocos = pintados.slice(1);
+        const blocos = pintados.slice(1).filter((p) => p.startsWith("#"));
         expect(blocos).toContain("#4e5a6b@1,191");
         expect(blocos.filter((p) => p.startsWith("#e6c48f"))).toHaveLength(4);
         expect(blocos).toHaveLength(5);
@@ -54,7 +54,15 @@ describe("desenharTabuleiro", () => {
         const tabuleiro = estadoDeTeste().tabuleiro.map((linha, l) =>
             linha.map((_, c) => (l === 21 && c === 0 ? "ACO" : null)),
         );
-        const previa = { indice: 0, desvio: 3, centroDeMassa: 2, eixo: 5, derruba: true };
+        const previa = {
+            indice: 0,
+            desvio: 3,
+            centroDeMassa: 2,
+            eixo: 5,
+            derruba: true,
+            quebras: [],
+            esmagados: [],
+        };
         const base = estadoDeTeste({ tabuleiro });
         const estado = { ...base, estabilidade: { ...base.estabilidade, previa } };
         const arcos: number[] = [];
@@ -126,7 +134,7 @@ describe("desenharColapso", () => {
 
         expect(pintados[0]).toBe("#1b2432@50,190");
         expect(pintados[1]).toBe("#4e5a6b@51,91");
-        expect(pintados[2]).toMatch(/^rgba\(244, 112, 103, 0.45\)@0,0$/);
+        expect(pintados.at(-1)).toMatch(/^rgba\(244, 112, 103, 0.45\)@0,0$/);
     });
 });
 

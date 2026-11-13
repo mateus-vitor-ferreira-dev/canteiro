@@ -1,6 +1,8 @@
 package canteiro.api;
 
 import canteiro.controle.GerenciadorPartidas;
+import canteiro.modelo.Comando;
+import canteiro.modelo.MotorJogo;
 import canteiro.modelo.EstadoPartida;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -77,12 +80,45 @@ class CanalPartidaTest {
     }
 
     @Test
-    void modoTreinoERecusadoEnquantoOMotorNaoDesfaz() throws Exception {
-        HttpResponse<String> resposta = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
-        assertEquals(501, resposta.statusCode());
-        assertEquals("MODO_TREINO_INDISPONIVEL", json.readTree(resposta.body()).get("erro").asText());
+    void criaPartidaDeTreinoOuNao() throws Exception {
+        HttpResponse<String> treino = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": true}");
+        HttpResponse<String> normal = post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}");
 
-        assertEquals(201, post("{\"dificuldade\": \"NORMAL\", \"modoTreino\": false}").statusCode());
+        assertEquals(201, treino.statusCode());
+        assertEquals(201, normal.statusCode());
+        assertTrue(partidas.buscar(json.readTree(treino.body()).get("id").asText()).orElseThrow().modoTreino());
+        assertFalse(partidas.buscar(json.readTree(normal.body()).get("id").asText()).orElseThrow().modoTreino());
+    }
+
+    @Test
+    void relatorioDePartidaInexistenteE404() throws Exception {
+        HttpResponse<String> resposta = get("/api/partidas/naoexiste/relatorio");
+
+        assertEquals(404, resposta.statusCode());
+        assertEquals("PARTIDA_NAO_ENCONTRADA", json.readTree(resposta.body()).get("erro").asText());
+    }
+
+    @Test
+    void relatorioTrazUmIndicePorPecaEOsMateriais() throws Exception {
+        String id = criarPartida();
+        MotorJogo motor = partidas.buscar(id).orElseThrow().motor();
+        int pecas = 3;
+        for (int i = 0; i < pecas; i++) {
+            motor.avancarCiclo();
+            motor.aplicar(Comando.QUEDA_INSTANTANEA);
+        }
+
+        HttpResponse<String> resposta = get("/api/partidas/" + id + "/relatorio");
+
+        assertEquals(200, resposta.statusCode());
+        JsonNode relatorio = json.readTree(resposta.body());
+        assertEquals(pecas, relatorio.get("indices").size());
+        assertTrue(relatorio.get("colapsos").isArray());
+        int contadas = 0;
+        for (JsonNode quantidade : relatorio.get("materiais")) {
+            contadas += quantidade.asInt();
+        }
+        assertEquals(pecas, contadas);
     }
 
     @Test
@@ -147,6 +183,11 @@ class CanalPartidaTest {
         HttpRequest pedido = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + porta + "/api/partidas"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(corpo)).build();
+        return cliente.send(pedido, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> get(String caminho) throws IOException, InterruptedException {
+        HttpRequest pedido = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + porta + caminho)).GET().build();
         return cliente.send(pedido, HttpResponse.BodyHandlers.ofString());
     }
 
