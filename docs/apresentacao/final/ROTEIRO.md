@@ -68,7 +68,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 **6. Requisitos funcionais (40 s).** Os 31 estão prontos; estes 14 aparecem no código. Destaque o RF14 (recalcular o centro de massa a cada mudança) e o RF17 (o colapso), que são o coração do jogo.
 
-**7. Requisitos não funcionais (25 s).** São de qualidade, e não de função. Destaque o RNF02 (centro de massa em tempo constante) e o RNF08 (regras só no modelo). Dos 16, 2 ainda esperam medição em máquina real, o que você vai dizer na demonstração.
+**7. Requisitos não funcionais (25 s).** São de qualidade, e não de função. Destaque o RNF02 (centro de massa em tempo constante) e o RNF08 (regras só no modelo). O RNF01 (60 quadros por segundo com 2 núcleos e 4 GB) foi medido; os números estão no slide 29.
 
 **8. Bibliotecas e referências (30 s).** As regras são Java puro. O Javalin só serve HTTP e WebSocket; o Svelte só desenha. Cite as referências.
 
@@ -114,18 +114,18 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 **28. RF15 e RF16, painel (30 s).** É o lado do navegador, em Svelte. Ele não calcula nada: recebe a estabilidade e a prévia prontas e decide o aviso.
 
-**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. 60 ciclos por segundo e 13 ms da tecla à tela.
+**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. O RNF01 foi medido com o jogo e o navegador presos a 2 núcleos e 4 GB, durante 15 minutos de jogo: 60 quadros por segundo na tela, 60 ciclos no backend e 14 ms da tecla à tela. Diga que foi uma **emulação**, não uma máquina antiga de verdade; os detalhes estão em `docs/testes/desempenho/`.
 
 ## Parte 3: demonstração ao vivo (2 min 30 s)
 
 **30.** Deixe tudo pronto **antes** de começar: o JAR baixado e o navegador fechado. Se o JAR falhar, use a versão online (na rede da UFLA, o endereço alternativo do README).
 
-1. Dois cliques no JAR: o navegador abre sozinho. (15 s)
+1. Abra o JAR: o navegador abre sozinho. (15 s) No Windows, tente o duplo clique. **No Ubuntu, o duplo clique não abre o JAR** (o atalho do Java está quebrado no sistema): abra pelo terminal com `java -jar canteiro.jar`. Teste antes, no computador da apresentação.
 2. Nova partida no **Normal**: mostre o índice e o anel da prévia. (30 s)
 3. Empilhe tudo de um lado: o painel avisa, aparece o X vermelho e a obra desaba. (45 s)
 4. Se aparecer aço, mostre que ele firma os blocos de baixo. (15 s)
 5. Termine a partida, salve no ranking e abra o relatório. (30 s)
-6. Diga o que não está pronto, apontando a coluna da direita. (15 s)
+6. Diga o que não está pronto, apontando a coluna da direita: o duplo clique no Ubuntu, o duplo clique no Windows e no macOS em máquina real e o desempenho numa máquina antiga de verdade. (15 s)
 
 ## Conclusão (1 min)
 

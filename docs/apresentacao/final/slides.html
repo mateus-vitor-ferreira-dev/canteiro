@@ -175,8 +175,8 @@
 <section>
   <div class="bloco">Documentação · requisitos</div>
   <h1>Requisitos não funcionais: como o sistema deve ser</h1>
-  <p class="suave" style="font-size: 17px; margin: -14px 0 12px;"><strong style="color: var(--marinho);">6 de 16</strong> aparecem no código; 2 dos 16 ainda esperam medição em máquina real. A coluna <strong>Slide</strong> diz onde cada um aparece no código.</p>
-  <table class="mapa"><tr><th style="width: 80px;">Código</th><th>O que pede</th><th style="width: 64px;">Slide</th></tr><tr><td><span class="cod">RNF01</span></td><td>Backend atualiza o estado 60 vezes por segundo</td><td>24</td></tr><tr><td><span class="cod">RNF02</span></td><td>Recálculo do centro de massa incremental, em tempo constante por bloco</td><td>16</td></tr><tr><td><span class="cod">RNF08</span></td><td>Regras só no modelo, sem Javalin, JSON nem classes gráficas: testáveis sem servidor</td><td>10</td></tr><tr><td><span class="cod">RNF10</span></td><td>Colisão, rotação, linhas, centro de massa e protocolo com testes automatizados</td><td>18</td></tr><tr><td><span class="cod">RNF11</span></td><td>Falha ao ler ranking ou configuração não impede o jogo: usa valores padrão</td><td>27</td></tr><tr><td><span class="cod">RNF12</span></td><td>Arquivo malformado é rejeitado com registro em log, sem interromper a aplicação</td><td>27</td></tr></table>
+  <p class="suave" style="font-size: 17px; margin: -14px 0 12px;"><strong style="color: var(--marinho);">6 de 16</strong> aparecem no código; o RNF01 foi medido com 2 núcleos e 4 GB emulados, e o RNF04 ainda espera o duplo clique em máquina real. A coluna <strong>Slide</strong> diz onde cada um aparece no código.</p>
+  <table class="mapa"><tr><th style="width: 80px;">Código</th><th>O que pede</th><th style="width: 64px;">Slide</th></tr><tr><td><span class="cod">RNF01</span></td><td>Tela a 60 quadros/s e backend a 60 atualizações/s, com 2 núcleos e 4 GB</td><td>24</td></tr><tr><td><span class="cod">RNF02</span></td><td>Recálculo do centro de massa incremental, em tempo constante por bloco</td><td>16</td></tr><tr><td><span class="cod">RNF08</span></td><td>Regras só no modelo, sem Javalin, JSON nem classes gráficas: testáveis sem servidor</td><td>10</td></tr><tr><td><span class="cod">RNF10</span></td><td>Colisão, rotação, linhas, centro de massa e protocolo com testes automatizados</td><td>18</td></tr><tr><td><span class="cod">RNF11</span></td><td>Falha ao ler ranking ou configuração não impede o jogo: usa valores padrão</td><td>27</td></tr><tr><td><span class="cod">RNF12</span></td><td>Arquivo malformado é rejeitado com registro em log, sem interromper a aplicação</td><td>27</td></tr></table>
   <div class="num">7</div>
 </section>
 
@@ -372,7 +372,7 @@
   <div class="bloco">Codificação · concorrência</div>
   <h1>Só uma thread mexe no jogo</h1>
   <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/concorrencia.png" alt="Código de concorrencia"></div>
-    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RNF01</b><span>Backend atualiza o estado 60 vezes por segundo</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 47</span>: a fronteira entre as threads é uma fila concorrente</li><li><span class="ln">linha 143</span>: a thread do WebSocket só enfileira</li><li><span class="ln">linha 198</span>: o laço, 60 vezes por segundo, esvazia a fila e avança. <b>Sem trava</b></li></ul></div></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RNF01</b><span>Tela a 60 quadros/s e backend a 60 atualizações/s, com 2 núcleos e 4 GB</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 47</span>: a fronteira entre as threads é uma fila concorrente</li><li><span class="ln">linha 143</span>: a thread do WebSocket só enfileira</li><li><span class="ln">linha 198</span>: o laço, 60 vezes por segundo, esvazia a fila e avança. <b>Sem trava</b></li></ul></div></div>
   <div class="num">24</div>
 </section>
 
@@ -414,11 +414,12 @@
   <div class="grade g4" style="margin-bottom: 22px;">
     <div class="cartao"><div class="grande">406</div><p class="suave">testes no backend (JUnit 5)</p></div>
     <div class="cartao"><div class="grande">234</div><p class="suave">testes no frontend (Vitest)</p></div>
-    <div class="cartao"><div class="grande">60</div><p class="suave">ciclos/s em 10 min; ciclo médio de 0,03 ms</p></div>
-    <div class="cartao"><div class="grande">13 ms</div><p class="suave">da tecla à tela (mediana); meta de 50 ms</p></div>
+    <div class="cartao"><div class="grande">60</div><p class="suave">quadros/s na tela e ciclos/s no backend, com 2 núcleos e 4 GB</p></div>
+    <div class="cartao"><div class="grande">14 ms</div><p class="suave">da tecla à tela (mediana), com 2 núcleos; meta de 50 ms</p></div>
   </div>
   <ul class="lista">
-    <li>O CI roda tudo em cada PR e abre o JAR no <strong>Linux, Windows e macOS</strong>.</li>
+    <li><strong>RNF01 medido:</strong> 15 min de jogo com o jogo e o navegador presos a 2 núcleos e 4 GB (emulados). Ciclo médio de 0,08 ms, contra a meta de 4 ms; backend com até 76 MB.</li>
+    <li><strong>RNF04:</strong> Chrome, Chromium e Firefox abrem a partida e respondem ao teclado, sem erro no console. O CI abre o JAR no Linux, no Windows e no macOS.</li>
     <li>Testes manuais com roteiros e sessões com jogadores de fora do grupo.</li>
   </ul>
   <div class="preencher" style="margin-top: 14px;">Marcelo: quando a #27 e a #30 fecharem, colocar aqui quantos casos passaram, os bugs achados e o que os jogadores disseram.</div>
@@ -434,7 +435,7 @@
     <div>
       <p style="color: var(--ambar); font-weight: 700; margin-bottom: 10px;">Roteiro da demonstração</p>
       <ol style="padding-left: 26px; font-size: 22px; line-height: 1.7; color: #eef1f6;">
-        <li>Abrir o JAR com dois cliques</li>
+        <li>Abrir o JAR</li>
         <li>Partida no normal: índice e anel da prévia</li>
         <li>Carregar um lado até o colapso</li>
         <li>Aço firmando os blocos de baixo</li>
@@ -444,8 +445,9 @@
     <div>
       <p style="color: var(--ambar); font-weight: 700; margin-bottom: 10px;">O que ainda não está pronto</p>
       <ul style="padding-left: 26px; font-size: 22px; line-height: 1.7; color: #eef1f6;">
-        <li>Medir o desempenho na máquina de 2 núcleos e 4 GB</li>
-        <li>Dois cliques e navegadores em máquinas reais</li>
+        <li>Duplo clique no Ubuntu: não abre o JAR (o atalho do Java está quebrado no sistema); abre com <code style="background: #2c4677; color: #fff; white-space: nowrap;">java -jar</code></li>
+        <li>Duplo clique no Windows e no macOS, em máquina real</li>
+        <li>Desempenho numa máquina antiga de verdade (o medido foi emulado)</li>
         <li>Online: sem login, e um deploy encerra as partidas abertas</li>
       </ul>
     </div>
