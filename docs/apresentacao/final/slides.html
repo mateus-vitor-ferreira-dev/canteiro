@@ -5,9 +5,9 @@
 <title>CANTEIRO: apresentação final</title>
 <!--
   Slides da apresentação final (#84). Cada <section> é um slide de 1280 × 720.
-  Para gerar o PDF, veja docs/apresentacao/final/README.md.
-  Os trechos com a classe "preencher" ainda esperam conteúdo: o PDF mostra
-  eles em amarelo para ninguém esquecer.
+  Os prints de código saem de prints/gerar.py, direto dos arquivos do repositório.
+  Para gerar o PDF, veja o README.md desta pasta.
+  Os trechos com a classe "preencher" ainda esperam conteúdo e aparecem em amarelo.
 -->
 <style>
   @page { size: 1280px 720px; margin: 0; }
@@ -61,6 +61,22 @@
   td code, p code, li code { font-family: "DejaVu Sans Mono", monospace; font-size: .86em; background: #ebe7de; padding: 1px 5px; border-radius: 4px; }
   .mat { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: -2px; margin-right: 8px; }
   img.tela { border-radius: 10px; border: 1px solid var(--borda); box-shadow: 0 6px 24px rgba(0,0,0,.12); display: block; }
+
+  .rot { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--rotulo); margin-bottom: 8px; }
+  .codigo-lado { display: grid; grid-template-columns: 1fr 330px; gap: 24px; align-items: start; }
+  .prints { display: flex; flex-direction: column; gap: 12px; height: 545px; justify-content: flex-start; }
+  .prints img.print { max-width: 100%; min-height: 0; object-fit: contain; object-position: left top; flex: 0 1 auto; }
+  img.print { display: block; border-radius: 10px; box-shadow: 0 8px 26px rgba(15, 23, 42, .22); }
+  .larga img.print { max-width: 100%; max-height: 380px; margin: 0 auto; }
+  .rodape-larga { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 18px; }
+  .reqs { background: #fff; border: 1px solid var(--borda); border-left: 5px solid var(--marinho); border-radius: 10px; padding: 14px 16px; }
+  .req { display: flex; gap: 10px; font-size: 15px; line-height: 1.35; margin-bottom: 6px; }
+  .req:last-child { margin-bottom: 0; }
+  .req b { flex: none; min-width: 52px; font-size: 13px; color: #fff; background: var(--marinho); border-radius: 5px; padding: 2px 6px; height: fit-content; text-align: center; }
+  .codigo-lado ul.lista li, .rodape-larga ul.lista li { font-size: 17px; line-height: 1.4; margin-bottom: 8px; }
+  .ln { font-family: "DejaVu Sans Mono", monospace; font-size: 14px; font-weight: 700; color: #8a5a00; background: #fbecc8; padding: 1px 6px; border-radius: 4px; }
+  table.mapa td { padding: 6px 10px; font-size: 15px; }
+  table.mapa td:last-child { text-align: center; font-weight: 700; color: var(--marinho); }
 </style>
 </head>
 <body>
@@ -91,7 +107,8 @@
   <div class="num">1</div>
 </section>
 
-<!-- ===================== BLOCO 1: DOCUMENTAÇÃO (4 min) ===================== -->
+
+<!-- ===================== PARTE 1: DOCUMENTAÇÃO ===================== -->
 
 <section>
   <div class="bloco">Documentação · o assunto</div>
@@ -111,7 +128,7 @@
         <li>Cada peça sai em <strong>madeira, alvenaria, concreto ou aço</strong>, com densidade própria</li>
         <li>A cada peça, o jogo calcula o <strong>centro de massa</strong> e compara com o <strong>eixo da base</strong></li>
         <li>O <strong>índice de estabilidade</strong> vai de 100 % a 0 %; passou do limite, <strong>a obra desaba</strong></li>
-        <li>Ranking, relatório da partida, repetição, modo treino e configurações</li>
+        <li>Ranking, relatório, repetição, modo treino e configurações</li>
       </ul>
       <div class="faixa" style="margin-top: 18px;">Uma torre de aço encostada numa parede cai antes de uma pirâmide de madeira duas vezes maior.</div>
     </div>
@@ -138,20 +155,32 @@
 
 <section>
   <div class="bloco">Documentação · requisitos</div>
-  <h1>O que o sistema precisava fazer</h1>
-  <div class="grade g3" style="margin-bottom: 24px;">
-    <div class="cartao" style="text-align: center;"><div class="grande">22</div><p class="suave">regras de negócio</p></div>
-    <div class="cartao" style="text-align: center;"><div class="grande">31</div><p class="suave">requisitos funcionais, todos prontos</p></div>
-    <div class="cartao" style="text-align: center;"><div class="grande">16</div><p class="suave">não funcionais, 2 com medição pendente</p></div>
+  <h1>Os requisitos, e onde cada um aparece no código</h1>
+  <p class="suave" style="font-size: 18px; margin: -12px 0 14px;"><strong style="color: var(--marinho);">22</strong> regras de negócio · <strong style="color: var(--marinho);">31</strong> requisitos funcionais, todos prontos · <strong style="color: var(--marinho);">16</strong> não funcionais, 2 com medição pendente</p>
+  <div class="grade g2" style="gap: 24px;">
+    <table class="mapa"><tr><th style="width: 150px;">Requisitos</th><th>No código</th><th style="width: 46px;">Slide</th></tr>
+      <tr><td>RNF08</td><td>Teste de arquitetura</td><td>8</td></tr>
+      <tr><td>RN04, RF03, RF05</td><td>Sacola e fila de peças</td><td>9</td></tr>
+      <tr><td>RN05, RF10</td><td>Reserva em pilha</td><td>10</td></tr>
+      <tr><td>RF08</td><td>Rotação com correção</td><td>11</td></tr>
+      <tr><td>RF11, RN03</td><td>Fixar e o aço (polimorfismo)</td><td>12</td></tr>
+      <tr><td>RF13, RN17, RN18</td><td>Pontuação</td><td>13</td></tr>
+      <tr><td>RF14, RNF02, RN07, RN08</td><td>Centro de massa O(1)</td><td>14</td></tr>
+      <tr><td>RN09, RN10, RN22</td><td>Índice de estabilidade</td><td>15</td></tr>
+      <tr><td>RNF10</td><td>Teste contra a varredura</td><td>16</td></tr>
+    </table>
+    <table class="mapa"><tr><th style="width: 150px;">Requisitos</th><th>No código</th><th style="width: 46px;">Slide</th></tr>
+      <tr><td>RN11, RF17</td><td>Colapso recursivo</td><td>17</td></tr>
+      <tr><td>RN20</td><td>Balanço</td><td>19</td></tr>
+      <tr><td>RN21</td><td>Esmagamento</td><td>20</td></tr>
+      <tr><td>RF20, RN13</td><td>Bug do fim de jogo</td><td>21</td></tr>
+      <tr><td>RNF01</td><td>Fila de comandos</td><td>22</td></tr>
+      <tr><td>RF23, RF24</td><td>Repetição da partida</td><td>23</td></tr>
+      <tr><td>RF21, RN15</td><td>Ranking no servidor</td><td>24</td></tr>
+      <tr><td>RNF11, RNF12</td><td>Leitura de arquivos</td><td>25</td></tr>
+      <tr><td>RF15, RF16</td><td>Painel de estabilidade</td><td>26</td></tr>
+    </table>
   </div>
-  <table>
-    <tr><th style="width: 120px;">Código</th><th>Os que mais importam</th></tr>
-    <tr><td>RN08–RN11</td><td>Centro de massa ponderado, desvio até o eixo, índice de 100 % a 0 % e colapso acima do limite</td></tr>
-    <tr><td>RF14–RF17</td><td>Recalcular a cada mudança, mostrar o índice sempre, avisar antes e executar o colapso</td></tr>
-    <tr><td>RNF02</td><td>Recálculo incremental, em tempo constante</td></tr>
-    <tr><td>RNF08</td><td>Regras só no modelo: testáveis sem servidor e sem navegador</td></tr>
-    <tr><td>RNF16</td><td>Um único JAR com o frontend dentro; o jogador não precisa de Node.js</td></tr>
-  </table>
   <div class="num">5</div>
 </section>
 
@@ -185,480 +214,201 @@
   <div class="num">6</div>
 </section>
 
-<!-- ===================== BLOCO 2: CODIFICAÇÃO (11 min) ===================== -->
+<!-- ===================== PARTE 2: CODIFICAÇÃO ===================== -->
 
 <section class="escuro" style="display: flex; flex-direction: column; justify-content: center;">
   <div class="bloco">Parte 2</div>
-  <h1 style="font-size: 60px;">Como foi feito</h1>
-  <p style="font-size: 24px; color: #dfe5f0;">Arquitetura · orientação a objetos · estruturas de dados · física · concorrência · problemas e soluções</p>
+  <h1 style="font-size: 60px;">Como cada requisito foi implementado</h1>
+  <p style="font-size: 24px; color: #dfe5f0;">Prints do código do repositório, com os números de linha reais. Em cada slide: o requisito, o código e o que ele resolve.</p>
   <div class="num">7</div>
 </section>
 
 <section>
   <div class="bloco">Codificação · arquitetura</div>
-  <h1>Duas partes na mesma máquina, e as regras só no Java</h1>
-  <img src="img/arquitetura.svg" alt="Arquitetura do CANTEIRO" style="display: block; height: 420px; margin: 0 auto; border-radius: 12px;">
-  <div class="grade g3" style="margin-top: 18px; gap: 14px;">
-    <div class="faixa" style="font-size: 16px;"><strong>MotorJogo</strong> não implementa regra: só delega.</div>
-    <div class="faixa" style="font-size: 16px;"><strong>O frontend não tem regra:</strong> recebe o estado e desenha.</div>
-    <div class="faixa" style="font-size: 16px;"><strong>Um teste reprova o build</strong> se o modelo importar Javalin ou JSON.</div>
+  <h1>As regras só no Java, e um teste que garante isso</h1>
+  <div class="lado" style="grid-template-columns: 1fr 1fr; gap: 26px;">
+    <img src="img/arquitetura.svg" alt="Arquitetura do CANTEIRO" style="width: 100%; border-radius: 12px;">
+    <div>
+      <img class="print" src="img/codigo/arquitetura.png" alt="ArquiteturaTest" style="width: 100%;">
+      <div class="reqs" style="margin-top: 16px;"><div class="rot">O requisito</div><div class="req"><b>RNF08</b><span>Regras só no modelo, sem Javalin, JSON nem classes gráficas: testáveis sem servidor</span></div></div>
+      <ul class="lista" style="margin-top: 12px;"><li style="font-size: 17px;">O teste lê os <code>import</code> de cada pacote e <b>reprova o build</b> se o modelo importar o servidor ou o JSON</li></ul>
+    </div>
   </div>
   <div class="num">8</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · o protocolo</div>
-  <h1>Toda mensagem leva o estado inteiro</h1>
-  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
-    <div>
-      <div class="arquivo">api/dto/EstadoDto.java</div>
-<pre><span class="k">public record</span> <span class="t">EstadoDto</span>(
-        <span class="t">String</span> tipo, <span class="k">long</span> ciclo, <span class="t">String</span> estado,
-        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">String</span>&gt;&gt; tabuleiro,
-        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; rachaduras,
-        <span class="t">PecaDto</span> pecaAtual,
-        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; pecaFantasma,
-        <span class="t">List</span>&lt;<span class="t">PecaDto</span>&gt; proximas,
-        <span class="t">PecaDto</span> reservada, <span class="k">boolean</span> podeReservar,
-        <span class="t">PlacarDto</span> placar,
-        <span class="t">EstabilidadeDto</span> estabilidade,
-        <span class="t">MetaDto</span> meta) { }</pre>
-    </div>
-    <div>
-      <p>O backend não manda "a peça desceu". Manda <strong>tudo</strong>, até 60 vezes por segundo, em menos de 4 KB.</p>
-      <p style="margin-top: 14px;">Se uma mensagem se perder, <strong>a próxima corrige tudo</strong>. A tela nunca fica dessincronizada.</p>
-      <p style="margin-top: 14px;">O mesmo formato existe em TypeScript (<code>protocolo.ts</code>), e um teste confere a serialização contra exemplos fixos.</p>
-    </div>
-  </div>
+  <div class="bloco">Codificação · fila e sacola</div>
+  <h1>As próximas peças: uma sacola e uma fila</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/sacola.png" alt="Código de sacola"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN04</b><span>As sete formas são embaralhadas e distribuídas antes que qualquer uma se repita (sacola)</span></div><div class="req"><b>RF03</b><span>Gerar elementos continuamente enquanto a partida estiver em andamento</span></div><div class="req"><b>RF05</b><span>Exibir os três próximos elementos da fila, com forma e material</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 103</span>: a sacola vazia recebe as 7 formas embaralhadas</li><li><span class="ln">linha 106</span>: tira da frente; só repete quando a sacola esvazia</li><li><b>Fila</b> (<code>ArrayDeque</code>): o jogador vê as 3 próximas, remoção em O(1)</li></ul></div></div>
   <div class="num">9</div>
-</section>
-
-<section>
-  <div class="bloco">Codificação · herança</div>
-  <h1>Uma peça nova é só a sua forma</h1>
-  <div class="lado" style="grid-template-columns: 1.1fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/pecas/PecaT.java</div>
-<pre><span class="k">public final class</span> <span class="t">PecaT</span> <span class="k">extends</span> <span class="t">Peca</span> {
-    <span class="k">private static final int</span>[][][] FORMAS =
-        rotacoesDe(<span class="k">new int</span>[][] {
-            {<span class="d">0</span>, <span class="d">1</span>, <span class="d">0</span>},
-            {<span class="d">1</span>, <span class="d">1</span>, <span class="d">1</span>},
-            {<span class="d">0</span>, <span class="d">0</span>, <span class="d">0</span>},
-        });
-
-    <span class="k">public</span> PecaT(<span class="t">Material</span> material) {
-        <span class="k">super</span>(<span class="d">'T'</span>, material);
-    }
-
-    <span class="k">@Override</span>
-    <span class="k">protected int</span>[][][] formas() { <span class="k">return</span> FORMAS; }
-}</pre>
-    </div>
-    <div>
-      <p>A superclasse abstrata <code>Peca</code> guarda o que é comum: blocos, material, rotação, giro.</p>
-      <p style="margin-top: 14px;">Cada uma das 7 subclasses só diz <strong>o seu desenho</strong>.</p>
-      <p style="margin-top: 14px;">A peça <strong>tem</strong> um material (composição), em vez de <strong>ser</strong> de um material.</p>
-      <div class="faixa" style="margin-top: 18px;">Uma hierarquia só: 7 × 4 = <strong>28 classes</strong>. Duas: <strong>11</strong>.</div>
-    </div>
-  </div>
-  <div class="num">10</div>
-</section>
-
-<section>
-  <div class="bloco">Codificação · polimorfismo</div>
-  <h1>O motor não pergunta qual material é</h1>
-  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/materiais/Aco.java</div>
-<pre><span class="k">public final class</span> <span class="t">Aco</span> <span class="k">extends</span> <span class="t">Material</span> {
-    <span class="k">@Override</span>
-    <span class="k">public double</span> cargaMaxima() {
-        <span class="k">return</span> Double.POSITIVE_INFINITY;
-    }
-    <span class="k">@Override</span>
-    <span class="k">public void</span> aoFixar(<span class="t">Tabuleiro</span> t, <span class="t">List</span>&lt;<span class="t">Celula</span>&gt; ocupadas) {
-        t.consolidarAbaixo(ocupadas);
-    }
-}</pre>
-      <div class="arquivo" style="margin-top: 12px;">modelo/Tabuleiro.java</div>
-<pre>grade[l][c] = <span class="k">new</span> <span class="t">Bloco</span>(material);
-material.aoFixar(<span class="k">this</span>, celulas); <span class="c">// sem switch por tipo</span></pre>
-    </div>
-    <div>
-      <p>Cada material responde do seu jeito a <code>aoFixar</code>, <code>cargaMaxima</code> e <code>bonusLinha</code>.</p>
-      <p style="margin-top: 14px;">O aço <strong>firma os blocos logo abaixo</strong>, que não caem no colapso. Os outros não fazem nada.</p>
-      <div class="faixa" style="margin-top: 18px;">Um quinto material é <strong>uma classe nova</strong> no catálogo, sem tocar no motor.</div>
-    </div>
-  </div>
-  <div class="num">11</div>
-</section>
-
-<section>
-  <div class="bloco">Codificação · fila</div>
-  <h1>As próximas peças: duas filas e uma sacola</h1>
-  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/estruturas/GeradorPecas.java</div>
-<pre><span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Forma</span>&gt; sacola = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
-<span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Peca</span>&gt; fila = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
-
-<span class="k">public</span> <span class="t">Peca</span> proxima() {
-    completar(<span class="d">1</span>);
-    <span class="k">return</span> fila.poll();
-}
-
-<span class="k">private</span> <span class="t">Forma</span> tirarDaSacola() {
-    <span class="k">if</span> (sacola.isEmpty()) {
-        <span class="t">List</span>&lt;<span class="t">Forma</span>&gt; formas = ... Forma.values();
-        <span class="t">Collections</span>.shuffle(formas, sorteio);
-        sacola.addAll(formas);
-    }
-    <span class="k">return</span> sacola.poll();
-}</pre>
-    </div>
-    <div>
-      <p><strong>Sacola:</strong> as 7 formas embaralhadas saem todas antes de qualquer uma se repetir. Sem seca de peça.</p>
-      <p style="margin-top: 14px;"><strong>Fila:</strong> o jogador vê as 3 próximas; a primeira a entrar é a primeira a sair, em O(1).</p>
-      <p style="margin-top: 14px;">O sorteio usa uma <strong>semente</strong>: a mesma semente gera as mesmas peças.</p>
-    </div>
-  </div>
-  <div class="num">12</div>
 </section>
 
 <section>
   <div class="bloco">Codificação · pilha</div>
   <h1>A reserva é uma pilha, com uma troca por peça</h1>
-  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/estruturas/Reserva.java</div>
-<pre><span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Peca</span>&gt; pilha = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
-<span class="k">private boolean</span> travada;
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/reserva.png" alt="Código de reserva"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN05</b><span>Reservar um elemento por vez; a troca só pode ser feita uma vez a cada elemento gerado</span></div><div class="req"><b>RF10</b><span>Reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 49</span>: trava até nascer a próxima peça</li><li><span class="ln">linha 50</span> e <span class="ln">linha 52</span>: pega a guardada e guarda a atual, sempre no topo</li><li>Trocar duas vezes lança exceção: a regra não depende da tela</li></ul></div></div>
+  <div class="num">10</div>
+</section>
 
-<span class="k">public</span> <span class="t">Optional</span>&lt;<span class="t">Peca</span>&gt; trocar(<span class="t">Peca</span> atual) {
-    <span class="k">if</span> (travada)
-        <span class="k">throw new</span> <span class="t">IllegalStateException</span>(
-            <span class="d">"só uma troca por peça"</span>);
-    travada = <span class="k">true</span>;
-    <span class="t">Optional</span>&lt;<span class="t">Peca</span>&gt; guardada =
-        <span class="t">Optional</span>.ofNullable(pilha.poll());
-    atual.endireitar();
-    pilha.push(atual);
-    <span class="k">return</span> guardada;
-}</pre>
-    </div>
-    <div>
-      <p>Guardar e pegar sempre operam sobre <strong>o último</strong>: é uma pilha.</p>
-      <p style="margin-top: 14px;">A trava impede trocar duas vezes a mesma peça (RN05); ela se solta quando nasce a próxima.</p>
-      <p style="margin-top: 14px;">O histórico de jogadas, usado no <strong>desfazer</strong> do modo treino, também é uma pilha.</p>
-    </div>
-  </div>
+<section>
+  <div class="bloco">Codificação · rotação</div>
+  <h1>Girar com deslocamento corretivo</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/rotacao.png" alt="Código de rotacao"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF08</b><span>Girar nos dois sentidos, com deslocamento corretivo quando a rotação causar sobreposição</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Gira; se não colidiu, pronto</li><li><span class="ln">linha 85</span>: se colidiu, tenta cada deslocamento da tabela da própria peça (padrão SRS)</li><li><span class="ln">linha 90</span>: nenhum serviu, desfaz o giro</li></ul></div></div>
+  <div class="num">11</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · polimorfismo</div>
+  <h1>Fixar a peça sem perguntar qual material é</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/fixar.png" alt="Código de fixar"><img class="print" src="img/codigo/aco.png" alt="Código de aco"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF11</b><span>Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado</span></div><div class="req"><b>RN03</b><span>O material é sorteado entre os liberados na fase e determina densidade, cor e multiplicador de pontos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 89</span>: o tabuleiro chama <code>aoFixar</code> sem saber o material</li><li>O <code>Aco</code> sobrescreve: aguenta qualquer peso e <b>firma os blocos de baixo</b></li><li>Forma e material em duas hierarquias: <b>11 classes em vez de 28</b></li></ul></div></div>
+  <div class="num">12</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · pontuação</div>
+  <h1>A pontuação junta linhas, nível, material e risco</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/pontuacao.png" alt="Código de pontuacao"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF13</b><span>Pontuação por linhas simultâneas, material predominante e nível</span></div><div class="req"><b>RN17</b><span>Fechar linha com estabilidade abaixo de 25 % é obra ousada: vale 50 % a mais</span></div><div class="req"><b>RN18</b><span>Cada peça seguida que fecha linha soma 10 % à próxima eliminação, até 100 %</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 47</span>: base por linhas de uma vez (1 a 4)</li><li><span class="ln">linha 87</span>: bônus do material × obra ousada × sequência</li><li>Linhas 78 a 86 (dobradas): valores inválidos lançam <code>IllegalArgumentException</code></li></ul></div></div>
   <div class="num">13</div>
 </section>
 
 <section>
   <div class="bloco">Codificação · a física</div>
   <h1>O centro de massa em tempo constante</h1>
-  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/fisica/AnalisadorEstrutural.java</div>
-<pre><span class="k">private double</span> massaTotal;
-<span class="k">private double</span> momento;   <span class="c">// Σ massa × coluna</span>
-
-<span class="k">public void</span> registrar(<span class="t">Celula</span> celula, <span class="t">Material</span> m) {
-    <span class="k">double</span> massa = m.massaPorBloco();
-    massaTotal += massa;
-    momento += massa * (celula.coluna() + <span class="d">0.5</span>);
-}
-
-<span class="k">public double</span> centroDeMassa() {
-    <span class="k">return</span> momento / massaTotal;
-}
-
-<span class="c">// desvio = |centro − eixo da base|</span>
-<span class="c">// índice = max(0, 1 − desvio / limite)</span></pre>
-    </div>
-    <div>
-      <p><strong>Ingênuo:</strong> varrer as 200 posições a cada ciclo e refazer a média.</p>
-      <p style="margin-top: 14px;"><strong>Feito:</strong> dois acumuladores. Fixar soma, remover subtrai: <strong>O(1) por bloco</strong>, qualquer que seja a altura (RNF02).</p>
-      <p style="margin-top: 14px;">Eliminar uma linha <strong>não muda o momento</strong> de quem desce: o bloco continua na mesma coluna.</p>
-    </div>
-  </div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/centro.png" alt="Código de centro"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF14</b><span>Recalcular o centro de massa sempre que a composição do tabuleiro mudar</span></div><div class="req"><b>RNF02</b><span>Recálculo do centro de massa incremental, em tempo constante por bloco</span></div><div class="req"><b>RN07</b><span>Massa do bloco = densidade × volume; massa da estrutura = soma das massas</span></div><div class="req"><b>RN08</b><span>Centro de massa horizontal = média das colunas, ponderada pela massa</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 59</span>: fixar soma massa × coluna</li><li><span class="ln">linha 71</span>: remover subtrai</li><li><span class="ln">linha 107</span>: o centro é uma divisão. <b>O(1)</b>, sem varrer as 200 posições</li></ul></div></div>
   <div class="num">14</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · testando a otimização</div>
-  <h1>Como saber que a conta rápida está certa?</h1>
-  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
-    <div>
-      <div class="arquivo">test/.../modelo/EquilibrioTest.java (resumido)</div>
-<pre><span class="k">while</span> (pecas &lt; <span class="d">500</span>) {
-    jogarAoAcaso(motor, sorteio);
-    pecas++;
-    assertEquals(
-        <span class="t">AnalisadorEstrutural</span>.centroPorVarredura(
-            motor.tabuleiro()),             <span class="c">// ingênuo</span>
-        motor.analisador().centroDeMassa(), <span class="c">// O(1)</span>
-        <span class="d">0.001</span>);
-}</pre>
-    </div>
-    <div>
-      <p>O maior risco do projeto era um <strong>acumulador dessincronizado</strong>: colapsos que parecem injustos, sem o jogador saber por quê.</p>
-      <p style="margin-top: 14px;">O teste joga <strong>500 peças ao acaso</strong> e, a cada uma, compara a conta incremental com a varredura completa.</p>
-      <p style="margin-top: 14px;">A versão ingênua <strong>continua no código</strong>, só para conferir a rápida.</p>
-    </div>
-  </div>
+  <div class="bloco">Codificação · estabilidade</div>
+  <h1>Do desvio ao índice de estabilidade</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/estabilidade.png" alt="Código de estabilidade"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN09</b><span>Desvio = |centro de massa − eixo da base|, em colunas</span></div><div class="req"><b>RN10</b><span>Índice de estabilidade: 100 % com desvio nulo, 0 % no limite, variando linearmente</span></div><div class="req"><b>RN22</b><span>A parte de cima também é medida, sobre onde encosta; vale a pior das duas medidas</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 176</span>: desvio = |centro − eixo|</li><li><span class="ln">linha 177</span>: índice cai em linha reta até 0 no limite</li><li><span class="ln">linha 138</span>: mede a pilha inteira e a parte de cima, e vale a pior</li></ul></div></div>
   <div class="num">15</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · teste</div>
+  <h1>Como saber que a conta rápida está certa?</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/teste.png" alt="Código de teste"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RNF10</b><span>Colisão, rotação, linhas, centro de massa e protocolo com testes automatizados</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Joga <b>500 peças ao acaso</b> em várias partidas</li><li><span class="ln">linha 47</span>: a cada peça, compara com a varredura completa</li><li>Pega o pior erro possível: um acumulador dessincronizado, que gera colapso injusto</li></ul></div></div>
+  <div class="num">16</div>
 </section>
 
 <section>
   <div class="bloco">Codificação · recursividade</div>
   <h1>Passou do limite, a obra desaba</h1>
-  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/fisica/Colapso.java (resumido)</div>
-<pre><span class="k">int</span> critica = linhaCritica(t); <span class="c">// a linha mais pesada</span>
-<span class="k">for</span> (<span class="k">int</span> col = <span class="d">0</span>; col &lt; COLUNAS; col++)
-    <span class="k">for</span> (<span class="k">int</span> lin = critica - <span class="d">1</span>; lin &gt;= <span class="d">0</span>; lin--) {
-        <span class="t">Bloco</span> b = t.bloco(lin, col);
-        <span class="k">if</span> (b != <span class="k">null</span> &amp;&amp; !b.consolidado())
-            cair(t, <span class="k">new</span> <span class="t">Celula</span>(lin, col));
-    }
-
-<span class="k">static</span> <span class="t">Celula</span> cair(<span class="t">Tabuleiro</span> t, <span class="t">Celula</span> pos) {
-    <span class="t">Celula</span> abaixo = pos.deslocada(<span class="d">1</span>, <span class="d">0</span>);
-    <span class="k">if</span> (!dentro(abaixo) || t.ocupada(abaixo))
-        <span class="k">return</span> pos;
-    t.moverBloco(pos, abaixo);
-    <span class="k">return</span> cair(t, abaixo);   <span class="c">// recursão</span>
-}</pre>
-    </div>
-    <div>
-      <p>Os blocos acima da <strong>linha de maior massa</strong> se soltam e caem, coluna a coluna.</p>
-      <p style="margin-top: 14px;"><code>cair</code> chama a si mesma até achar apoio. O caso base é o chão ou um bloco.</p>
-      <p style="margin-top: 14px;">Bloco <strong>consolidado pelo aço</strong> fica: é o polimorfismo do slide 11.</p>
-      <p style="margin-top: 14px;">Custo: <strong>2 linhas</strong> de pontos. Acima de 18 linhas, fim de jogo.</p>
-    </div>
-  </div>
-  <div class="num">16</div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/colapso.png" alt="Código de colapso"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN11</b><span>Desvio acima do limite: os blocos acima da linha de maior massa caem por gravidade, coluna a coluna</span></div><div class="req"><b>RF17</b><span>Executar o colapso, reacomodando os blocos desprendidos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 36</span>: acha a linha de maior massa</li><li><span class="ln">linha 41</span>: bloco firmado pelo aço não cai</li><li><span class="ln">linha 90</span>: <code>cair</code> chama a si mesma até achar apoio</li></ul></div></div>
+  <div class="num">17</div>
 </section>
 
 <section>
   <div class="bloco">Codificação · problema encontrado</div>
   <h1>Jogando, parecia um encaixe de blocos comum</h1>
-  <div class="lado" style="grid-template-columns: 1fr 1fr; gap: 50px;">
-    <div class="cartao" style="padding: 26px;">
+  <div class="lado" style="grid-template-columns: 1fr 1fr 300px; gap: 26px;">
+    <div class="cartao" style="padding: 24px;">
       <div class="rot">Problema</div>
-      <p>A única física era o centro de massa da <strong>pilha inteira</strong>.</p>
-      <p style="margin-top: 12px;">Linhas quase cheias puxam esse centro para o meio, então quase nunca desabava, e o <strong>material quase não importava</strong>.</p>
+      <p style="font-size: 19px;">A única física era o centro de massa da <strong>pilha inteira</strong>.</p>
+      <p style="font-size: 19px; margin-top: 12px;">Linhas quase cheias puxam esse centro para o meio: quase nunca desabava, e o <strong>material quase não importava</strong>.</p>
     </div>
-    <div class="cartao" style="padding: 26px; border-color: var(--ambar);">
+    <div class="cartao" style="padding: 24px; border-color: var(--ambar);">
       <div class="rot">Solução: física local</div>
       <ul class="lista">
-        <li><strong>Balanço:</strong> peça mais pesada que o apoio perde a ponta solta</li>
-        <li><strong>Esmagamento:</strong> cada material aguenta um peso em cima</li>
-        <li><strong>Parte de cima:</strong> o topo é medido sobre onde encosta; vale a pior medida</li>
+        <li style="font-size: 18px;"><strong>Balanço</strong> (RN20): peça mais pesada que o apoio perde a ponta</li>
+        <li style="font-size: 18px;"><strong>Esmagamento</strong> (RN21): cada material aguenta um peso em cima</li>
+        <li style="font-size: 18px;"><strong>Parte de cima</strong> (RN22): vale a pior das duas medidas (slide 15)</li>
       </ul>
     </div>
-  </div>
-  <div class="faixa" style="margin-top: 30px;">Três regras novas (RN20 a RN22), todas no backend e com testes. A tela só ganhou o desenho das rachaduras e do X.</div>
-  <div class="num">17</div>
-</section>
-
-<section>
-  <div class="bloco">Codificação · balanço</div>
-  <h1>Concreto sobre madeira perde a ponta</h1>
-  <div class="lado" style="grid-template-columns: 1.35fr 1fr;">
-    <div>
-      <div class="arquivo">modelo/fisica/Balanco.java (resumido)</div>
-<pre><span class="k">for</span> (<span class="t">Map.Entry</span>&lt;<span class="t">Integer</span>, <span class="t">Integer</span>&gt; base : baseDaColuna.entrySet()) {
-    <span class="k">int</span> abaixo = base.getValue() + <span class="d">1</span>;
-    <span class="k">int</span> coluna = base.getKey();
-    <span class="k">if</span> (abaixo &gt;= LINHAS)              <span class="c">// o chão</span>
-        apoioMaisForte = Double.POSITIVE_INFINITY;
-    <span class="k">else if</span> (t.ocupada(abaixo, coluna))
-        apoioMaisForte = Math.max(apoioMaisForte,
-            t.bloco(abaixo, coluna).material().densidade());
-    <span class="k">else</span>
-        emBalanco.add(coluna);          <span class="c">// nada embaixo</span>
-}
-<span class="k">if</span> (emBalanco.isEmpty()
-        || material.densidade() &lt;= apoioMaisForte)
-    <span class="k">return</span> <span class="t">List</span>.of();                  <span class="c">// segura</span>
-<span class="k">return</span> soltar(t, celulas, emBalanco);</pre>
-    </div>
-    <div>
-      <p>A peça olha <strong>o que tem embaixo de cada coluna</strong>: chão, um bloco ou nada.</p>
-      <p style="margin-top: 14px;">Se ela for <strong>mais densa que o apoio mais forte</strong>, as colunas sem nada embaixo se soltam.</p>
-      <p style="margin-top: 14px;">A queda reaproveita o mesmo <code>Colapso.cair</code> recursivo.</p>
-      <p style="margin-top: 14px;">Uma <code>TreeMap</code> guarda a base de cada coluna, em ordem.</p>
+    <div style="text-align: center;">
+      <img class="tela" src="img/esmagado.jpg" alt="Blocos rachados e X vermelho" style="height: 470px; margin: 0 auto;">
+      <div class="legenda">Rachaduras e o X nos blocos que a jogada vai quebrar.</div>
     </div>
   </div>
   <div class="num">18</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · esmagamento</div>
-  <h1>Pesado embaixo, leve em cima</h1>
-  <div class="lado" style="grid-template-columns: 1.35fr 0.75fr;">
-    <div>
-      <div class="arquivo">modelo/fisica/Esmagamento.java (resumido)</div>
-<pre><span class="c">// peso que um bloco carrega: os colados acima, até o vazio</span>
-<span class="k">static double</span> carga(<span class="t">Tabuleiro</span> t, <span class="k">int</span> linha, <span class="k">int</span> coluna) {
-    <span class="k">double</span> carga = <span class="d">0</span>;
-    <span class="k">for</span> (<span class="k">int</span> acima = linha - <span class="d">1</span>;
-         acima &gt;= <span class="d">0</span> &amp;&amp; t.ocupada(acima, coluna); acima--)
-        carga += t.bloco(acima, coluna).massa();
-    <span class="k">return</span> carga;
-}
-
-<span class="c">// cede um, recalcula, até ninguém mais ceder</span>
-<span class="t">Celula</span> cedeu = primeiroQueCede(t, fator);
-<span class="k">while</span> (cedeu != <span class="k">null</span>) {
-    <span class="t">Bloco</span> bloco = t.remover(cedeu);
-    analisador.remover(cedeu, bloco.material());
-    cedeu = primeiroQueCede(t, fator);
-}</pre>
-      <p style="margin-top: 12px; font-size: 18px;">Madeira aguenta 8, alvenaria 20, concreto 40, aço tudo. A 50 % do limite o bloco começa a <strong>rachar</strong>.</p>
-    </div>
-    <div style="text-align: center;">
-      <img class="tela" src="img/esmagado.jpg" alt="Blocos rachados e X vermelho nos blocos que a jogada quebraria" style="height: 500px; margin: 0 auto;">
-      <div class="legenda">Rachaduras e o X nos blocos que a jogada vai quebrar.</div>
-    </div>
-  </div>
+  <div class="bloco">Codificação · balanço</div>
+  <h1>Concreto sobre madeira perde a ponta</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/balanco.png" alt="Código de balanco"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN20</b><span>Coluna sem nada embaixo está em balanço; peça mais densa que o apoio perde esses blocos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 53</span>: coluna sem nada embaixo está em balanço</li><li><span class="ln">linha 56</span>: se a peça não for mais densa que o apoio, segura</li><li>Senão os blocos em balanço caem, com o mesmo <code>cair</code> recursivo do colapso</li></ul></div></div>
   <div class="num">19</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · concorrência</div>
-  <h1>Só uma thread mexe no jogo</h1>
-  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
-    <div>
-      <div class="arquivo">controle/SessaoPartida.java</div>
-<pre><span class="k">private final</span> <span class="t">Queue</span>&lt;<span class="t">Comando</span>&gt; comandos =
-        <span class="k">new</span> <span class="t">ConcurrentLinkedQueue</span>&lt;&gt;();
-
-<span class="c">// thread do WebSocket: só enfileira</span>
-<span class="k">public void</span> enfileirar(<span class="t">Comando</span> comando) {
-    comandos.add(comando);
-}
-
-<span class="c">// laço da partida, a cada ~16 ms</span>
-<span class="k">void</span> ciclo() {
-    <span class="t">Comando</span> comando;
-    <span class="k">while</span> ((comando = comandos.poll()) != <span class="k">null</span>)
-        motor.aplicar(comando);
-    motor.avancarCiclo();
-}</pre>
-    </div>
-    <div>
-      <p>As teclas chegam pela thread do WebSocket, mas <strong>não tocam no motor</strong>: viram um <code>Comando</code> na fila.</p>
-      <p style="margin-top: 14px;">O laço (<code>ScheduledExecutorService</code>) esvazia a fila no começo do ciclo.</p>
-      <div class="faixa" style="margin-top: 18px;"><strong>Sem trava e sem condição de corrida:</strong> a fila concorrente é a única fronteira entre as duas threads.</div>
-    </div>
-  </div>
+  <div class="bloco">Codificação · esmagamento</div>
+  <h1>Pesado embaixo, leve em cima</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/esmagamento.png" alt="Código de esmagamento"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN21</b><span>Cada material aguenta um peso máximo em cima; passou, o bloco é esmagado</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 128</span>: a carga é a massa dos blocos colados acima</li><li><span class="ln">linha 85</span>: esmaga um, recalcula, até ninguém mais ceder</li><li>Remove do analisador também, para o centro de massa continuar certo</li></ul></div></div>
   <div class="num">20</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · repetição da partida</div>
-  <h1>Mesma semente e mesmos comandos, mesma partida</h1>
-  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+  <div class="bloco">Codificação · problema encontrado</div>
+  <h1>Bug: a pilha chegava ao topo e a tela congelava</h1>
+  <div class="lado" style="grid-template-columns: 1.1fr 1fr; gap: 30px;">
     <div>
-      <div class="arquivo">modelo/Reprodutor.java</div>
-<pre><span class="k">public void</span> passo(<span class="t">MotorJogo</span> motor) {
-    aplicarDoCiclo(motor, jogadas.size());
-    motor.avancarCiclo();
-}
-
-<span class="k">private int</span> aplicarDoCiclo(<span class="t">MotorJogo</span> motor, <span class="k">int</span> limite) {
-    <span class="k">int</span> antes = aplicadas;
-    <span class="k">while</span> (aplicadas &lt; limite
-            &amp;&amp; jogadas.get(aplicadas).ciclo() == motor.ciclo())
-        motor.aplicar(jogadas.get(aplicadas++).comando());
-    <span class="k">return</span> aplicadas - antes;
-}</pre>
-      <div class="arquivo" style="margin-top: 12px;">~/.canteiro/repeticoes/&lt;data-hora&gt;.txt</div>
-<pre style="font-size: 15px;"><span class="c">NORMAL;semente;pontuação;data</span>
-<span class="d">412;DIREITA</span>
-<span class="d">430;GIRAR_HORARIO</span>
-<span class="d">455;QUEDA_INSTANTANEA</span></pre>
+      <img class="print" src="img/codigo/fimdejogo.png" alt="MotorJogo.previa" style="width: 100%;">
+      <div class="reqs" style="margin-top: 18px;"><div class="rot">O requisito</div>
+        <div class="req"><b>RF20</b><span>Encerrar a partida nas condições de fim de jogo e exibir a tela de resultado</span></div>
+        <div class="req"><b>RN13</b><span>Fim de jogo se a peça nova já nasce colidindo, ou colapso com a pilha acima de 18 linhas</span></div></div>
     </div>
     <div>
-      <p>Como só uma thread mexe no motor, o jogo é <strong>determinístico</strong>.</p>
-      <p style="margin-top: 14px;">A repetição não grava vídeo nem tabuleiros: grava a <strong>semente e cada comando com o ciclo</strong> em que chegou.</p>
-      <p style="margin-top: 14px;">Reproduzir é refazer os comandos no mesmo ciclo. O mesmo truque faz o <strong>desfazer</strong> do modo treino.</p>
+      <div class="rot">Causa</div>
+      <p style="font-size: 18px;">A prévia da jogada simula o assentamento numa cópia da grade. No fim de jogo, a peça nasce <strong>em cima da pilha</strong>: a prévia tentava fixá-la em células ocupadas e lançava <code>IllegalStateException</code>.</p>
+      <p style="font-size: 18px; margin-top: 10px;">Como a prévia vai dentro do estado, o estado <code>FIM_DE_JOGO</code> nunca chegava à tela.</p>
+      <div class="rot" style="margin-top: 16px;">Correção</div>
+      <p style="font-size: 18px;"><span class="ln">linha 349</span>: sem prévia com a partida encerrada. <strong>Dois testes novos</strong> jogam até o fim e conferem o estado enviado.</p>
     </div>
   </div>
   <div class="num">21</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · exceções e arquivos</div>
-  <h1>Arquivo estragado nunca impede o jogo de abrir</h1>
-  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
-    <div>
-      <div class="arquivo">persistencia/LeitorPropriedades.java (resumido)</div>
-<pre><span class="k">public static</span> <span class="t">Optional</span>&lt;<span class="t">Properties</span>&gt; lerArquivo(<span class="t">Path</span> arq) {
-    <span class="k">if</span> (!<span class="t">Files</span>.isRegularFile(arq))
-        <span class="k">return</span> <span class="t">Optional</span>.empty();       <span class="c">// usa o padrão</span>
-    <span class="k">try</span> (<span class="t">Reader</span> leitor = <span class="t">Files</span>.newBufferedReader(arq, UTF_8)) {
-        <span class="t">Properties</span> p = <span class="k">new</span> <span class="t">Properties</span>();
-        p.load(leitor);
-        <span class="k">return</span> p.isEmpty() ? <span class="t">Optional</span>.empty()
-                           : <span class="t">Optional</span>.of(p);
-    } <span class="k">catch</span> (<span class="t">IOException</span> | <span class="t">IllegalArgumentException</span> e) {
-        LOG.warn(<span class="d">"Não foi possível ler {}; usando o padrão"</span>, arq);
-        <span class="k">return</span> <span class="t">Optional</span>.empty();
-    }
-}</pre>
-    </div>
-    <div>
-      <p>Sem banco: ranking, configurações e repetições são <strong>arquivos de texto</strong> em <code>~/.canteiro/</code>.</p>
-      <p style="margin-top: 14px;">Ausente, vazio ou ilegível: vira o <strong>padrão que vem dentro do JAR</strong>, com aviso no log.</p>
-      <p style="margin-top: 14px;">Mensagem inválida pelo WebSocket vira um evento <code>ERRO</code>, e a partida continua.</p>
-    </div>
-  </div>
+  <div class="bloco">Codificação · concorrência</div>
+  <h1>Só uma thread mexe no jogo</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/concorrencia.png" alt="Código de concorrencia"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RNF01</b><span>Backend atualiza o estado 60 vezes por segundo</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 47</span>: a fronteira entre as threads é uma fila concorrente</li><li><span class="ln">linha 143</span>: a thread do WebSocket só enfileira</li><li><span class="ln">linha 198</span>: o laço, 60 vezes por segundo, esvazia a fila e avança. <b>Sem trava</b></li></ul></div></div>
   <div class="num">22</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · a tela</div>
-  <h1>O navegador só desenha o último estado</h1>
-  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
-    <div>
-      <div class="arquivo">frontend/src/componentes/Tabuleiro.svelte (resumido)</div>
-<pre><span class="k">const</span> desenhar = (agora: <span class="t">number</span>) =&gt; {
-    desenharTabuleiro(ctx, estado, celula, balanco);
-    animacoes.desenhar(ctx, estado, agora, celula);
-    quadro = requestAnimationFrame(desenhar);
-};
-quadro = requestAnimationFrame(desenhar);</pre>
-      <div class="grade g2" style="margin-top: 18px; gap: 14px;">
-        <div class="cartao" style="padding: 14px 18px;"><div class="rot">Backend</div><p>Simula a <strong>60 ciclos/s</strong>, sempre.</p></div>
-        <div class="cartao" style="padding: 14px 18px;"><div class="rot">Frontend</div><p>Redesenha o Canvas a cada quadro da tela.</p></div>
-      </div>
-    </div>
-    <div>
-      <p>O frontend não calcula colisão, pontos nem estabilidade. <strong>Recebe pronto e desenha.</strong></p>
-      <p style="margin-top: 14px;">Em máquina lenta, cai a taxa de quadros da tela, <strong>nunca o ritmo da regra</strong>: um jogo que muda conforme o hardware está quebrado.</p>
-      <p style="margin-top: 14px;">Cada material tem <strong>textura além da cor</strong>, para quem tem daltonismo.</p>
-    </div>
-  </div>
+  <div class="bloco">Codificação · repetição</div>
+  <h1>Mesma semente e mesmos comandos, mesma partida</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/repeticao.png" alt="Código de repeticao"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF23</b><span>Registrar em pilha todas as jogadas executadas na partida</span></div><div class="req"><b>RF24</b><span>Reproduzir passo a passo uma partida encerrada, a partir do histórico</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Como só uma thread mexe no motor, o jogo é <b>determinístico</b></li><li>A gravação guarda só a semente e cada comando com o ciclo em que chegou</li><li><span class="ln">linha 87</span>: reproduzir é aplicar cada comando no mesmo ciclo</li></ul></div></div>
   <div class="num">23</div>
 </section>
 
 <section>
-  <div class="bloco">Codificação · problemas e soluções</div>
-  <h1>Outros problemas, e o que foi escolhido</h1>
-  <div class="grade g2">
-    <div class="cartao"><div class="rot">Plataforma</div><h3>Swing deixava a tela difícil</h3><p>Planejado em Swing. Animação, textura e gráfico ficam bem mais simples no navegador: virou Svelte, com as regras no Java.</p></div>
-    <div class="cartao"><div class="rot">Bug</div><h3>A tela não mostrava o fim de jogo</h3><p>A prévia da jogada tentava fixar a peça que nasce em cima da pilha e lançava exceção. Agora não há prévia com a partida encerrada, e dois testes jogam até o fim.</p></div>
-    <div class="cartao"><div class="rot">Celular</div><h3>Injogável na tela pequena</h3><p>Botões empilhados e placar fora da vista. Gestos no tabuleiro, botões em duas linhas e a partida inteira numa tela.</p></div>
-    <div class="cartao"><div class="rot">Segurança</div><h3>Pontuação vinda do navegador</h3><p>O ranking recebe só o id da partida e o nome, e lê a pontuação da sessão no servidor.</p></div>
-  </div>
+  <div class="bloco">Codificação · ranking</div>
+  <h1>A pontuação do ranking nunca vem do navegador</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/ranking.png" alt="Código de ranking"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF21</b><span>Registrar a pontuação no ranking persistente, com o nome do jogador</span></div><div class="req"><b>RN15</b><span>Só entram no ranking partidas concluídas sem uso do desfazer</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>O navegador manda só o id da partida e o nome</li><li><span class="ln">linha 149</span>: partida de treino (com desfazer) é recusada</li><li><span class="ln">linha 162</span>: a pontuação é lida da sessão, no servidor</li></ul></div></div>
   <div class="num">24</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · exceções</div>
+  <h1>Arquivo estragado nunca impede o jogo de abrir</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/arquivos.png" alt="Código de arquivos"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RNF11</b><span>Falha ao ler ranking ou configuração não impede o jogo: usa valores padrão</span></div><div class="req"><b>RNF12</b><span>Arquivo malformado é rejeitado com registro em log, sem interromper a aplicação</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Sem banco: ranking, configurações e repetições são arquivos de texto</li><li><span class="ln">linha 54</span>: ilegível vira aviso no log</li><li>Ausente, vazio ou ilegível: <code>Optional.empty()</code>, e vale o padrão de dentro do JAR</li></ul></div></div>
+  <div class="num">25</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · a tela</div>
+  <h1>O painel avisa antes de desabar</h1>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/painel.png" alt="Código de painel"></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF15</b><span>Exibir continuamente o índice de estabilidade, o desvio e o limite</span></div><div class="req"><b>RF16</b><span>Sinalizar visualmente a aproximação do limite antes do colapso</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>O frontend não calcula nada: recebe a estabilidade pronta do backend</li><li>A prévia diz onde o centro de massa vai parar com a peça atual</li><li>Avisa se a jogada derruba a obra, quebra blocos ou se a carga está pesando de um lado</li></ul></div></div>
+  <div class="num">26</div>
 </section>
 
 <section>
@@ -675,10 +425,10 @@ quadro = requestAnimationFrame(desenhar);</pre>
     <li>Testes manuais com roteiros e sessões com jogadores de fora do grupo.</li>
   </ul>
   <div class="preencher" style="margin-top: 14px;">Marcelo: quando a #27 e a #30 fecharem, colocar aqui quantos casos passaram, os bugs achados e o que os jogadores disseram.</div>
-  <div class="num">25</div>
+  <div class="num">27</div>
 </section>
 
-<!-- ===================== BLOCO 3: DEMONSTRAÇÃO (2 min 30 s) ===================== -->
+<!-- ===================== PARTE 3: DEMONSTRAÇÃO ===================== -->
 
 <section class="escuro">
   <div class="bloco">Parte 3 · ao vivo</div>
@@ -703,10 +453,10 @@ quadro = requestAnimationFrame(desenhar);</pre>
       </ul>
     </div>
   </div>
-  <div class="num">26</div>
+  <div class="num">28</div>
 </section>
 
-<!-- ===================== CONCLUSÃO (1 min) ===================== -->
+<!-- ===================== CONCLUSÃO ===================== -->
 
 <section>
   <div class="bloco">Conclusão</div>
@@ -717,14 +467,14 @@ quadro = requestAnimationFrame(desenhar);</pre>
     • o que foi difícil (prazo, trabalho em equipe, ferramentas novas);<br>
     • o que mudariam na disciplina, sendo sinceros, como o professor pediu.
   </div>
-  <div class="num">27</div>
+  <div class="num">29</div>
 </section>
 
 <section class="escuro" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
   <h1 style="font-size: 64px; margin-bottom: 18px;">Obrigado!</h1>
   <p style="font-size: 24px; color: #dfe5f0;">Jogue online: <strong style="color: var(--ambar);">canteiro.digitalcodexa.com</strong></p>
   <p style="font-size: 18px; color: #b9c3d6; margin-top: 10px;">Código: github.com/mateus-vitor-ferreira-dev/canteiro</p>
-  <div class="num">28</div>
+  <div class="num">30</div>
 </section>
 
 </body>
