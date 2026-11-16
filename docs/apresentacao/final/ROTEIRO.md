@@ -131,7 +131,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 **31. Opinião (50 s).** É do grupo e tem que ser sincera, como o professor pediu. Combinem antes.
 
-**32. Obrigado (10 s).** Deixe o link do jogo na tela durante as perguntas.
+**32. Obrigado (10 s).** Convide a turma a jogar: "quem quiser, aponte a câmera para o QR code". Deixe esse slide na tela durante as perguntas. O QR code grande abre o endereço principal; o pequeno abre o endereço alternativo, para quem estiver no Wi-Fi da UFLA, que bloqueia o principal.
 
 ---
 
