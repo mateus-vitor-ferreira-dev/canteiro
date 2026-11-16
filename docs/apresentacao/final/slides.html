@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>CANTEIRO: apresentação final</title>
+<!--
+  Slides da apresentação final (#84). Cada <section> é um slide de 1280 × 720.
+  Para gerar o PDF, veja docs/apresentacao/final/README.md.
+  Os trechos com a classe "preencher" ainda esperam conteúdo: o PDF mostra
+  eles em amarelo para ninguém esquecer.
+-->
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root {
+    --marinho: #1f3864; --ambar: #e3a322; --vermelho: #c0392b; --verde: #2e7d32;
+    --fundo: #f6f4ef; --cartao: #fff; --borda: #e2ded5; --texto: #1b2432; --suave: #5b6472;
+    --rotulo: #8a5a00; --madeira: #e6c48f; --alvenaria: #c8704b; --concreto: #9ea7b1; --aco: #4e5a6b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #888; }
+  body { font-family: Inter, "Noto Sans", sans-serif; color: var(--texto); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  section {
+    width: 1280px; height: 720px; position: relative; overflow: hidden;
+    background: var(--fundo); padding: 56px 72px 48px; break-after: page;
+    border-left: 10px solid var(--ambar);
+  }
+  section.escuro { background: var(--marinho); color: #fff; border-left: none; }
+  .bloco { font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--rotulo); margin-bottom: 10px; }
+  .escuro .bloco { color: var(--ambar); }
+  h1 { font-size: 40px; font-weight: 800; line-height: 1.12; color: var(--marinho); margin-bottom: 28px; letter-spacing: -.01em; }
+  .escuro h1 { color: #fff; }
+  p, li { font-size: 21px; line-height: 1.45; }
+  .suave { color: var(--suave); }
+  strong { font-weight: 700; }
+  .num { position: absolute; right: 40px; bottom: 22px; font-size: 13px; color: var(--suave); font-weight: 600; }
+  .escuro .num { color: #b9c3d6; }
+  .grade { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+  .cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: 12px; padding: 20px 22px; }
+  .cartao h3 { font-size: 20px; color: var(--marinho); margin-bottom: 8px; }
+  .cartao p, .cartao li { font-size: 17px; line-height: 1.4; }
+  .cartao .rot { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--rotulo); margin-bottom: 6px; }
+  ul.lista { list-style: none; } ul.lista li { padding-left: 22px; position: relative; margin-bottom: 8px; }
+  ul.lista li::before { content: ""; position: absolute; left: 0; top: .6em; width: 9px; height: 9px; background: var(--ambar); border-radius: 2px; }
+  pre {
+    background: #1b2432; color: #e6e9ef; border-radius: 12px; padding: 18px 22px;
+    font-family: "DejaVu Sans Mono", monospace; font-size: 16px; line-height: 1.5; white-space: pre; overflow: hidden;
+  }
+  pre .c { color: #8b96a8; font-style: italic; } pre .k { color: #f2b950; } pre .t { color: #7fc3ff; } pre .d { color: #b6e3a0; }
+  .arquivo { font-family: "DejaVu Sans Mono", monospace; font-size: 13px; color: var(--suave); margin: 0 0 6px 4px; }
+  .faixa { background: var(--marinho); color: #fff; border-radius: 10px; padding: 14px 22px; font-size: 18px; line-height: 1.4; }
+  .faixa strong { color: var(--ambar); }
+  .preencher { background: #fff4cc; border: 2px dashed var(--ambar); border-radius: 10px; padding: 12px 16px; color: #6b4a00; font-size: 17px; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; }
+  .grande { font-size: 54px; font-weight: 800; color: var(--marinho); line-height: 1; }
+  .legenda { font-size: 14px; color: var(--suave); margin-top: 6px; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 9px; border-radius: 6px; background: #e9eef8; color: var(--marinho); margin: 0 6px 6px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 17px; }
+  th { text-align: left; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--rotulo); padding: 8px 10px; border-bottom: 2px solid var(--borda); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; line-height: 1.35; }
+  td code, p code, li code { font-family: "DejaVu Sans Mono", monospace; font-size: .86em; background: #ebe7de; padding: 1px 5px; border-radius: 4px; }
+  .mat { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: -2px; margin-right: 8px; }
+  img.tela { border-radius: 10px; border: 1px solid var(--borda); box-shadow: 0 6px 24px rgba(0,0,0,.12); display: block; }
+</style>
+</head>
+<body>
+
+<!-- 1. CAPA ================================================================ -->
+<section class="escuro" style="padding: 80px 90px;">
+  <div class="bloco">GAC111 · Programação Aplicada à Engenharia · UFLA · 2026/2</div>
+  <h1 style="font-size: 92px; margin: 18px 0 14px; letter-spacing: -.02em;">CANTEIRO</h1>
+  <p style="font-size: 28px; color: #dfe5f0; max-width: 640px;">O jogo de encaixe de blocos em que a pilha tem peso e precisa ficar de pé.</p>
+  <div style="margin-top: 70px; border-left: 4px solid var(--ambar); padding-left: 18px;">
+    <p style="font-size: 15px; letter-spacing: .12em; text-transform: uppercase; color: var(--ambar); font-weight: 700; margin-bottom: 8px;">Grupo</p>
+    <p style="font-size: 22px; line-height: 1.6;">Marcelo Camillo De Paula Leite<br>Mateus Vitor Ferreira<br>Alisson Antônio Oliveira Santos</p>
+  </div>
+  <svg viewBox="0 0 10 11" style="position: absolute; right: 110px; bottom: 90px; width: 330px;">
+    <!-- pilha estilizada: madeira em cima, aço embaixo, eixo da base tracejado -->
+    <g stroke="#1f3864" stroke-width=".06">
+      <rect x="4" y="2" width="1" height="1" fill="#e6c48f"/><rect x="5" y="2" width="1" height="1" fill="#e6c48f"/>
+      <rect x="3" y="3" width="1" height="1" fill="#e6c48f"/><rect x="4" y="3" width="1" height="1" fill="#e6c48f"/><rect x="5" y="3" width="1" height="1" fill="#c8704b"/><rect x="6" y="3" width="1" height="1" fill="#e6c48f"/>
+      <rect x="2" y="4" width="1" height="1" fill="#c8704b"/><rect x="3" y="4" width="1" height="1" fill="#c8704b"/><rect x="4" y="4" width="1" height="1" fill="#c8704b"/><rect x="5" y="4" width="1" height="1" fill="#c8704b"/><rect x="6" y="4" width="1" height="1" fill="#c8704b"/><rect x="7" y="4" width="1" height="1" fill="#c8704b"/>
+      <rect x="1" y="5" width="1" height="1" fill="#9ea7b1"/><rect x="2" y="5" width="1" height="1" fill="#9ea7b1"/><rect x="3" y="5" width="1" height="1" fill="#9ea7b1"/><rect x="4" y="5" width="1" height="1" fill="#c8704b"/><rect x="5" y="5" width="1" height="1" fill="#c8704b"/><rect x="6" y="5" width="1" height="1" fill="#9ea7b1"/><rect x="7" y="5" width="1" height="1" fill="#9ea7b1"/><rect x="8" y="5" width="1" height="1" fill="#9ea7b1"/>
+      <rect x="0" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="1" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="2" y="6" width="1" height="1" fill="#9ea7b1"/><rect x="3" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="4" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="5" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="6" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="7" y="6" width="1" height="1" fill="#9ea7b1"/><rect x="8" y="6" width="1" height="1" fill="#4e5a6b"/><rect x="9" y="6" width="1" height="1" fill="#4e5a6b"/>
+    </g>
+    <rect x="0" y="7.05" width="10" height=".25" fill="#e3a322"/>
+    <line x1="5" y1=".3" x2="5" y2="7" stroke="#e3a322" stroke-width=".06" stroke-dasharray=".2 .15"/>
+    <circle cx="5" cy="4.6" r=".22" fill="#c0392b" stroke="#fff" stroke-width=".06"/>
+    <text x="5.25" y=".7" font-size=".38" fill="#e3a322" font-family="Inter">eixo da base</text>
+  </svg>
+  <div class="num">1</div>
+</section>
+
+<!-- ===================== BLOCO 1: DOCUMENTAÇÃO (4 min) ===================== -->
+
+<section>
+  <div class="bloco">Documentação · o assunto</div>
+  <h1 style="font-size: 52px; margin-top: 60px;">Jogos de encaixe só se preocupam com <span style="color: var(--suave);">espaço</span>.</h1>
+  <h1 style="font-size: 52px; color: var(--rotulo);">E se cada peça tivesse peso?</h1>
+  <p style="font-size: 24px; max-width: 900px; margin-top: 30px;">No CANTEIRO, cada peça é um <strong>material de construção</strong>. Não basta fechar linha: a pilha precisa ficar <strong>equilibrada sobre a base</strong>, como uma obra de verdade.</p>
+  <div class="num">2</div>
+</section>
+
+<section>
+  <div class="bloco">Documentação · o que o sistema faz</div>
+  <h1>Encaixe, peso e equilíbrio, o tempo todo na tela</h1>
+  <div class="lado" style="grid-template-columns: 1fr 1.15fr;">
+    <div>
+      <ul class="lista">
+        <li>Grade de <strong>10 × 20</strong>, peças de 4 blocos nas <strong>7 formas</strong> clássicas</li>
+        <li>Cada peça sai em <strong>madeira, alvenaria, concreto ou aço</strong>, com densidade própria</li>
+        <li>A cada peça, o jogo calcula o <strong>centro de massa</strong> e compara com o <strong>eixo da base</strong></li>
+        <li>O <strong>índice de estabilidade</strong> vai de 100 % a 0 %; passou do limite, <strong>a obra desaba</strong></li>
+        <li>Ranking, relatório da partida, repetição, modo treino e configurações</li>
+      </ul>
+      <div class="faixa" style="margin-top: 18px;">Uma torre de aço encostada numa parede cai antes de uma pirâmide de madeira duas vezes maior.</div>
+    </div>
+    <img class="tela" src="img/partida.jpg" alt="Partida em andamento" style="width: 100%;">
+  </div>
+  <div class="num">3</div>
+</section>
+
+<section>
+  <div class="bloco">Documentação · objetivos</div>
+  <h1>Cada conceito da disciplina resolvendo um problema do jogo</h1>
+  <div class="grade g4">
+    <div class="cartao"><div class="rot">Orientação a objetos</div><h3>Duas hierarquias</h3><p>7 formas e 4 materiais, independentes, ligados por composição.</p></div>
+    <div class="cartao"><div class="rot">Física</div><h3>Equilíbrio em O(1)</h3><p>Centro de massa incremental e colapso por gravidade.</p></div>
+    <div class="cartao"><div class="rot">Estruturas de dados</div><h3>Fila, pilha, lista, hash</h3><p>Próximas peças, reserva, histórico, catálogo, ranking.</p></div>
+    <div class="cartao"><div class="rot">Tempo real</div><h3>60 ciclos por segundo</h3><p>Motor no backend; tabuleiro em Canvas no navegador.</p></div>
+    <div class="cartao"><div class="rot">Comunicação</div><h3>REST + WebSocket</h3><p>Protocolo tipado dos dois lados.</p></div>
+    <div class="cartao"><div class="rot">Persistência</div><h3>Arquivos de texto</h3><p>Ranking, configurações e repetições, sem banco.</p></div>
+    <div class="cartao"><div class="rot">Qualidade</div><h3>Testes e Javadoc</h3><p>Regras críticas testadas; o build reprova Javadoc faltando.</p></div>
+    <div class="cartao"><div class="rot">Entrega</div><h3>Um JAR, dois cliques</h3><p>Só Java 17 e um navegador.</p></div>
+  </div>
+  <div class="num">4</div>
+</section>
+
+<section>
+  <div class="bloco">Documentação · requisitos</div>
+  <h1>O que o sistema precisava fazer</h1>
+  <div class="grade g3" style="margin-bottom: 24px;">
+    <div class="cartao" style="text-align: center;"><div class="grande">22</div><p class="suave">regras de negócio</p></div>
+    <div class="cartao" style="text-align: center;"><div class="grande">31</div><p class="suave">requisitos funcionais, todos prontos</p></div>
+    <div class="cartao" style="text-align: center;"><div class="grande">16</div><p class="suave">não funcionais, 2 com medição pendente</p></div>
+  </div>
+  <table>
+    <tr><th style="width: 120px;">Código</th><th>Os que mais importam</th></tr>
+    <tr><td>RN08–RN11</td><td>Centro de massa ponderado, desvio até o eixo, índice de 100 % a 0 % e colapso acima do limite</td></tr>
+    <tr><td>RF14–RF17</td><td>Recalcular a cada mudança, mostrar o índice sempre, avisar antes e executar o colapso</td></tr>
+    <tr><td>RNF02</td><td>Recálculo incremental, em tempo constante</td></tr>
+    <tr><td>RNF08</td><td>Regras só no modelo: testáveis sem servidor e sem navegador</td></tr>
+    <tr><td>RNF16</td><td>Um único JAR com o frontend dentro; o jogador não precisa de Node.js</td></tr>
+  </table>
+  <div class="num">5</div>
+</section>
+
+<section>
+  <div class="bloco">Documentação · bibliotecas e referências</div>
+  <h1>Com o que foi feito</h1>
+  <div class="lado">
+    <table>
+      <tr><th>Parte</th><th>Ferramenta</th></tr>
+      <tr><td>Regras do jogo</td><td><strong>Java 17</strong>, só a biblioteca padrão</td></tr>
+      <tr><td>HTTP e WebSocket</td><td><strong>Javalin 7</strong> (Jetty)</td></tr>
+      <tr><td>JSON · log</td><td>Jackson · SLF4J</td></tr>
+      <tr><td>Rotas documentadas</td><td>OpenAPI + Swagger UI</td></tr>
+      <tr><td>Tela</td><td><strong>Svelte 5</strong>, TypeScript, Vite, Canvas</td></tr>
+      <tr><td>Gráfico · som</td><td>Chart.js · Web Audio</td></tr>
+      <tr><td>Testes</td><td>JUnit 5 · Vitest</td></tr>
+      <tr><td>Build e entrega</td><td>Maven · Docker</td></tr>
+    </table>
+    <div>
+      <p style="font-weight: 700; color: var(--marinho); margin-bottom: 10px;">Referências consultadas</p>
+      <ul class="lista">
+        <li>Documentação do Java 17: coleções e <code>java.util.concurrent</code></li>
+        <li>Documentação do Javalin e do Svelte 5</li>
+        <li>MDN: Canvas, WebSocket e Web Audio</li>
+        <li>Convenções do gênero: rotação SRS e sorteio pela sacola</li>
+        <li>Estática: centro de massa como média ponderada</li>
+      </ul>
+      <div class="preencher" style="margin-top: 14px;">Marcelo: acrescentar o material da disciplina que o grupo usou, se houver.</div>
+    </div>
+  </div>
+  <div class="num">6</div>
+</section>
+
+<!-- ===================== BLOCO 2: CODIFICAÇÃO (11 min) ===================== -->
+
+<section class="escuro" style="display: flex; flex-direction: column; justify-content: center;">
+  <div class="bloco">Parte 2</div>
+  <h1 style="font-size: 60px;">Como foi feito</h1>
+  <p style="font-size: 24px; color: #dfe5f0;">Arquitetura · orientação a objetos · estruturas de dados · física · concorrência · problemas e soluções</p>
+  <div class="num">7</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · arquitetura</div>
+  <h1>Duas partes na mesma máquina, e as regras só no Java</h1>
+  <img src="img/arquitetura.svg" alt="Arquitetura do CANTEIRO" style="display: block; height: 420px; margin: 0 auto; border-radius: 12px;">
+  <div class="grade g3" style="margin-top: 18px; gap: 14px;">
+    <div class="faixa" style="font-size: 16px;"><strong>MotorJogo</strong> não implementa regra: só delega.</div>
+    <div class="faixa" style="font-size: 16px;"><strong>O frontend não tem regra:</strong> recebe o estado e desenha.</div>
+    <div class="faixa" style="font-size: 16px;"><strong>Um teste reprova o build</strong> se o modelo importar Javalin ou JSON.</div>
+  </div>
+  <div class="num">8</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · o protocolo</div>
+  <h1>Toda mensagem leva o estado inteiro</h1>
+  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
+    <div>
+      <div class="arquivo">api/dto/EstadoDto.java</div>
+<pre><span class="k">public record</span> <span class="t">EstadoDto</span>(
+        <span class="t">String</span> tipo, <span class="k">long</span> ciclo, <span class="t">String</span> estado,
+        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">String</span>&gt;&gt; tabuleiro,
+        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; rachaduras,
+        <span class="t">PecaDto</span> pecaAtual,
+        <span class="t">List</span>&lt;<span class="t">List</span>&lt;<span class="t">Integer</span>&gt;&gt; pecaFantasma,
+        <span class="t">List</span>&lt;<span class="t">PecaDto</span>&gt; proximas,
+        <span class="t">PecaDto</span> reservada, <span class="k">boolean</span> podeReservar,
+        <span class="t">PlacarDto</span> placar,
+        <span class="t">EstabilidadeDto</span> estabilidade,
+        <span class="t">MetaDto</span> meta) { }</pre>
+    </div>
+    <div>
+      <p>O backend não manda "a peça desceu". Manda <strong>tudo</strong>, até 60 vezes por segundo, em menos de 4 KB.</p>
+      <p style="margin-top: 14px;">Se uma mensagem se perder, <strong>a próxima corrige tudo</strong>. A tela nunca fica dessincronizada.</p>
+      <p style="margin-top: 14px;">O mesmo formato existe em TypeScript (<code>protocolo.ts</code>), e um teste confere a serialização contra exemplos fixos.</p>
+    </div>
+  </div>
+  <div class="num">9</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · herança</div>
+  <h1>Uma peça nova é só a sua forma</h1>
+  <div class="lado" style="grid-template-columns: 1.1fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/pecas/PecaT.java</div>
+<pre><span class="k">public final class</span> <span class="t">PecaT</span> <span class="k">extends</span> <span class="t">Peca</span> {
+    <span class="k">private static final int</span>[][][] FORMAS =
+        rotacoesDe(<span class="k">new int</span>[][] {
+            {<span class="d">0</span>, <span class="d">1</span>, <span class="d">0</span>},
+            {<span class="d">1</span>, <span class="d">1</span>, <span class="d">1</span>},
+            {<span class="d">0</span>, <span class="d">0</span>, <span class="d">0</span>},
+        });
+
+    <span class="k">public</span> PecaT(<span class="t">Material</span> material) {
+        <span class="k">super</span>(<span class="d">'T'</span>, material);
+    }
+
+    <span class="k">@Override</span>
+    <span class="k">protected int</span>[][][] formas() { <span class="k">return</span> FORMAS; }
+}</pre>
+    </div>
+    <div>
+      <p>A superclasse abstrata <code>Peca</code> guarda o que é comum: blocos, material, rotação, giro.</p>
+      <p style="margin-top: 14px;">Cada uma das 7 subclasses só diz <strong>o seu desenho</strong>.</p>
+      <p style="margin-top: 14px;">A peça <strong>tem</strong> um material (composição), em vez de <strong>ser</strong> de um material.</p>
+      <div class="faixa" style="margin-top: 18px;">Uma hierarquia só: 7 × 4 = <strong>28 classes</strong>. Duas: <strong>11</strong>.</div>
+    </div>
+  </div>
+  <div class="num">10</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · polimorfismo</div>
+  <h1>O motor não pergunta qual material é</h1>
+  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/materiais/Aco.java</div>
+<pre><span class="k">public final class</span> <span class="t">Aco</span> <span class="k">extends</span> <span class="t">Material</span> {
+    <span class="k">@Override</span>
+    <span class="k">public double</span> cargaMaxima() {
+        <span class="k">return</span> Double.POSITIVE_INFINITY;
+    }
+    <span class="k">@Override</span>
+    <span class="k">public void</span> aoFixar(<span class="t">Tabuleiro</span> t, <span class="t">List</span>&lt;<span class="t">Celula</span>&gt; ocupadas) {
+        t.consolidarAbaixo(ocupadas);
+    }
+}</pre>
+      <div class="arquivo" style="margin-top: 12px;">modelo/Tabuleiro.java</div>
+<pre>grade[l][c] = <span class="k">new</span> <span class="t">Bloco</span>(material);
+material.aoFixar(<span class="k">this</span>, celulas); <span class="c">// sem switch por tipo</span></pre>
+    </div>
+    <div>
+      <p>Cada material responde do seu jeito a <code>aoFixar</code>, <code>cargaMaxima</code> e <code>bonusLinha</code>.</p>
+      <p style="margin-top: 14px;">O aço <strong>firma os blocos logo abaixo</strong>, que não caem no colapso. Os outros não fazem nada.</p>
+      <div class="faixa" style="margin-top: 18px;">Um quinto material é <strong>uma classe nova</strong> no catálogo, sem tocar no motor.</div>
+    </div>
+  </div>
+  <div class="num">11</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · fila</div>
+  <h1>As próximas peças: duas filas e uma sacola</h1>
+  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/estruturas/GeradorPecas.java</div>
+<pre><span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Forma</span>&gt; sacola = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
+<span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Peca</span>&gt; fila = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
+
+<span class="k">public</span> <span class="t">Peca</span> proxima() {
+    completar(<span class="d">1</span>);
+    <span class="k">return</span> fila.poll();
+}
+
+<span class="k">private</span> <span class="t">Forma</span> tirarDaSacola() {
+    <span class="k">if</span> (sacola.isEmpty()) {
+        <span class="t">List</span>&lt;<span class="t">Forma</span>&gt; formas = ... Forma.values();
+        <span class="t">Collections</span>.shuffle(formas, sorteio);
+        sacola.addAll(formas);
+    }
+    <span class="k">return</span> sacola.poll();
+}</pre>
+    </div>
+    <div>
+      <p><strong>Sacola:</strong> as 7 formas embaralhadas saem todas antes de qualquer uma se repetir. Sem seca de peça.</p>
+      <p style="margin-top: 14px;"><strong>Fila:</strong> o jogador vê as 3 próximas; a primeira a entrar é a primeira a sair, em O(1).</p>
+      <p style="margin-top: 14px;">O sorteio usa uma <strong>semente</strong>: a mesma semente gera as mesmas peças.</p>
+    </div>
+  </div>
+  <div class="num">12</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · pilha</div>
+  <h1>A reserva é uma pilha, com uma troca por peça</h1>
+  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/estruturas/Reserva.java</div>
+<pre><span class="k">private final</span> <span class="t">Deque</span>&lt;<span class="t">Peca</span>&gt; pilha = <span class="k">new</span> <span class="t">ArrayDeque</span>&lt;&gt;();
+<span class="k">private boolean</span> travada;
+
+<span class="k">public</span> <span class="t">Optional</span>&lt;<span class="t">Peca</span>&gt; trocar(<span class="t">Peca</span> atual) {
+    <span class="k">if</span> (travada)
+        <span class="k">throw new</span> <span class="t">IllegalStateException</span>(
+            <span class="d">"só uma troca por peça"</span>);
+    travada = <span class="k">true</span>;
+    <span class="t">Optional</span>&lt;<span class="t">Peca</span>&gt; guardada =
+        <span class="t">Optional</span>.ofNullable(pilha.poll());
+    atual.endireitar();
+    pilha.push(atual);
+    <span class="k">return</span> guardada;
+}</pre>
+    </div>
+    <div>
+      <p>Guardar e pegar sempre operam sobre <strong>o último</strong>: é uma pilha.</p>
+      <p style="margin-top: 14px;">A trava impede trocar duas vezes a mesma peça (RN05); ela se solta quando nasce a próxima.</p>
+      <p style="margin-top: 14px;">O histórico de jogadas, usado no <strong>desfazer</strong> do modo treino, também é uma pilha.</p>
+    </div>
+  </div>
+  <div class="num">13</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · a física</div>
+  <h1>O centro de massa em tempo constante</h1>
+  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/fisica/AnalisadorEstrutural.java</div>
+<pre><span class="k">private double</span> massaTotal;
+<span class="k">private double</span> momento;   <span class="c">// Σ massa × coluna</span>
+
+<span class="k">public void</span> registrar(<span class="t">Celula</span> celula, <span class="t">Material</span> m) {
+    <span class="k">double</span> massa = m.massaPorBloco();
+    massaTotal += massa;
+    momento += massa * (celula.coluna() + <span class="d">0.5</span>);
+}
+
+<span class="k">public double</span> centroDeMassa() {
+    <span class="k">return</span> momento / massaTotal;
+}
+
+<span class="c">// desvio = |centro − eixo da base|</span>
+<span class="c">// índice = max(0, 1 − desvio / limite)</span></pre>
+    </div>
+    <div>
+      <p><strong>Ingênuo:</strong> varrer as 200 posições a cada ciclo e refazer a média.</p>
+      <p style="margin-top: 14px;"><strong>Feito:</strong> dois acumuladores. Fixar soma, remover subtrai: <strong>O(1) por bloco</strong>, qualquer que seja a altura (RNF02).</p>
+      <p style="margin-top: 14px;">Eliminar uma linha <strong>não muda o momento</strong> de quem desce: o bloco continua na mesma coluna.</p>
+    </div>
+  </div>
+  <div class="num">14</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · testando a otimização</div>
+  <h1>Como saber que a conta rápida está certa?</h1>
+  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
+    <div>
+      <div class="arquivo">test/.../modelo/EquilibrioTest.java (resumido)</div>
+<pre><span class="k">while</span> (pecas &lt; <span class="d">500</span>) {
+    jogarAoAcaso(motor, sorteio);
+    pecas++;
+    assertEquals(
+        <span class="t">AnalisadorEstrutural</span>.centroPorVarredura(
+            motor.tabuleiro()),             <span class="c">// ingênuo</span>
+        motor.analisador().centroDeMassa(), <span class="c">// O(1)</span>
+        <span class="d">0.001</span>);
+}</pre>
+    </div>
+    <div>
+      <p>O maior risco do projeto era um <strong>acumulador dessincronizado</strong>: colapsos que parecem injustos, sem o jogador saber por quê.</p>
+      <p style="margin-top: 14px;">O teste joga <strong>500 peças ao acaso</strong> e, a cada uma, compara a conta incremental com a varredura completa.</p>
+      <p style="margin-top: 14px;">A versão ingênua <strong>continua no código</strong>, só para conferir a rápida.</p>
+    </div>
+  </div>
+  <div class="num">15</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · recursividade</div>
+  <h1>Passou do limite, a obra desaba</h1>
+  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/fisica/Colapso.java (resumido)</div>
+<pre><span class="k">int</span> critica = linhaCritica(t); <span class="c">// a linha mais pesada</span>
+<span class="k">for</span> (<span class="k">int</span> col = <span class="d">0</span>; col &lt; COLUNAS; col++)
+    <span class="k">for</span> (<span class="k">int</span> lin = critica - <span class="d">1</span>; lin &gt;= <span class="d">0</span>; lin--) {
+        <span class="t">Bloco</span> b = t.bloco(lin, col);
+        <span class="k">if</span> (b != <span class="k">null</span> &amp;&amp; !b.consolidado())
+            cair(t, <span class="k">new</span> <span class="t">Celula</span>(lin, col));
+    }
+
+<span class="k">static</span> <span class="t">Celula</span> cair(<span class="t">Tabuleiro</span> t, <span class="t">Celula</span> pos) {
+    <span class="t">Celula</span> abaixo = pos.deslocada(<span class="d">1</span>, <span class="d">0</span>);
+    <span class="k">if</span> (!dentro(abaixo) || t.ocupada(abaixo))
+        <span class="k">return</span> pos;
+    t.moverBloco(pos, abaixo);
+    <span class="k">return</span> cair(t, abaixo);   <span class="c">// recursão</span>
+}</pre>
+    </div>
+    <div>
+      <p>Os blocos acima da <strong>linha de maior massa</strong> se soltam e caem, coluna a coluna.</p>
+      <p style="margin-top: 14px;"><code>cair</code> chama a si mesma até achar apoio. O caso base é o chão ou um bloco.</p>
+      <p style="margin-top: 14px;">Bloco <strong>consolidado pelo aço</strong> fica: é o polimorfismo do slide 11.</p>
+      <p style="margin-top: 14px;">Custo: <strong>2 linhas</strong> de pontos. Acima de 18 linhas, fim de jogo.</p>
+    </div>
+  </div>
+  <div class="num">16</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · problema encontrado</div>
+  <h1>Jogando, parecia um encaixe de blocos comum</h1>
+  <div class="lado" style="grid-template-columns: 1fr 1fr; gap: 50px;">
+    <div class="cartao" style="padding: 26px;">
+      <div class="rot">Problema</div>
+      <p>A única física era o centro de massa da <strong>pilha inteira</strong>.</p>
+      <p style="margin-top: 12px;">Linhas quase cheias puxam esse centro para o meio, então quase nunca desabava, e o <strong>material quase não importava</strong>.</p>
+    </div>
+    <div class="cartao" style="padding: 26px; border-color: var(--ambar);">
+      <div class="rot">Solução: física local</div>
+      <ul class="lista">
+        <li><strong>Balanço:</strong> peça mais pesada que o apoio perde a ponta solta</li>
+        <li><strong>Esmagamento:</strong> cada material aguenta um peso em cima</li>
+        <li><strong>Parte de cima:</strong> o topo é medido sobre onde encosta; vale a pior medida</li>
+      </ul>
+    </div>
+  </div>
+  <div class="faixa" style="margin-top: 30px;">Três regras novas (RN20 a RN22), todas no backend e com testes. A tela só ganhou o desenho das rachaduras e do X.</div>
+  <div class="num">17</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · balanço</div>
+  <h1>Concreto sobre madeira perde a ponta</h1>
+  <div class="lado" style="grid-template-columns: 1.35fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/fisica/Balanco.java (resumido)</div>
+<pre><span class="k">for</span> (<span class="t">Map.Entry</span>&lt;<span class="t">Integer</span>, <span class="t">Integer</span>&gt; base : baseDaColuna.entrySet()) {
+    <span class="k">int</span> abaixo = base.getValue() + <span class="d">1</span>;
+    <span class="k">int</span> coluna = base.getKey();
+    <span class="k">if</span> (abaixo &gt;= LINHAS)              <span class="c">// o chão</span>
+        apoioMaisForte = Double.POSITIVE_INFINITY;
+    <span class="k">else if</span> (t.ocupada(abaixo, coluna))
+        apoioMaisForte = Math.max(apoioMaisForte,
+            t.bloco(abaixo, coluna).material().densidade());
+    <span class="k">else</span>
+        emBalanco.add(coluna);          <span class="c">// nada embaixo</span>
+}
+<span class="k">if</span> (emBalanco.isEmpty()
+        || material.densidade() &lt;= apoioMaisForte)
+    <span class="k">return</span> <span class="t">List</span>.of();                  <span class="c">// segura</span>
+<span class="k">return</span> soltar(t, celulas, emBalanco);</pre>
+    </div>
+    <div>
+      <p>A peça olha <strong>o que tem embaixo de cada coluna</strong>: chão, um bloco ou nada.</p>
+      <p style="margin-top: 14px;">Se ela for <strong>mais densa que o apoio mais forte</strong>, as colunas sem nada embaixo se soltam.</p>
+      <p style="margin-top: 14px;">A queda reaproveita o mesmo <code>Colapso.cair</code> recursivo.</p>
+      <p style="margin-top: 14px;">Uma <code>TreeMap</code> guarda a base de cada coluna, em ordem.</p>
+    </div>
+  </div>
+  <div class="num">18</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · esmagamento</div>
+  <h1>Pesado embaixo, leve em cima</h1>
+  <div class="lado" style="grid-template-columns: 1.35fr 0.75fr;">
+    <div>
+      <div class="arquivo">modelo/fisica/Esmagamento.java (resumido)</div>
+<pre><span class="c">// peso que um bloco carrega: os colados acima, até o vazio</span>
+<span class="k">static double</span> carga(<span class="t">Tabuleiro</span> t, <span class="k">int</span> linha, <span class="k">int</span> coluna) {
+    <span class="k">double</span> carga = <span class="d">0</span>;
+    <span class="k">for</span> (<span class="k">int</span> acima = linha - <span class="d">1</span>;
+         acima &gt;= <span class="d">0</span> &amp;&amp; t.ocupada(acima, coluna); acima--)
+        carga += t.bloco(acima, coluna).massa();
+    <span class="k">return</span> carga;
+}
+
+<span class="c">// cede um, recalcula, até ninguém mais ceder</span>
+<span class="t">Celula</span> cedeu = primeiroQueCede(t, fator);
+<span class="k">while</span> (cedeu != <span class="k">null</span>) {
+    <span class="t">Bloco</span> bloco = t.remover(cedeu);
+    analisador.remover(cedeu, bloco.material());
+    cedeu = primeiroQueCede(t, fator);
+}</pre>
+      <p style="margin-top: 12px; font-size: 18px;">Madeira aguenta 8, alvenaria 20, concreto 40, aço tudo. A 50 % do limite o bloco começa a <strong>rachar</strong>.</p>
+    </div>
+    <div style="text-align: center;">
+      <img class="tela" src="img/esmagado.jpg" alt="Blocos rachados e X vermelho nos blocos que a jogada quebraria" style="height: 500px; margin: 0 auto;">
+      <div class="legenda">Rachaduras e o X nos blocos que a jogada vai quebrar.</div>
+    </div>
+  </div>
+  <div class="num">19</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · concorrência</div>
+  <h1>Só uma thread mexe no jogo</h1>
+  <div class="lado" style="grid-template-columns: 1.2fr 1fr;">
+    <div>
+      <div class="arquivo">controle/SessaoPartida.java</div>
+<pre><span class="k">private final</span> <span class="t">Queue</span>&lt;<span class="t">Comando</span>&gt; comandos =
+        <span class="k">new</span> <span class="t">ConcurrentLinkedQueue</span>&lt;&gt;();
+
+<span class="c">// thread do WebSocket: só enfileira</span>
+<span class="k">public void</span> enfileirar(<span class="t">Comando</span> comando) {
+    comandos.add(comando);
+}
+
+<span class="c">// laço da partida, a cada ~16 ms</span>
+<span class="k">void</span> ciclo() {
+    <span class="t">Comando</span> comando;
+    <span class="k">while</span> ((comando = comandos.poll()) != <span class="k">null</span>)
+        motor.aplicar(comando);
+    motor.avancarCiclo();
+}</pre>
+    </div>
+    <div>
+      <p>As teclas chegam pela thread do WebSocket, mas <strong>não tocam no motor</strong>: viram um <code>Comando</code> na fila.</p>
+      <p style="margin-top: 14px;">O laço (<code>ScheduledExecutorService</code>) esvazia a fila no começo do ciclo.</p>
+      <div class="faixa" style="margin-top: 18px;"><strong>Sem trava e sem condição de corrida:</strong> a fila concorrente é a única fronteira entre as duas threads.</div>
+    </div>
+  </div>
+  <div class="num">20</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · repetição da partida</div>
+  <h1>Mesma semente e mesmos comandos, mesma partida</h1>
+  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+    <div>
+      <div class="arquivo">modelo/Reprodutor.java</div>
+<pre><span class="k">public void</span> passo(<span class="t">MotorJogo</span> motor) {
+    aplicarDoCiclo(motor, jogadas.size());
+    motor.avancarCiclo();
+}
+
+<span class="k">private int</span> aplicarDoCiclo(<span class="t">MotorJogo</span> motor, <span class="k">int</span> limite) {
+    <span class="k">int</span> antes = aplicadas;
+    <span class="k">while</span> (aplicadas &lt; limite
+            &amp;&amp; jogadas.get(aplicadas).ciclo() == motor.ciclo())
+        motor.aplicar(jogadas.get(aplicadas++).comando());
+    <span class="k">return</span> aplicadas - antes;
+}</pre>
+      <div class="arquivo" style="margin-top: 12px;">~/.canteiro/repeticoes/&lt;data-hora&gt;.txt</div>
+<pre style="font-size: 15px;"><span class="c">NORMAL;semente;pontuação;data</span>
+<span class="d">412;DIREITA</span>
+<span class="d">430;GIRAR_HORARIO</span>
+<span class="d">455;QUEDA_INSTANTANEA</span></pre>
+    </div>
+    <div>
+      <p>Como só uma thread mexe no motor, o jogo é <strong>determinístico</strong>.</p>
+      <p style="margin-top: 14px;">A repetição não grava vídeo nem tabuleiros: grava a <strong>semente e cada comando com o ciclo</strong> em que chegou.</p>
+      <p style="margin-top: 14px;">Reproduzir é refazer os comandos no mesmo ciclo. O mesmo truque faz o <strong>desfazer</strong> do modo treino.</p>
+    </div>
+  </div>
+  <div class="num">21</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · exceções e arquivos</div>
+  <h1>Arquivo estragado nunca impede o jogo de abrir</h1>
+  <div class="lado" style="grid-template-columns: 1.3fr 1fr;">
+    <div>
+      <div class="arquivo">persistencia/LeitorPropriedades.java (resumido)</div>
+<pre><span class="k">public static</span> <span class="t">Optional</span>&lt;<span class="t">Properties</span>&gt; lerArquivo(<span class="t">Path</span> arq) {
+    <span class="k">if</span> (!<span class="t">Files</span>.isRegularFile(arq))
+        <span class="k">return</span> <span class="t">Optional</span>.empty();       <span class="c">// usa o padrão</span>
+    <span class="k">try</span> (<span class="t">Reader</span> leitor = <span class="t">Files</span>.newBufferedReader(arq, UTF_8)) {
+        <span class="t">Properties</span> p = <span class="k">new</span> <span class="t">Properties</span>();
+        p.load(leitor);
+        <span class="k">return</span> p.isEmpty() ? <span class="t">Optional</span>.empty()
+                           : <span class="t">Optional</span>.of(p);
+    } <span class="k">catch</span> (<span class="t">IOException</span> | <span class="t">IllegalArgumentException</span> e) {
+        LOG.warn(<span class="d">"Não foi possível ler {}; usando o padrão"</span>, arq);
+        <span class="k">return</span> <span class="t">Optional</span>.empty();
+    }
+}</pre>
+    </div>
+    <div>
+      <p>Sem banco: ranking, configurações e repetições são <strong>arquivos de texto</strong> em <code>~/.canteiro/</code>.</p>
+      <p style="margin-top: 14px;">Ausente, vazio ou ilegível: vira o <strong>padrão que vem dentro do JAR</strong>, com aviso no log.</p>
+      <p style="margin-top: 14px;">Mensagem inválida pelo WebSocket vira um evento <code>ERRO</code>, e a partida continua.</p>
+    </div>
+  </div>
+  <div class="num">22</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · a tela</div>
+  <h1>O navegador só desenha o último estado</h1>
+  <div class="lado" style="grid-template-columns: 1.25fr 1fr;">
+    <div>
+      <div class="arquivo">frontend/src/componentes/Tabuleiro.svelte (resumido)</div>
+<pre><span class="k">const</span> desenhar = (agora: <span class="t">number</span>) =&gt; {
+    desenharTabuleiro(ctx, estado, celula, balanco);
+    animacoes.desenhar(ctx, estado, agora, celula);
+    quadro = requestAnimationFrame(desenhar);
+};
+quadro = requestAnimationFrame(desenhar);</pre>
+      <div class="grade g2" style="margin-top: 18px; gap: 14px;">
+        <div class="cartao" style="padding: 14px 18px;"><div class="rot">Backend</div><p>Simula a <strong>60 ciclos/s</strong>, sempre.</p></div>
+        <div class="cartao" style="padding: 14px 18px;"><div class="rot">Frontend</div><p>Redesenha o Canvas a cada quadro da tela.</p></div>
+      </div>
+    </div>
+    <div>
+      <p>O frontend não calcula colisão, pontos nem estabilidade. <strong>Recebe pronto e desenha.</strong></p>
+      <p style="margin-top: 14px;">Em máquina lenta, cai a taxa de quadros da tela, <strong>nunca o ritmo da regra</strong>: um jogo que muda conforme o hardware está quebrado.</p>
+      <p style="margin-top: 14px;">Cada material tem <strong>textura além da cor</strong>, para quem tem daltonismo.</p>
+    </div>
+  </div>
+  <div class="num">23</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · problemas e soluções</div>
+  <h1>Outros problemas, e o que foi escolhido</h1>
+  <div class="grade g2">
+    <div class="cartao"><div class="rot">Plataforma</div><h3>Swing deixava a tela difícil</h3><p>Planejado em Swing. Animação, textura e gráfico ficam bem mais simples no navegador: virou Svelte, com as regras no Java.</p></div>
+    <div class="cartao"><div class="rot">Bug</div><h3>A tela não mostrava o fim de jogo</h3><p>A prévia da jogada tentava fixar a peça que nasce em cima da pilha e lançava exceção. Agora não há prévia com a partida encerrada, e dois testes jogam até o fim.</p></div>
+    <div class="cartao"><div class="rot">Celular</div><h3>Injogável na tela pequena</h3><p>Botões empilhados e placar fora da vista. Gestos no tabuleiro, botões em duas linhas e a partida inteira numa tela.</p></div>
+    <div class="cartao"><div class="rot">Segurança</div><h3>Pontuação vinda do navegador</h3><p>O ranking recebe só o id da partida e o nome, e lê a pontuação da sessão no servidor.</p></div>
+  </div>
+  <div class="num">24</div>
+</section>
+
+<section>
+  <div class="bloco">Codificação · testes e desempenho</div>
+  <h1>Como sabemos que funciona</h1>
+  <div class="grade g4" style="margin-bottom: 22px;">
+    <div class="cartao"><div class="grande">406</div><p class="suave">testes no backend (JUnit 5)</p></div>
+    <div class="cartao"><div class="grande">234</div><p class="suave">testes no frontend (Vitest)</p></div>
+    <div class="cartao"><div class="grande">60</div><p class="suave">ciclos/s em 10 min; ciclo médio de 0,03 ms</p></div>
+    <div class="cartao"><div class="grande">13 ms</div><p class="suave">da tecla à tela (mediana); meta de 50 ms</p></div>
+  </div>
+  <ul class="lista">
+    <li>O CI roda tudo em cada PR e abre o JAR no <strong>Linux, Windows e macOS</strong>.</li>
+    <li>Testes manuais com roteiros e sessões com jogadores de fora do grupo.</li>
+  </ul>
+  <div class="preencher" style="margin-top: 14px;">Marcelo: quando a #27 e a #30 fecharem, colocar aqui quantos casos passaram, os bugs achados e o que os jogadores disseram.</div>
+  <div class="num">25</div>
+</section>
+
+<!-- ===================== BLOCO 3: DEMONSTRAÇÃO (2 min 30 s) ===================== -->
+
+<section class="escuro">
+  <div class="bloco">Parte 3 · ao vivo</div>
+  <h1 style="font-size: 52px;">O jogo funcionando</h1>
+  <div class="grade g2" style="gap: 40px; margin-top: 10px;">
+    <div>
+      <p style="color: var(--ambar); font-weight: 700; margin-bottom: 10px;">Roteiro da demonstração</p>
+      <ol style="padding-left: 26px; font-size: 22px; line-height: 1.7; color: #eef1f6;">
+        <li>Abrir o JAR com dois cliques</li>
+        <li>Partida no normal: índice e anel da prévia</li>
+        <li>Carregar um lado até o colapso</li>
+        <li>Aço firmando os blocos de baixo</li>
+        <li>Fim de jogo, ranking e relatório</li>
+      </ol>
+    </div>
+    <div>
+      <p style="color: var(--ambar); font-weight: 700; margin-bottom: 10px;">O que ainda não está pronto</p>
+      <ul style="padding-left: 26px; font-size: 22px; line-height: 1.7; color: #eef1f6;">
+        <li>Medir o desempenho na máquina de 2 núcleos e 4 GB</li>
+        <li>Dois cliques e navegadores em máquinas reais</li>
+        <li>Online: sem login, e um deploy encerra as partidas abertas</li>
+      </ul>
+    </div>
+  </div>
+  <div class="num">26</div>
+</section>
+
+<!-- ===================== CONCLUSÃO (1 min) ===================== -->
+
+<section>
+  <div class="bloco">Conclusão</div>
+  <h1>O que achamos da disciplina</h1>
+  <div class="preencher" style="font-size: 20px; line-height: 1.5;">
+    Marcelo: esta parte é a opinião do grupo, então tem que vir de vocês. Sugestão de roteiro, 1 minuto:<br>
+    • o que mais ajudou no projeto (por exemplo, estruturas de dados aparecendo num problema real);<br>
+    • o que foi difícil (prazo, trabalho em equipe, ferramentas novas);<br>
+    • o que mudariam na disciplina, sendo sinceros, como o professor pediu.
+  </div>
+  <div class="num">27</div>
+</section>
+
+<section class="escuro" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+  <h1 style="font-size: 64px; margin-bottom: 18px;">Obrigado!</h1>
+  <p style="font-size: 24px; color: #dfe5f0;">Jogue online: <strong style="color: var(--ambar);">canteiro.digitalcodexa.com</strong></p>
+  <p style="font-size: 18px; color: #b9c3d6; margin-top: 10px;">Código: github.com/mateus-vitor-ferreira-dev/canteiro</p>
+  <div class="num">28</div>
+</section>
+
+</body>
+</html>
