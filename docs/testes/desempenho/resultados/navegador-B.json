@@ -1,0 +1,325 @@
+{
+  "duracaoS": 300,
+  "partidas": 9,
+  "pecas": 199,
+  "teclas": 2482,
+  "janelasSemEstado": 0,
+  "quadrosPorSegundo": {
+    "media": 60.00233348195315,
+    "minimoJanela": 60.00143544103919,
+    "maximoJanela": 60.003128997524406,
+    "quadrosLentos": 0,
+    "quadrosTotais": 16752
+  },
+  "teclaAteEstadoMs": {
+    "amostras": 2155,
+    "mediana": 14.300000000279397,
+    "p95": 191.20000000018626,
+    "maximo": 618.5999999996275
+  },
+  "memoriaNavegadorMb": {
+    "maximo": 1332
+  },
+  "janelas": [
+    {
+      "segundo": 10,
+      "quadrosPorSegundo": 60.00234155479239,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 615,
+      "estadosRecebidos": 89,
+      "memoriaNavegadorMb": 1258,
+      "amostrasLatencia": 81
+    },
+    {
+      "segundo": 21,
+      "quadrosPorSegundo": 60.003128997524406,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 652,
+      "estadosRecebidos": 89,
+      "memoriaNavegadorMb": 1278,
+      "amostrasLatencia": 81
+    },
+    {
+      "segundo": 30,
+      "quadrosPorSegundo": 60.00179444618904,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 535,
+      "estadosRecebidos": 78,
+      "memoriaNavegadorMb": 1295,
+      "amostrasLatencia": 70
+    },
+    {
+      "segundo": 41,
+      "quadrosPorSegundo": 60.002371635242476,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 506,
+      "estadosRecebidos": 70,
+      "memoriaNavegadorMb": 1301,
+      "amostrasLatencia": 65
+    },
+    {
+      "segundo": 50,
+      "quadrosPorSegundo": 60.00256695473603,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 561,
+      "estadosRecebidos": 80,
+      "memoriaNavegadorMb": 1248,
+      "amostrasLatencia": 73
+    },
+    {
+      "segundo": 61,
+      "quadrosPorSegundo": 60.00248022970743,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 629,
+      "estadosRecebidos": 93,
+      "memoriaNavegadorMb": 1261,
+      "amostrasLatencia": 83
+    },
+    {
+      "segundo": 72,
+      "quadrosPorSegundo": 60.00211772180194,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 510,
+      "estadosRecebidos": 72,
+      "memoriaNavegadorMb": 1319,
+      "amostrasLatencia": 65
+    },
+    {
+      "segundo": 80,
+      "quadrosPorSegundo": 60.00223610817795,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 483,
+      "estadosRecebidos": 67,
+      "memoriaNavegadorMb": 1307,
+      "amostrasLatencia": 61
+    },
+    {
+      "segundo": 91,
+      "quadrosPorSegundo": 60.00169816126872,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 636,
+      "estadosRecebidos": 91,
+      "memoriaNavegadorMb": 1312,
+      "amostrasLatencia": 82
+    },
+    {
+      "segundo": 100,
+      "quadrosPorSegundo": 60.00297359869161,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 565,
+      "estadosRecebidos": 84,
+      "memoriaNavegadorMb": 1275,
+      "amostrasLatencia": 76
+    },
+    {
+      "segundo": 111,
+      "quadrosPorSegundo": 60.00202460819231,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 652,
+      "estadosRecebidos": 92,
+      "memoriaNavegadorMb": 1291,
+      "amostrasLatencia": 84
+    },
+    {
+      "segundo": 121,
+      "quadrosPorSegundo": 60.00143544103919,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 418,
+      "estadosRecebidos": 59,
+      "memoriaNavegadorMb": 1291,
+      "amostrasLatencia": 52
+    },
+    {
+      "segundo": 131,
+      "quadrosPorSegundo": 60.00309693403532,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 620,
+      "estadosRecebidos": 90,
+      "memoriaNavegadorMb": 1311,
+      "amostrasLatencia": 82
+    },
+    {
+      "segundo": 140,
+      "quadrosPorSegundo": 60.00190482237531,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 567,
+      "estadosRecebidos": 79,
+      "memoriaNavegadorMb": 1311,
+      "amostrasLatencia": 72
+    },
+    {
+      "segundo": 151,
+      "quadrosPorSegundo": 60.00268812042779,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 625,
+      "estadosRecebidos": 89,
+      "memoriaNavegadorMb": 1280,
+      "amostrasLatencia": 79
+    },
+    {
+      "segundo": 161,
+      "quadrosPorSegundo": 60.002727396699875,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 396,
+      "estadosRecebidos": 59,
+      "memoriaNavegadorMb": 1299,
+      "amostrasLatencia": 53
+    },
+    {
+      "segundo": 171,
+      "quadrosPorSegundo": 60.002054864892635,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 584,
+      "estadosRecebidos": 84,
+      "memoriaNavegadorMb": 1298,
+      "amostrasLatencia": 76
+    },
+    {
+      "segundo": 181,
+      "quadrosPorSegundo": 60.00246163945189,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 585,
+      "estadosRecebidos": 86,
+      "memoriaNavegadorMb": 1309,
+      "amostrasLatencia": 77
+    },
+    {
+      "segundo": 191,
+      "quadrosPorSegundo": 60.00214293367618,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 616,
+      "estadosRecebidos": 90,
+      "memoriaNavegadorMb": 1288,
+      "amostrasLatencia": 82
+    },
+    {
+      "segundo": 204,
+      "quadrosPorSegundo": 60.00269399850609,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 490,
+      "estadosRecebidos": 56,
+      "memoriaNavegadorMb": 1308,
+      "amostrasLatencia": 52
+    },
+    {
+      "segundo": 212,
+      "quadrosPorSegundo": 60.00229308126426,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 471,
+      "estadosRecebidos": 70,
+      "memoriaNavegadorMb": 1298,
+      "amostrasLatencia": 63
+    },
+    {
+      "segundo": 220,
+      "quadrosPorSegundo": 60.0022388895108,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 536,
+      "estadosRecebidos": 79,
+      "memoriaNavegadorMb": 1306,
+      "amostrasLatencia": 72
+    },
+    {
+      "segundo": 231,
+      "quadrosPorSegundo": 60.00198353664584,
+      "quadroP99": 16.799999999999272,
+      "quadrosLentos": 0,
+      "quadros": 605,
+      "estadosRecebidos": 87,
+      "memoriaNavegadorMb": 1313,
+      "amostrasLatencia": 78
+    },
+    {
+      "segundo": 244,
+      "quadrosPorSegundo": 60.00240009600385,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 650,
+      "estadosRecebidos": 78,
+      "memoriaNavegadorMb": 1286,
+      "amostrasLatencia": 72
+    },
+    {
+      "segundo": 251,
+      "quadrosPorSegundo": 60.00197653569765,
+      "quadroP99": 16.800000000000182,
+      "quadrosLentos": 0,
+      "quadros": 425,
+      "estadosRecebidos": 60,
+      "memoriaNavegadorMb": 1290,
+      "amostrasLatencia": 55
+    },
+    {
+      "segundo": 261,
+      "quadrosPorSegundo": 60.00241215727265,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 597,
+      "estadosRecebidos": 89,
+      "memoriaNavegadorMb": 1294,
+      "amostrasLatencia": 80
+    },
+    {
+      "segundo": 271,
+      "quadrosPorSegundo": 60.00246585476112,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 438,
+      "estadosRecebidos": 62,
+      "memoriaNavegadorMb": 1319,
+      "amostrasLatencia": 57
+    },
+    {
+      "segundo": 280,
+      "quadrosPorSegundo": 60.00280084887266,
+      "quadroP99": 16.80000000000109,
+      "quadrosLentos": 0,
+      "quadros": 557,
+      "estadosRecebidos": 80,
+      "memoriaNavegadorMb": 1307,
+      "amostrasLatencia": 73
+    },
+    {
+      "segundo": 291,
+      "quadrosPorSegundo": 60.00230778106849,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 624,
+      "estadosRecebidos": 91,
+      "memoriaNavegadorMb": 1313,
+      "amostrasLatencia": 81
+    },
+    {
+      "segundo": 304,
+      "quadrosPorSegundo": 60.00218551006827,
+      "quadroP99": 16.80000000000291,
+      "quadrosLentos": 0,
+      "quadros": 604,
+      "estadosRecebidos": 85,
+      "memoriaNavegadorMb": 1332,
+      "amostrasLatencia": 78
+    }
+  ]
+}
