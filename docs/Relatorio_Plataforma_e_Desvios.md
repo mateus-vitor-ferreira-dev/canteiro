@@ -10,7 +10,7 @@ As linhas "pendente" da seção 2.3 esperam os testes em máquina real (#133).
 | **Responsável** | Mateus Vitor Ferreira |
 | **Revisão** | Alisson Antônio Oliveira Santos |
 | **Testes em máquina real e apresentação** | Marcelo Camillo De Paula Leite |
-| **Versão do jogo** | 0.3.0 |
+| **Versão do jogo** | 0.3.1 |
 | **Especificação de referência** | 2.5 (2026-10-29) |
 | **Última atualização** | 2026-11-13 |
 
