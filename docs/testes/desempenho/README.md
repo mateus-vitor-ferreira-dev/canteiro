@@ -46,7 +46,7 @@ Dois cenários:
 
 **Limites:** é uma emulação. Os 2 núcleos são de um processador de 2025, e a memória é limitada por cgroup, não por hardware. O navegador rodou sem tela, então desenhou o Canvas no processador, sem placa de vídeo; isso pesa mais, não menos. Uma máquina antiga de verdade ainda é o teste definitivo (#133).
 
-Os dados brutos estão em [`resultados/`](resultados/): `navegador-A.json` e `navegador-B.json` têm cada janela de 10 s do navegador; `backend-A.log` e `backend-B.log` têm as linhas do log do laço.
+Os dados brutos estão em [`resultados/`](resultados/): `navegador-A.json` e `navegador-B.json` têm cada janela de 10 s do navegador; `backend-A.txt` e `backend-B.txt` têm as linhas do log do laço.
 
 ## RNF04: navegadores
 
