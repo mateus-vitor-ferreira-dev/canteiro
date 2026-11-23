@@ -10,7 +10,7 @@
 | [`img/qr-jogo.svg`](img/qr-jogo.svg) · [`img/qr-jogo-ufla.svg`](img/qr-jogo-ufla.svg) | Os QR codes do último slide: o endereço do jogo e o alternativo, para a rede da UFLA |
 | [`../Apresentacao_Final_Canteiro.pdf`](../Apresentacao_Final_Canteiro.pdf) | O PDF que vai para o Campus Virtual |
 
-As caixas amarelas tracejadas são partes que ainda faltam preencher.
+As caixas amarelas tracejadas (classe `preencher`) marcam partes que ainda faltam preencher. Hoje não há nenhuma.
 
 ## Como mudar um slide e gerar o PDF
 
