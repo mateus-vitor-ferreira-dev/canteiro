@@ -11,6 +11,8 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 > 2. **A linha:** "aqui, na linha 103, ...".
 > 3. **O porquê:** por que essa estrutura, e não outra.
 >
+> Embaixo do código, a faixa **No jogo** mostra o requisito funcionando na tela. Aponte para ela no fim, numa frase ("e é isso que o jogador vê"), sem gastar tempo a mais.
+>
 > Não leia o código linha a linha.
 
 ## Tempos
@@ -129,7 +131,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 ## Conclusão (1 min)
 
-**31. Opinião (50 s).** Um cartão por vez: o que ajudou, o que foi difícil e o que mudariam. Os cartões são um rascunho: confiram com o grupo antes e troquem o que não for a opinião de vocês, porque o professor pediu sinceridade.
+**31. Opinião (50 s).** Um cartão por vez: o que ajudou, o que foi difícil e o que mudariam. Os cartões são a opinião do grupo, aprovada por todos.
 
 **32. Obrigado (10 s).** Convide a turma a jogar: "quem quiser, aponte a câmera para o QR code". Deixe esse slide na tela durante as perguntas. O QR code grande abre o endereço principal; o pequeno abre o endereço alternativo, para quem estiver no Wi-Fi da UFLA, que bloqueia o principal.
 
@@ -138,7 +140,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 ## Antes de entregar
 
 - [x] Preencher as caixas amarelas dos slides 8, 29 e 31 e gerar o PDF de novo (veja o [README](README.md) desta pasta)
-- [ ] Conferir com o grupo a opinião do slide 31
+- [x] Conferir com o grupo a opinião do slide 31
 - [ ] Ensaiar com cronômetro, pelo menos dois dias antes, conferindo os três marcos
 - [ ] Testar o JAR no computador da apresentação
 - [ ] Enviar o PDF no Campus Virtual até **26/11, 12:00**

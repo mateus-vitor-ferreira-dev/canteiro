@@ -65,10 +65,13 @@
   .rot { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--rotulo); margin-bottom: 8px; }
   .codigo-lado { display: grid; grid-template-columns: 1fr 330px; gap: 24px; align-items: start; }
   .prints { display: flex; flex-direction: column; gap: 12px; height: 545px; justify-content: flex-start; }
-  .prints img.print { max-width: 100%; min-height: 0; object-fit: contain; object-position: left top; flex: 0 1 auto; }
+  .prints img.print { max-width: 100%; min-height: 0; object-fit: contain; object-position: left top; flex: 0 1 auto; width: auto; align-self: flex-start; }
   img.print { display: block; border-radius: 10px; box-shadow: 0 8px 26px rgba(15, 23, 42, .22); }
   .larga img.print { max-width: 100%; max-height: 380px; margin: 0 auto; }
   .rodape-larga { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 18px; }
+  .no-jogo { flex: 0 0 auto; display: flex; gap: 16px; align-items: flex-end; }
+  .no-jogo img.jogo { height: 100%; width: auto; max-width: 62%; object-fit: contain; object-position: left bottom; border-radius: 8px; box-shadow: 0 6px 18px rgba(15, 23, 42, .18); }
+  .no-jogo p { font-size: 15px; color: var(--suave); line-height: 1.35; margin-top: 4px; max-width: 260px; }
   .reqs { background: #fff; border: 1px solid var(--borda); border-left: 5px solid var(--marinho); border-radius: 10px; padding: 14px 16px; }
   .req { display: flex; gap: 10px; font-size: 15px; line-height: 1.35; margin-bottom: 6px; }
   .req:last-child { margin-bottom: 0; }
@@ -236,7 +239,7 @@
 <section>
   <div class="bloco">Codificação · fila e sacola</div>
   <h1>As próximas peças: uma sacola e uma fila</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/sacola.png" alt="Código de sacola"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/sacola.png" alt="Código de sacola"><div class="no-jogo" style="height: 140px;"><img class="jogo" src="img/jogo/fila.png" alt="A fila mostra as três próximas peças, com forma e material"><div><div class="rot">No jogo</div><p>A fila mostra as três próximas peças, com forma e material</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN04</b><span>As sete formas são embaralhadas e distribuídas antes que qualquer uma se repita (sacola)</span></div><div class="req"><b>RF03</b><span>Gerar elementos continuamente enquanto a partida estiver em andamento</span></div><div class="req"><b>RF05</b><span>Exibir os três próximos elementos da fila, com forma e material</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 103</span>: a sacola vazia recebe as 7 formas embaralhadas</li><li><span class="ln">linha 106</span>: tira da frente; só repete quando a sacola esvazia</li><li><b>Fila</b> (<code>ArrayDeque</code>): o jogador vê as 3 próximas, remoção em O(1)</li></ul></div></div>
   <div class="num">11</div>
 </section>
@@ -244,7 +247,7 @@
 <section>
   <div class="bloco">Codificação · pilha</div>
   <h1>A reserva é uma pilha, com uma troca por peça</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/reserva.png" alt="Código de reserva"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/reserva.png" alt="Código de reserva"><div class="no-jogo" style="height: 150px;"><img class="jogo" src="img/jogo/reserva.png" alt="A peça guardada fica cinza: a troca só volta na próxima peça"><div><div class="rot">No jogo</div><p>A peça guardada fica cinza: a troca só volta na próxima peça</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN05</b><span>Reservar um elemento por vez; a troca só pode ser feita uma vez a cada elemento gerado</span></div><div class="req"><b>RF10</b><span>Reservar o elemento em queda e trocá-lo pelo reservado, uma vez por elemento</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 49</span>: trava até nascer a próxima peça</li><li><span class="ln">linha 50</span> e <span class="ln">linha 52</span>: pega a guardada e guarda a atual, sempre no topo</li><li>Trocar duas vezes lança exceção: a regra não depende da tela</li></ul></div></div>
   <div class="num">12</div>
 </section>
@@ -252,7 +255,7 @@
 <section>
   <div class="bloco">Codificação · rotação</div>
   <h1>Girar com deslocamento corretivo</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/rotacao.png" alt="Código de rotacao"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/rotacao.png" alt="Código de rotacao"><div class="no-jogo" style="height: 150px;"><img class="jogo" src="img/jogo/rotacao.png" alt="A peça I encostada na parede gira e é empurrada para dentro"><div><div class="rot">No jogo</div><p>A peça I encostada na parede gira e é empurrada para dentro</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF08</b><span>Girar nos dois sentidos, com deslocamento corretivo quando a rotação causar sobreposição</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Gira; se não colidiu, pronto</li><li><span class="ln">linha 85</span>: se colidiu, tenta cada deslocamento da tabela da própria peça (padrão SRS)</li><li><span class="ln">linha 90</span>: nenhum serviu, desfaz o giro</li></ul></div></div>
   <div class="num">13</div>
 </section>
@@ -260,7 +263,7 @@
 <section>
   <div class="bloco">Codificação · polimorfismo</div>
   <h1>Fixar a peça sem perguntar qual material é</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/fixar.png" alt="Código de fixar"><img class="print" src="img/codigo/aco.png" alt="Código de aco"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/fixar.png" alt="Código de fixar"><img class="print" src="img/codigo/aco.png" alt="Código de aco"><div class="no-jogo" style="height: 120px;"><img class="jogo" src="img/jogo/materiais.png" alt="Cada material tem textura e peso próprios, sem depender da cor"><div><div class="rot">No jogo</div><p>Cada material tem textura e peso próprios, sem depender da cor</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF11</b><span>Fixar o elemento quando ele colidir com o fundo ou com um bloco fixado</span></div><div class="req"><b>RN03</b><span>O material é sorteado entre os liberados na fase e determina densidade, cor e multiplicador de pontos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 89</span>: o tabuleiro chama <code>aoFixar</code> sem saber o material</li><li>O <code>Aco</code> sobrescreve: aguenta qualquer peso e <b>firma os blocos de baixo</b></li><li>Forma e material em duas hierarquias: <b>11 classes em vez de 28</b></li></ul></div></div>
   <div class="num">14</div>
 </section>
@@ -268,7 +271,7 @@
 <section>
   <div class="bloco">Codificação · pontuação</div>
   <h1>A pontuação junta linhas, nível, material e risco</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/pontuacao.png" alt="Código de pontuacao"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/pontuacao.png" alt="Código de pontuacao"><div class="no-jogo" style="height: 160px;"><img class="jogo" src="img/jogo/pontuacao.png" alt="Linha fechada: os pontos da jogada e o bônus da meta do nível"><div><div class="rot">No jogo</div><p>Linha fechada: os pontos da jogada e o bônus da meta do nível</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF13</b><span>Pontuação por linhas simultâneas, material predominante e nível</span></div><div class="req"><b>RN17</b><span>Fechar linha com estabilidade abaixo de 25 % é obra ousada: vale 50 % a mais</span></div><div class="req"><b>RN18</b><span>Cada peça seguida que fecha linha soma 10 % à próxima eliminação, até 100 %</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 47</span>: base por linhas de uma vez (1 a 4)</li><li><span class="ln">linha 87</span>: bônus do material × obra ousada × sequência</li><li>Linhas 78 a 86 (dobradas): valores inválidos lançam <code>IllegalArgumentException</code></li></ul></div></div>
   <div class="num">15</div>
 </section>
@@ -276,7 +279,7 @@
 <section>
   <div class="bloco">Codificação · a física</div>
   <h1>O centro de massa em tempo constante</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/centro.png" alt="Código de centro"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/centro.png" alt="Código de centro"><div class="no-jogo" style="height: 140px;"><img class="jogo" src="img/jogo/centro.png" alt="O eixo da base (tracejado) e o centro de massa (ponto vermelho)"><div><div class="rot">No jogo</div><p>O eixo da base (tracejado) e o centro de massa (ponto vermelho)</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF14</b><span>Recalcular o centro de massa sempre que a composição do tabuleiro mudar</span></div><div class="req"><b>RNF02</b><span>Recálculo do centro de massa incremental, em tempo constante por bloco</span></div><div class="req"><b>RN07</b><span>Massa do bloco = densidade × volume; massa da estrutura = soma das massas</span></div><div class="req"><b>RN08</b><span>Centro de massa horizontal = média das colunas, ponderada pela massa</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 59</span>: fixar soma massa × coluna</li><li><span class="ln">linha 71</span>: remover subtrai</li><li><span class="ln">linha 107</span>: o centro é uma divisão. <b>O(1)</b>, sem varrer as 200 posições</li></ul></div></div>
   <div class="num">16</div>
 </section>
@@ -284,7 +287,7 @@
 <section>
   <div class="bloco">Codificação · estabilidade</div>
   <h1>Do desvio ao índice de estabilidade</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/estabilidade.png" alt="Código de estabilidade"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/estabilidade.png" alt="Código de estabilidade"><div class="no-jogo" style="height: 150px;"><img class="jogo" src="img/jogo/estabilidade.png" alt="O índice agora, a prévia com a peça atual (→ 72 %), o desvio e o limite"><div><div class="rot">No jogo</div><p>O índice agora, a prévia com a peça atual (→ 72 %), o desvio e o limite</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN09</b><span>Desvio = |centro de massa − eixo da base|, em colunas</span></div><div class="req"><b>RN10</b><span>Índice de estabilidade: 100 % com desvio nulo, 0 % no limite, variando linearmente</span></div><div class="req"><b>RN22</b><span>A parte de cima também é medida, sobre onde encosta; vale a pior das duas medidas</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 176</span>: desvio = |centro − eixo|</li><li><span class="ln">linha 177</span>: índice cai em linha reta até 0 no limite</li><li><span class="ln">linha 138</span>: mede a pilha inteira e a parte de cima, e vale a pior</li></ul></div></div>
   <div class="num">17</div>
 </section>
@@ -301,7 +304,7 @@
   <div class="bloco">Codificação · recursividade</div>
   <h1>Passou do limite, a obra desaba</h1>
   <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/colapso.png" alt="Código de colapso"></div>
-    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN11</b><span>Desvio acima do limite: os blocos acima da linha de maior massa caem por gravidade, coluna a coluna</span></div><div class="req"><b>RF17</b><span>Executar o colapso, reacomodando os blocos desprendidos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 36</span>: acha a linha de maior massa</li><li><span class="ln">linha 41</span>: bloco firmado pelo aço não cai</li><li><span class="ln">linha 90</span>: <code>cair</code> chama a si mesma até achar apoio</li></ul></div></div>
+    <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN11</b><span>Desvio acima do limite: os blocos acima da linha de maior massa caem por gravidade, coluna a coluna</span></div><div class="req"><b>RF17</b><span>Executar o colapso, reacomodando os blocos desprendidos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 36</span>: acha a linha de maior massa</li><li><span class="ln">linha 41</span>: bloco firmado pelo aço não cai</li><li><span class="ln">linha 90</span>: <code>cair</code> chama a si mesma até achar apoio</li></ul><div class="no-jogo" style="height: 118px; margin-top: 14px;"><img class="jogo" src="img/jogo/colapso.png" alt="No colapso, a tela fica vermelha e a penalidade aparece (−540)"><div><div class="rot">No jogo</div><p>No colapso, a tela fica vermelha e a penalidade aparece (−540)</p></div></div></div></div>
   <div class="num">19</div>
 </section>
 
@@ -333,7 +336,7 @@
 <section>
   <div class="bloco">Codificação · balanço</div>
   <h1>Concreto sobre madeira perde a ponta</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/balanco.png" alt="Código de balanco"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/balanco.png" alt="Código de balanco"><div class="no-jogo" style="height: 145px;"><img class="jogo" src="img/jogo/balanco.png" alt="A prévia marca com X os blocos que vão se soltar"><div><div class="rot">No jogo</div><p>A prévia marca com X os blocos que vão se soltar</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN20</b><span>Coluna sem nada embaixo está em balanço; peça mais densa que o apoio perde esses blocos</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 53</span>: coluna sem nada embaixo está em balanço</li><li><span class="ln">linha 56</span>: se a peça não for mais densa que o apoio, segura</li><li>Senão os blocos em balanço caem, com o mesmo <code>cair</code> recursivo do colapso</li></ul></div></div>
   <div class="num">21</div>
 </section>
@@ -341,7 +344,7 @@
 <section>
   <div class="bloco">Codificação · esmagamento</div>
   <h1>Pesado embaixo, leve em cima</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/esmagamento.png" alt="Código de esmagamento"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/esmagamento.png" alt="Código de esmagamento"><div class="no-jogo" style="height: 145px;"><img class="jogo" src="img/jogo/esmagamento.png" alt="O bloco leve embaixo do pesado racha e é esmagado"><div><div class="rot">No jogo</div><p>O bloco leve embaixo do pesado racha e é esmagado</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RN21</b><span>Cada material aguenta um peso máximo em cima; passou, o bloco é esmagado</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li><span class="ln">linha 128</span>: a carga é a massa dos blocos colados acima</li><li><span class="ln">linha 85</span>: esmaga um, recalcula, até ninguém mais ceder</li><li>Remove do analisador também, para o centro de massa continuar certo</li></ul></div></div>
   <div class="num">22</div>
 </section>
@@ -362,6 +365,7 @@
       <p style="font-size: 18px; margin-top: 10px;">Como a prévia vai dentro do estado, o estado <code>FIM_DE_JOGO</code> nunca chegava à tela.</p>
       <div class="rot" style="margin-top: 16px;">Correção</div>
       <p style="font-size: 18px;"><span class="ln">linha 349</span>: sem prévia com a partida encerrada. <strong>Dois testes novos</strong> jogam até o fim e conferem o estado enviado.</p>
+      <div class="no-jogo" style="height: 170px; margin-top: 16px;"><img class="jogo" src="img/jogo/fim.png" alt="Depois da correção: a pilha chega ao topo e a tela de fim aparece"><div><div class="rot">No jogo</div><p>Depois da correção: a pilha chega ao topo e a tela de fim aparece</p></div></div>
     </div>
   </div>
   <div class="num">23</div>
@@ -378,7 +382,7 @@
 <section>
   <div class="bloco">Codificação · repetição</div>
   <h1>Mesma semente e mesmos comandos, mesma partida</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/repeticao.png" alt="Código de repeticao"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/repeticao.png" alt="Código de repeticao"><div class="no-jogo" style="height: 150px;"><img class="jogo" src="img/jogo/repeticao.png" alt="A repetição tem a própria faixa: dá para assistir, não para jogar"><div><div class="rot">No jogo</div><p>A repetição tem a própria faixa: dá para assistir, não para jogar</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF23</b><span>Registrar em pilha todas as jogadas executadas na partida</span></div><div class="req"><b>RF24</b><span>Reproduzir passo a passo uma partida encerrada, a partir do histórico</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>Como só uma thread mexe no motor, o jogo é <b>determinístico</b></li><li>A gravação guarda só a semente e cada comando com o ciclo em que chegou</li><li><span class="ln">linha 87</span>: reproduzir é aplicar cada comando no mesmo ciclo</li></ul></div></div>
   <div class="num">25</div>
 </section>
@@ -386,7 +390,7 @@
 <section>
   <div class="bloco">Codificação · ranking</div>
   <h1>A pontuação do ranking nunca vem do navegador</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/ranking.png" alt="Código de ranking"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/ranking.png" alt="Código de ranking"><div class="no-jogo" style="height: 135px;"><img class="jogo" src="img/jogo/ranking.png" alt="O ranking guarda as dez melhores, uma por pessoa"><div><div class="rot">No jogo</div><p>O ranking guarda as dez melhores, uma por pessoa</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF21</b><span>Registrar a pontuação no ranking persistente, com o nome do jogador</span></div><div class="req"><b>RN15</b><span>Só entram no ranking partidas concluídas sem uso do desfazer</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>O navegador manda só o id da partida e o nome</li><li><span class="ln">linha 149</span>: partida de treino (com desfazer) é recusada</li><li><span class="ln">linha 162</span>: a pontuação é lida da sessão, no servidor</li></ul></div></div>
   <div class="num">26</div>
 </section>
@@ -402,7 +406,7 @@
 <section>
   <div class="bloco">Codificação · a tela</div>
   <h1>O painel avisa antes de desabar</h1>
-  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/painel.png" alt="Código de painel"></div>
+  <div class="codigo-lado"><div class="prints"><img class="print" src="img/codigo/painel.png" alt="Código de painel"><div class="no-jogo" style="height: 160px;"><img class="jogo" src="img/jogo/alerta.png" alt="O painel avisa antes: "Esta jogada derruba a obra!""><div><div class="rot">No jogo</div><p>O painel avisa antes: "Esta jogada derruba a obra!"</p></div></div></div>
     <div><div class="reqs"><div class="rot">O requisito</div><div class="req"><b>RF15</b><span>Exibir continuamente o índice de estabilidade, o desvio e o limite</span></div><div class="req"><b>RF16</b><span>Sinalizar visualmente a aproximação do limite antes do colapso</span></div></div><div class="rot" style="margin-top: 16px;">Como foi feito</div><ul class="lista"><li>O frontend não calcula nada: recebe a estabilidade pronta do backend</li><li>A prévia diz onde o centro de massa vai parar com a peça atual</li><li>Avisa se a jogada derruba a obra, quebra blocos ou se a carga está pesando de um lado</li></ul></div></div>
   <div class="num">28</div>
 </section>
