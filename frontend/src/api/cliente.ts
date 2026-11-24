@@ -144,11 +144,7 @@ async function buscar(caminho: string, opcoes: RequestInit = {}): Promise<Respon
             headers: { Accept: "application/json", ...opcoes.headers },
         });
     } catch {
-        throw new ErroApi(
-            SEM_CONEXAO,
-            "Não foi possível falar com o jogo. O backend está rodando?",
-            0,
-        );
+        throw new ErroApi(SEM_CONEXAO, "Não foi possível conectar ao jogo. Tente novamente.", 0);
     }
     if (!resposta.ok) {
         const erro = await lerErro(resposta);
