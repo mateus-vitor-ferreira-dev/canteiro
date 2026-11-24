@@ -65,12 +65,12 @@ Os critérios de aceitação que só dá para conferir à mão, em ordem de prio
 | 🔴 | `CT-RF17-01` | RF16, RF17 | Empilhar peças de um lado só faz a estrutura desabar, com aviso antes | [pronto](roteiros/CT-RF17-colapso.md) |
 | 🔴 | `CT-RF21-01` a `03` | RF21, RF22 | Salvar o nome no ranking, recusar nome inválido e o ranking continuar lá depois de fechar o jogo | [pronto](roteiros/CT-RF21-ranking.md) |
 | 🔴 | `CT-RF30-01`, `CT-RF31-01` e `02` | RF30, RF31 | Pausar ao trocar de aba, reconectar quando a internet volta e avisar quando o servidor reinicia | [pronto](roteiros/CT-RF30-reconexao.md) |
-| 🔴 | `CT-RF07-01` | RF07, RF08, RF09 | Mover, girar e derrubar a peça, inclusive encostada nas paredes | a escrever |
-| 🔴 | `CT-RF15-01` | RF14, RF15 | O índice de estabilidade muda no mesmo instante em que a peça é fixada | a escrever |
-| 🔴 | `CT-RF12-01` | RF12, RF13, RF18 | Fechar linhas dá pontos, e 10 linhas sobem de nível | a escrever |
-| 🔴 | `CT-RF20-01` | RF20 | A partida acaba e a tela de resultado mostra pontuação, nível, linhas, colapsos e tempo | a escrever |
+| 🔴 | `CT-RF07-01` | RF07, RF08, RF09 | Mover, girar e derrubar a peça, inclusive encostada nas paredes | [pronto](roteiros/CT-RF07-movimento.md) |
+| 🔴 | `CT-RF15-01` | RF14, RF15 | O índice de estabilidade muda no mesmo instante em que a peça é fixada | [pronto](roteiros/CT-RF15-estabilidade.md) |
+| 🔴 | `CT-RF12-01` | RF12, RF13, RF18 | Fechar linhas dá pontos, e 10 linhas sobem de nível | [pronto](roteiros/CT-RF12-linhas-pontos-nivel.md) |
+| 🔴 | `CT-RF20-01` | RF20 | A partida acaba e a tela de resultado mostra pontuação, nível, linhas, colapsos e tempo | [pronto](roteiros/CT-RF20-fim-partida.md) |
 | 🟡 | `CT-RF29-01` | RF29, RNF04 | Dois cliques no JAR abrem o jogo no navegador em até 3 segundos, no Windows, no Linux e no macOS | a escrever |
-| 🟡 | `CT-RF19-01` | RF19, RNF05 | Pausar e retomar com P ou Esc; a legenda das teclas está sempre visível | a escrever |
+| 🟡 | `CT-RF19-01` | RF19, RNF05 | Pausar e retomar com P ou Esc; a legenda das teclas está sempre visível | [pronto](roteiros/CT-RF19-pausa.md) |
 | 🟡 | `CT-RF27-01` | RF27 | Trocar uma tecla nas configurações vale na partida e na legenda | a escrever |
 | 🟡 | `CT-RF28-01` | RF28 | Sons ao fixar peça, fechar linha e desabar; a tecla M liga e desliga | a escrever |
 | 🟡 | `CT-RNF06-01` | RNF06 | Os quatro materiais se distinguem pela textura, sem depender da cor | a escrever |

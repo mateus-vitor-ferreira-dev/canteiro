@@ -114,7 +114,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 **28. RF15 e RF16, painel (30 s).** É o lado do navegador, em Svelte. Ele não calcula nada: recebe a estabilidade e a prévia prontas e decide o aviso.
 
-**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. O RNF01 foi medido com o jogo e o navegador presos a 2 núcleos e 4 GB, durante 15 minutos de jogo: 60 quadros por segundo na tela, 60 ciclos no backend e 14 ms da tecla à tela. Diga que foi uma **emulação**, não uma máquina antiga de verdade; os detalhes estão em `docs/testes/desempenho/`. Feche com os testes manuais: os 8 casos passaram, sem bug no jogo, e diga com clareza que **as sessões com jogadores de fora do grupo não foram feitas**.
+**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. O RNF01 foi medido com o jogo e o navegador presos a 2 núcleos e 4 GB, durante 15 minutos de jogo: 60 quadros por segundo na tela, 60 ciclos no backend e 14 ms da tecla à tela. Diga que foi uma **emulação**, não uma máquina antiga de verdade; os detalhes estão em `docs/testes/desempenho/`. Feche com os testes manuais: os 8 casos passaram, sem bug no jogo. Cinco pessoas de fora do grupo jogaram: a maioria entendeu sozinha (nota 4,2 de 5) e a dificuldade não pediu ajuste, mas duas nem sempre souberam qual peça derrubou a obra, o que fica como melhoria de interface.
 
 ## Parte 3: demonstração ao vivo (2 min 30 s)
 
