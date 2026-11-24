@@ -114,7 +114,7 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 **28. RF15 e RF16, painel (30 s).** É o lado do navegador, em Svelte. Ele não calcula nada: recebe a estabilidade e a prévia prontas e decide o aviso.
 
-**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. O RNF01 foi medido com o jogo e o navegador presos a 2 núcleos e 4 GB, durante 15 minutos de jogo: 60 quadros por segundo na tela, 60 ciclos no backend e 14 ms da tecla à tela. Diga que foi uma **emulação**, não uma máquina antiga de verdade; os detalhes estão em `docs/testes/desempenho/`.
+**29. Testes e números (20 s).** 406 testes no backend e 234 no frontend, em cada PR. O RNF01 foi medido com o jogo e o navegador presos a 2 núcleos e 4 GB, durante 15 minutos de jogo: 60 quadros por segundo na tela, 60 ciclos no backend e 14 ms da tecla à tela. Diga que foi uma **emulação**, não uma máquina antiga de verdade; os detalhes estão em `docs/testes/desempenho/`. Feche com os testes manuais: os 8 casos passaram, sem bug no jogo. Cinco pessoas de fora do grupo jogaram: a maioria entendeu sozinha (nota 4,2 de 5) e a dificuldade não pediu ajuste, mas duas nem sempre souberam qual peça derrubou a obra, o que fica como melhoria de interface.
 
 ## Parte 3: demonstração ao vivo (2 min 30 s)
 
@@ -122,14 +122,14 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 1. Abra o JAR: o navegador abre sozinho. (15 s) No Windows, tente o duplo clique. **No Ubuntu, o duplo clique não abre o JAR** (o atalho do Java está quebrado no sistema): abra pelo terminal com `java -jar canteiro.jar`. Teste antes, no computador da apresentação.
 2. Nova partida no **Normal**: mostre o índice e o anel da prévia. (30 s)
-3. Empilhe tudo de um lado: o painel avisa, aparece o X vermelho e a obra desaba. (45 s)
+3. Faça a base nos dois lados (uma peça em cada parede) e depois ponha as peças pesadas, de concreto ou aço, **só de um lado da base**: o painel avisa, aparece **"Esta jogada derruba a obra!"** e a obra desaba. (45 s) **Não empilhe tudo numa parede só:** a base vai junto, o centro de massa fica em cima dela e a obra não cai. Se alguém perguntar, é exatamente a regra do eixo da base (RN09).
 4. Se aparecer aço, mostre que ele firma os blocos de baixo. (15 s)
 5. Termine a partida, salve no ranking e abra o relatório. (30 s)
 6. Diga o que não está pronto, apontando a coluna da direita: o duplo clique no Ubuntu, o duplo clique no Windows e no macOS em máquina real e o desempenho numa máquina antiga de verdade. (15 s)
 
 ## Conclusão (1 min)
 
-**31. Opinião (50 s).** É do grupo e tem que ser sincera, como o professor pediu. Combinem antes.
+**31. Opinião (50 s).** Um cartão por vez: o que ajudou, o que foi difícil e o que mudariam. Os cartões são um rascunho: confiram com o grupo antes e troquem o que não for a opinião de vocês, porque o professor pediu sinceridade.
 
 **32. Obrigado (10 s).** Convide a turma a jogar: "quem quiser, aponte a câmera para o QR code". Deixe esse slide na tela durante as perguntas. O QR code grande abre o endereço principal; o pequeno abre o endereço alternativo, para quem estiver no Wi-Fi da UFLA, que bloqueia o principal.
 
@@ -137,7 +137,8 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 
 ## Antes de entregar
 
-- [ ] Preencher as caixas amarelas dos slides 8, 29 e 31 e gerar o PDF de novo (veja o [README](README.md) desta pasta)
+- [x] Preencher as caixas amarelas dos slides 8, 29 e 31 e gerar o PDF de novo (veja o [README](README.md) desta pasta)
+- [ ] Conferir com o grupo a opinião do slide 31
 - [ ] Ensaiar com cronômetro, pelo menos dois dias antes, conferindo os três marcos
 - [ ] Testar o JAR no computador da apresentação
 - [ ] Enviar o PDF no Campus Virtual até **26/11, 12:00**
