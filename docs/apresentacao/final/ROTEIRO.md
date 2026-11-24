@@ -11,6 +11,8 @@ A tarefa pede de **15 a 20 minutos**: documentação (3 a 5 min), codificação 
 > 2. **A linha:** "aqui, na linha 103, ...".
 > 3. **O porquê:** por que essa estrutura, e não outra.
 >
+> Embaixo do código, a faixa **No jogo** mostra o requisito funcionando na tela. Aponte para ela no fim, numa frase ("e é isso que o jogador vê"), sem gastar tempo a mais.
+>
 > Não leia o código linha a linha.
 
 ## Tempos
