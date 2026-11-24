@@ -70,16 +70,14 @@ describe("NovaPartida", () => {
 
     it("mostra a mensagem de erro quando o backend não responde", async () => {
         vi.mocked(listarDificuldades).mockRejectedValue(
-            new ErroApi(
-                "SEM_CONEXAO",
-                "Não foi possível falar com o jogo. O backend está rodando?",
-                0,
-            ),
+            new ErroApi("SEM_CONEXAO", "Não foi possível conectar ao jogo. Tente novamente.", 0),
         );
 
         render(NovaPartida, { aoCriar: vi.fn() });
 
-        expect(await screen.findByRole("alert")).toHaveTextContent("O backend está rodando?");
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Não foi possível conectar ao jogo. Tente novamente.",
+        );
     });
 
     it("clicar numa dificuldade cria a partida e entrega o id", async () => {
